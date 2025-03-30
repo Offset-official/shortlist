@@ -70,23 +70,22 @@ const Page=()=> {
         </div>
       </div>
       
-      {/* Chart colors section */}
-      <h2 className="text-2xl font-bold my-6">Chart Colors</h2>
+      <h2 className="text-2xl font-bold my-6">Main Colors</h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
-        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--chart-1)', color: '#fff' }}>
-          <p className="font-semibold">--chart-1</p>
+        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--primary)', color: '#fff' }}>
+          <p className="font-semibold">--primary</p>
         </div>
-        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--chart-2)', color: '#fff' }}>
-          <p className="font-semibold">--chart-2</p>
+        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--secondary)', color: '#fff' }}>
+          <p className="font-semibold">--secondary</p>
         </div>
-        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--chart-3)', color: '#fff' }}>
-          <p className="font-semibold">--chart-3</p>
+        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--tertiary)', color: '#fff' }}>
+          <p className="font-semibold">--tertiary</p>
         </div>
-        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--chart-4)', color: '#fff' }}>
-          <p className="font-semibold">--chart-4</p>
+        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--tertiary_1)', color: '#fff' }}>
+          <p className="font-semibold">--tertiary_1</p>
         </div>
-        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--chart-5)', color: '#fff' }}>
-          <p className="font-semibold">--chart-5</p>
+        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--tertiary_2)', color: '#fff' }}>
+          <p className="font-semibold">--tertiary_2</p>
         </div>
       </div>
       
