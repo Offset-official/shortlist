@@ -1,4 +1,5 @@
-
+import { Button } from "@/components/ui/button";
+import Link from 'next/link'
 const Home=()=>{
 
   return (
@@ -8,6 +9,12 @@ const Home=()=>{
           <div
             className="p-4 rounded-lg border border-border shadow-md bg-card"
           >
+                <Link 
+      href="/color_check" 
+      className="bg-accent text-white hover:bg-accent-foreground px-4 py-2 rounded inline-block"
+    >
+      Color Check
+    </Link>
             <p className="font-semibold"></p>
             <p className="text-sm text-muted-foreground"></p>
           </div>
