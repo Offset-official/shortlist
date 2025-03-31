@@ -6,4 +6,4 @@ pnpm dev
 
 ## How to run?
 
-1. Add GROQ_API_KEY to `.env`.
+1. Use common `.env` on Secret Project.

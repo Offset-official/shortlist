@@ -22,20 +22,26 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      // Send the entire conversation (history + new message) to the API.
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
-      });
-      const data = await res.json();
-      const assistantMessage = { role: "assistant", content: data.reply };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      console.error("Error:", err);
-    } finally {
-      setLoading(false);
-    }
+        const systemInstruction = "";
+      
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [...messages, userMessage],
+            systemInstruction,
+          }),
+        });
+      
+        const data = await res.json();
+        const assistantMessage = { role: "assistant", content: data.reply };
+        setMessages((prev) => [...prev, assistantMessage]);
+      } catch (err) {
+        console.error("Error:", err);
+      } finally {
+        setLoading(false);
+      }
+      
   };
 
   // Automatically scroll to the bottom when messages update.
