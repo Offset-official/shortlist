@@ -33,18 +33,18 @@ export default function CodeEditor() {
 
   return (
     <div className="flex flex-col h-full p-4">
-      <div className="flex flex-col bg-gray-800 border border-gray-700 rounded shadow-lg h-full">
+      <div className="flex flex-col bg-card border border-border rounded shadow-lg h-full">
         {/* Header with Language Selector and Copy Button */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
-            <label htmlFor="language" className="text-sm text-gray-300">
+            <label htmlFor="language" className="text-sm text-foreground">
               Language:
             </label>
             <select
               id="language"
               value={language}
               onChange={(e) => setLanguage(e.target.value as SupportedLang)}
-              className="bg-gray-800 border border-gray-600 text-gray-200 text-sm px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-card border border-border text-foreground text-sm px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="javascript">JavaScript</option>
               <option value="python">Python</option>
@@ -55,7 +55,7 @@ export default function CodeEditor() {
           </div>
           <button
             onClick={handleCopy}
-            className="text-sm text-gray-200 bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            className="text-sm text-foreground bg-card hover:bg-muted px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           >
             {copied ? "Copied!" : "Copy Code"}
           </button>
@@ -68,14 +68,7 @@ export default function CodeEditor() {
             onValueChange={(newCode) => setCode(newCode)}
             highlight={(code) => highlight(code, languages[language], language)}
             padding={12}
-            style={{
-              fontFamily: '"Fira Code", "Fira Mono", monospace',
-              fontSize: 14,
-              backgroundColor: "#1e1e1e",
-              color: "#ffffff",
-              minHeight: "100%",
-            }}
-            className="outline-none"
+            className="outline-none bg-background text-foreground font-mono text-sm min-h-full"
           />
         </div>
       </div>
