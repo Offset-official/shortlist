@@ -15,3 +15,8 @@ pnpm dev
 `/color_check`- color scheme of the website
 
 `/resume` - resume parsing
+
+
+## Debugging
+
+`npx prisma studio`- To check database
