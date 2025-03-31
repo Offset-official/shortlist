@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { extractTextFromResume } from "@/lib/resume-parser";
 import { FileUploader } from "@/components/file-uploader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -19,11 +18,26 @@ export function ResumeUploader() {
       setError(null);
       setFileName(file.name);
       
-      const text = await extractTextFromResume(file);
-      setExtractedText(text);
-    } catch (err) {
+      // Create FormData and append the file
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      // Send the file to the API endpoint
+      const response = await fetch("/api/parsedoc", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to process file");
+      }
+      
+      const data = await response.json();
+      setExtractedText(data.text);
+    } catch (err: any) {
       console.error("Error extracting text:", err);
-      setError("Failed to extract text from the file. Please try a different file format.");
+      setError(err.message || "Failed to extract text from the file. Please try a different file format.");
     } finally {
       setIsLoading(false);
     }
