@@ -9,3 +9,9 @@
 ```bash 
 pnpm dev 
 ``` 
+
+## Info
+
+`/color_check`- color scheme of the website
+
+`/resume` - resume parsing
