@@ -8,8 +8,81 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Webcam state and refs
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  // permissionStatus can be "waiting", "granted", or "denied"
+  const [permissionStatus, setPermissionStatus] = useState("waiting");
+  const [isRecording, setIsRecording] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    // Request webcam access when component mounts.
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((mediaStream) => {
+        setStream(mediaStream);
+        setPermissionStatus("granted");
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      })
+      .catch((err) => {
+        console.error("Error accessing webcam:", err);
+        setPermissionStatus("denied");
+      });
+
+    // Cleanup: stop all tracks when component unmounts.
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []); // Only run once on mount
+
+  const toggleRecording = () => {
+    if (!stream) return;
+
+    if (!isRecording) {
+      // Start recording
+      try {
+        const options = { mimeType: "video/webm" };
+        const mediaRecorder = new MediaRecorder(stream, options);
+        mediaRecorderRef.current = mediaRecorder;
+        recordedChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            recordedChunksRef.current.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
+          console.log("Recorded video blob:", blob);
+          // Optionally, you can create a download URL:
+          // const url = URL.createObjectURL(blob);
+          // console.log("Video URL:", url);
+        };
+
+        mediaRecorder.start();
+        setIsRecording(true);
+      } catch (err) {
+        console.error("Error starting recording:", err);
+      }
+    } else {
+      // Stop recording
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+        setIsRecording(false);
+      }
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -20,6 +93,7 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
+      // You can update systemInstruction if needed.
       const systemInstruction = "";
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -48,6 +122,7 @@ export default function ChatPage() {
     }
   }, [input]);
 
+  // Auto-scroll chat to the bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -116,6 +191,29 @@ export default function ChatPage() {
       {/* Right: Editor Section */}
       <div className="w-1/2 flex flex-col h-screen">
         <CodeEditor />
+      </div>
+
+      {/* Webcam view at the bottom right */}
+      <div className="fixed bottom-4 right-4 p-4 bg-muted rounded-lg shadow-lg">
+        {permissionStatus === "waiting" && <p>Waiting for permission...</p>}
+        {permissionStatus === "denied" && <p>Permission not given</p>}
+        {permissionStatus === "granted" && (
+          <>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-64 h-48 rounded-lg bg-black"
+            />
+            <button
+              onClick={toggleRecording}
+              className="mt-2 px-4 py-2 bg-primary text-white rounded"
+            >
+              {isRecording ? "Stop Recording" : "Start Recording"}
+            </button>
+          </>
+        )}
       </div>
 
       <style jsx>{`
