@@ -64,7 +64,7 @@ const Page=()=> {
         </div>
         
         {/* Ring visualization */}
-        <div className="p-4 rounded-lg border border-border shadow-md bg-background outline outline-4 outline-ring">
+        <div className="p-4 rounded-lg border border-border shadow-md bg-background outline-4 outline-ring">
           <p className="font-semibold text-foreground">--color-ring</p>
           <p className="text-sm text-muted-foreground">outline-ring</p>
         </div>
@@ -72,7 +72,7 @@ const Page=()=> {
       
       <h2 className="text-2xl font-bold my-6">Main Colors</h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
-        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--primary)', color: '#fff' }}>
+        <div className="h-24 rounded-lg shadow-md flex items-end p-2 text-white bg-primary">
           <p className="font-semibold">--primary</p>
         </div>
         <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--secondary)', color: '#fff' }}>
