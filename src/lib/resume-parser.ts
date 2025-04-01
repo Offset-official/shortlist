@@ -11,26 +11,23 @@ export async function extractTextFromResume(file: File): Promise<string> {
     return extractTextFromPDF(file)
   }
 
-  // For DOCX, DOC, RTF files
-  if (
-    fileType === "application/msword" ||
-    fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-    fileType === "application/rtf"
-  ) {
-    return extractTextFromDocument(file)
-  }
+  // // For DOCX, DOC, RTF files
+  // if (
+  //   fileType === "application/msword" ||
+  //   fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+  //   fileType === "application/rtf"
+  // ) {
+  //   return extractTextFromDocument(file)
+  // }
 
-  // For plain text files
-  if (fileType === "text/plain") {
-    return extractTextFromTXT(file)
-  }
+  // // For plain text files
+  // if (fileType === "text/plain") {
+  //   return extractTextFromTXT(file)
+  // }
 
-  throw new Error(`Unsupported file type: ${fileType}`)
+  // throw new Error(`Unsupported file type: ${fileType}`)
 }
 
-/**
- * Extracts text from a PDF file
- */
 async function extractTextFromPDF(file: File): Promise<string> {
   try {
     // Convert File to Blob for PDFLoader
@@ -48,9 +45,6 @@ async function extractTextFromPDF(file: File): Promise<string> {
   }
 }
 
-/**
- * Extracts text from a document file (DOCX, DOC, RTF)
- */
 async function extractTextFromDocument(file: File): Promise<string> {
   // In a real implementation, you would use a library like mammoth.js for DOCX
   // or another appropriate library for DOC/RTF
