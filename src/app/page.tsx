@@ -1,6 +1,18 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import Link from 'next/link'
+import { useRouter } from "next/navigation";
 const Home=()=>{
+
+  const router = useRouter();
+
+  function handleButtonClick() {
+    // Save your system instruction in sessionStorage (or localStorage)
+    sessionStorage.setItem("systemInstruction", "you are tom cruise");
+    // Then navigate cleanly to /chat (no query params)
+    router.push("/chat");
+  }
 
   return (
     <div className="min-h-screen p-8 bg-background text-foreground">
@@ -18,6 +30,9 @@ const Home=()=>{
             <p className="font-semibold"></p>
             <p className="text-sm text-muted-foreground"></p>
           </div>
+          <Button onClick={handleButtonClick}>
+      Go to Chat as Tom Cruise
+    </Button>
       </div>
     </div>
   );
