@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '@/lib/prisma';
 
 export const runtime = "nodejs";
 
@@ -8,7 +8,6 @@ const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
 const ai = new GoogleGenAI({ apiKey });
-const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {

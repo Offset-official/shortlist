@@ -1,5 +1,5 @@
 // app/candidates/[id]/page.tsx
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma';
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -21,7 +21,6 @@ type Candidate = {
 
 async function getCandidateData(id: number): Promise<Candidate | null> {
   try {
-    const prisma = new PrismaClient()
     const candidate = await prisma.candidate.findUnique({
       where: { id }
     })
