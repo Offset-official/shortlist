@@ -50,7 +50,7 @@ export default async function CandidateDetails({ params }: { params: { id: strin
   function openResumeChat() {
     // save resume in session storage as system instruction
     if (candidate && candidate.resume) {
-      sessionStorage.setItem("systemInstruction", JSON.stringify(candidate.resume));
+      sessionStorage.setItem("LLMsystemInstruction", JSON.stringify(candidate.resume));
       console.log("System instruction set in session storage:", candidate.resume);
     }
     // navigate to chat

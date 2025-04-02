@@ -9,7 +9,7 @@ const Home=()=>{
 
   function handleButtonClick() {
     // Save your system instruction in sessionStorage (or localStorage)
-    sessionStorage.setItem("systemInstruction", "you are tom cruise");
+    sessionStorage.setItem("LLMsystemInstruction", "you are tom cruise");
     // Then navigate cleanly to /chat (no query params)
     router.push("/chat");
   }

@@ -17,7 +17,7 @@ const ResumeButton: React.FC<ResumeButtonProps> = ({ resume }) => {
     // save system instruction as string of resume json 
     const resumeString = JSON.stringify(resume);
     const finalResumeString = `You are an assitant which should interview the user based on their resume. Upon the user's greeting, start asking the user about things on their resume and grill them. Following is the resume in a JSON format ${resumeString}`;
-    sessionStorage.setItem("systemInstruction", finalResumeString);
+    sessionStorage.setItem("LLMsystemInstruction", finalResumeString);
     // console.log("System instruction set in session storage:", resumeString);
 
     // This navigates to the "/chat" route client-side:
