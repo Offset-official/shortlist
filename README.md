@@ -18,6 +18,8 @@ pnpm dev
 
 `/candidate/[id]` - candidate's page
 
+`/jobs` - joblisting page
+
 ## Debugging
 
 `npx prisma studio`- To check database
