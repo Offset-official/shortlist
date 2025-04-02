@@ -81,10 +81,10 @@ const Page=()=> {
         <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--tertiary)', color: '#fff' }}>
           <p className="font-semibold">--tertiary</p>
         </div>
-        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--tertiary_1)', color: '#fff' }}>
+        <div className="h-24 rounded-lg shadow-md flex items-end p-2 text-foreground bg-tertiary-1">
           <p className="font-semibold">--tertiary_1</p>
         </div>
-        <div className="h-24 rounded-lg shadow-md flex items-end p-2" style={{ backgroundColor: 'var(--tertiary_2)', color: '#fff' }}>
+        <div className="h-24 rounded-lg shadow-md flex items-end p-2 text-foreground bg-tertiary-2">
           <p className="font-semibold">--tertiary_2</p>
         </div>
       </div>

@@ -1,26 +1,24 @@
-import { Button } from "@/components/ui/button";
-import Link from 'next/link'
-const Home=()=>{
-
+import TextCard from "@/components/text-card"
+const Home = () => {
   return (
     <div className="min-h-screen p-8 bg-background text-foreground">
       <h1 className="text-3xl font-bold mb-6">ShortList</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div
-            className="p-4 rounded-lg border border-border shadow-md bg-card"
-          >
-                <Link 
-      href="/color_check" 
-      className="bg-accent text-white hover:bg-accent-foreground px-4 py-2 rounded inline-block"
-    >
-      Color Check
-    </Link>
-            <p className="font-semibold"></p>
-            <p className="text-sm text-muted-foreground"></p>
-          </div>
+      <p className="mb-8">Welcome to ShortList! Please select an option below to get started.</p>
+      <div className="mt-8 ">
+        <div className="grid grid-cols-2 gap-6">
+          <TextCard href="/color_check" text="Color Check" glowColor="primary" />
+          <TextCard href="/resume" text="Upload Resume" glowColor="secondary" />
+          <TextCard href="/chat" text="DSA Chatbot" glowColor="tertiary" />
+          <TextCard href="/chat" text="Resume Chatbot" glowColor="tertiary-1" />
+          <TextCard href="/candidate/1" text="Profile" glowColor="tertiary-2" />
+          <TextCard href="/jobs" text="Job Listings" glowColor="foreground" />
+        </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default Home;
+
+
+export default Home
+
