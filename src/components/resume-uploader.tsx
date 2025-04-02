@@ -6,17 +6,60 @@ import { Card } from "@/components/ui/card";
 import { FileUploader } from "@/components/file-uploader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+type ResumeData = {
+  personalInfo?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    website?: string;
+    linkedIn?: string;
+  };
+  summary?: string;
+  education?: Array<{
+    degree?: string;
+    institution?: string;
+    location?: string;
+    dates?: string;
+    gpa?: string;
+    achievements?: string[];
+  }>;
+  experience?: Array<{
+    title?: string;
+    company?: string;
+    location?: string;
+    dates?: string;
+    responsibilities?: string[];
+    achievements?: string[];
+  }>;
+  skills?: {
+    technical?: string[];
+    soft?: string[];
+    languages?: string[];
+    certifications?: string[];
+  };
+  projects?: Array<{
+    name?: string;
+    description?: string;
+    technologies?: string[];
+    url?: string;
+  }>;
+};
+
 export function ResumeUploader() {
   const [extractedText, setExtractedText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [fileName, setFileName] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
 
   const handleFileUpload = async (file: File) => {
     try {
       setIsLoading(true);
       setError(null);
       setFileName(file.name);
+      setResumeData(null); // Reset any previous analysis
       
       // Create FormData and append the file
       const formData = new FormData();
@@ -47,13 +90,53 @@ export function ResumeUploader() {
     navigator.clipboard.writeText(extractedText);
   };
 
+  const handleCopyJson = () => {
+    if (resumeData) {
+      navigator.clipboard.writeText(JSON.stringify(resumeData, null, 2));
+    }
+  };
+
+  const handleExtractJson = async () => {
+    try {
+      setIsAnalyzing(true);
+      setError(null);
+      
+      // Send the extracted text to the new API endpoint
+      const response = await fetch("/api/extract_save_resume", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: extractedText }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to parse resume");
+      }
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      setResumeData(data);
+    } catch (err: any) {
+      console.error("Error parsing resume:", err);
+      setError(err.message || "Failed to parse the resume. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="p-6">
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Upload Resume</h2>
           <p className="text-sm text-muted-foreground">
-            Supported formats: PDF, DOCX, DOC, RTF, TXT
+            Supported formats: PDF
           </p>
           
           <FileUploader 
@@ -80,17 +163,31 @@ export function ResumeUploader() {
         <Card className="p-6">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Extracted Text</h2>
-              <Button variant="outline" size="sm" onClick={handleCopyText}>
-                Copy Text
-              </Button>
+              <h2 className="text-xl font-semibold">Extracted Content</h2>
+              <div className="flex space-x-2">
+                <Button variant="outline" size="sm" onClick={handleCopyText}>
+                  Copy Text
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={handleExtractJson}
+                  disabled={isAnalyzing}
+                >
+                  {isAnalyzing ? "Processing..." : "Parse to JSON"}
+                </Button>
+              </div>
             </div>
             
             <Tabs defaultValue="preview">
               <TabsList>
                 <TabsTrigger value="preview">Preview</TabsTrigger>
                 <TabsTrigger value="raw">Raw Text</TabsTrigger>
+                {resumeData && (
+                  <TabsTrigger value="json">JSON Data</TabsTrigger>
+                )}
               </TabsList>
+              
               <TabsContent value="preview" className="mt-4">
                 <div className="bg-muted/50 p-4 rounded-md max-h-[500px] overflow-y-auto">
                   {extractedText.split('\n').map((line, i) => (
@@ -100,6 +197,7 @@ export function ResumeUploader() {
                   ))}
                 </div>
               </TabsContent>
+              
               <TabsContent value="raw" className="mt-4">
                 <textarea
                   className="w-full h-[500px] p-4 font-mono text-sm bg-muted/50 rounded-md resize-none"
@@ -107,6 +205,21 @@ export function ResumeUploader() {
                   readOnly
                 />
               </TabsContent>
+              
+              {resumeData && (
+                <TabsContent value="json" className="mt-4">
+                  <div className="flex justify-end mb-2">
+                    <Button variant="outline" size="sm" onClick={handleCopyJson}>
+                      Copy JSON
+                    </Button>
+                  </div>
+                  <div className="bg-muted/50 p-4 rounded-md max-h-[500px] overflow-y-auto">
+                    <pre className="text-xs font-mono whitespace-pre-wrap">
+                      {JSON.stringify(resumeData, null, 2)}
+                    </pre>
+                  </div>
+                </TabsContent>
+              )}
             </Tabs>
             
             <div className="text-xs text-muted-foreground">
