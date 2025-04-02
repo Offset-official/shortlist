@@ -20,6 +20,8 @@ pnpm dev
 
 `/jobs` - joblisting page
 
+`/chat` - chat
+
 ## Debugging
 
 `npx prisma studio`- To check database
