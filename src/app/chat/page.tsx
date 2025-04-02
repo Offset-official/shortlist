@@ -17,6 +17,7 @@ export default function ChatPage() {
     // Check if sessionStorage already has a systemInstruction
     const storedInstruction = sessionStorage.getItem("systemInstruction");
     // If not, set a custom system instruction (e.g., "you are tom cruise")
+    // console.log(storedInstruction);
     if (!storedInstruction) {
       sessionStorage.setItem("systemInstruction", "You are a chatbot which will help candidates practice guided DSA questions. You will ask the candidate which topic they would like to practice (from linked lists, stack, queue, priority queue, trees) and then ask a DSA easy question from that topic. Then, you have to guide the conversation in such a way that the user is giving you the answer step by step. You will not give the answer to the question directly. You will only give hints and ask questions to guide the user to the answer. The user should build up the answer from brute force to optimized methods.");
     }
@@ -33,6 +34,8 @@ export default function ChatPage() {
     try {
       // Read the systemInstruction from sessionStorage each time
       const systemInstruction = sessionStorage.getItem("systemInstruction") || "";
+      // console.log("sending prompt with the system instruction");
+      // console.log(systemInstruction);
 
       const res = await fetch("/api/chat", {
         method: "POST",
