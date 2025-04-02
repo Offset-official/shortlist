@@ -1,7 +1,6 @@
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 type JobCardProps = {
   job: {
     id: number;
