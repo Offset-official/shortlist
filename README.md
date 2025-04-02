@@ -16,7 +16,14 @@ pnpm dev
 
 `/resume` - resume parsing
 
+`/candidate/[id]` - candidate's page
 
 ## Debugging
 
 `npx prisma studio`- To check database
+
+## TODOs
+
+- Toasts
+- 3D avatar
+- Resume chat
