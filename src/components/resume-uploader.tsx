@@ -101,13 +101,12 @@ export function ResumeUploader() {
       setIsAnalyzing(true);
       setError(null);
       
-      // Send the extracted text to the new API endpoint
       const response = await fetch("/api/extract_save_resume", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: extractedText }),
+        body: JSON.stringify({ text: extractedText, candidateId: "1" }), // hard coded for now. Waiting for Auth. 
       });
       
       if (!response.ok) {

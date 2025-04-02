@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
+import { PrismaClient } from "@prisma/client";
 
 export const runtime = "nodejs";
 
@@ -7,11 +8,12 @@ const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
 const ai = new GoogleGenAI({ apiKey });
+const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { text } = body;
+    const { text, candidateId } = body;
 
     if (!text) {
       return NextResponse.json(
@@ -20,11 +22,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // System instruction for structured JSON extraction
+    if (!candidateId) {
+      return NextResponse.json(
+        { error: "No candidate ID provided" },
+        { status: 400 }
+      );
+    }
+
     const systemInstruction = `
       You are an expert resume parser. Extract structured information from the provided resume text and return it as a JSON object with the following fields:
       
-      - personalInfo: Object containing name, email, phone, location, website/portfolio, linkedIn
+      - personalInfo: Object containing name, email, phone, location, website/portfolio
       - education: Array of objects, each containing:
           - degree: String
           - institution: String
@@ -62,15 +70,14 @@ export async function POST(req: NextRequest) {
     const response = await chat.sendMessage({ message: text });
     
     // Try to parse the response as JSON
+    let parsedJson;
     try {
       // First, attempt to extract just the JSON portion if there's any text around it
       const jsonMatch = response.text.match(/```json\s*([\s\S]*)\s*```/) || 
                         response.text.match(/\{[\s\S]*\}/);
       
       const jsonText = jsonMatch ? jsonMatch[0].replace(/```json|```/g, '') : response.text;
-      const parsedJson = JSON.parse(jsonText);
-      
-      return NextResponse.json(parsedJson);
+      parsedJson = JSON.parse(jsonText);
     } catch (parseError) {
       // If parsing fails, return the raw text with an error flag
       console.error("Failed to parse JSON response:", parseError);
@@ -79,7 +86,61 @@ export async function POST(req: NextRequest) {
         rawText: response.text 
       }, { status: 422 });
     }
-  } catch (error) {
+
+    // If JSON parsed successfully, update the candidate in the database
+    try {
+      const technicalSkills = parsedJson.skills?.technical || [];
+      const softSkills = parsedJson.skills?.soft || [];
+      
+      const allSkills = [...technicalSkills, ...softSkills];
+      
+      // Get candidate info for updating
+      const candidateInfo = {
+        location: parsedJson.personalInfo?.location || "",
+        collegeName: parsedJson.education?.[0]?.institution || "",
+        // Extract graduation year if available
+        year: parsedJson.education?.[0]?.dates ? 
+          parseInt(parsedJson.education[0].dates.match(/\d{4}/)?.[0] || "0") : 
+          null
+      };
+
+      // Update candidate in database
+      const updatedCandidate = await prisma.candidate.update({
+        where: {
+          id: parseInt(candidateId)
+        },
+        data: {
+          resume: parsedJson,
+          skills: allSkills.length > 0 ? allSkills : undefined,
+          location: candidateInfo.location || undefined,
+          collegeName: candidateInfo.collegeName || undefined,
+          year: candidateInfo.year || undefined,
+        }
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Resume data saved successfully",
+        data: parsedJson,
+        candidateId: updatedCandidate.id
+      });
+    } catch (dbError: any) {
+      console.error("Database error:", dbError);
+      
+      // Handle unique constraint violation separately
+      if (dbError.code === 'P2002') {
+        return NextResponse.json({
+          error: "Email address already exists in the system",
+          data: parsedJson
+        }, { status: 409 });
+      }
+      
+      return NextResponse.json({
+        error: `Failed to update candidate: ${dbError.message}`,
+        data: parsedJson
+      }, { status: 500 });
+    }
+  } catch (error: any) {
     console.error("Resume parsing error:", error);
     return NextResponse.json(
       { error: `Failed to parse resume: ${String(error)}` },
