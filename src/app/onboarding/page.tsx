@@ -1,12 +1,16 @@
 "use client";
-import React from "react";
+
+import React, { useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
+import interviewImg from "../../../public/assets/interview1.png";
+import { IoEye, IoEyeOff } from "react-icons/io5";
+
 import RotatingText from "@/components/reactbits/RotatingText";
-import Stepper, { Step } from "@/components/reactbits/Stepper"; 
+import Stepper, { Step } from "@/components/reactbits/Stepper";
 import { Card } from "@/components/ui/card";
-import MagnetLogos from "@/components/MagnetLogos";
 import {
   Form,
   FormField,
@@ -16,77 +20,148 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Country, CountryDropdown } from "@/components/country-dropdown";
+import { DreamCompaniesComboBox } from "@/components/DreamCompaniesComboBox"; // your Shadcn-based combo
 
-// Zod schema
-const FormSchema = z.object({
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react"; // <-- Import signIn from next-auth/react
+
+// 1) Zod schema
+export const FormSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
   country: z.string().min(1, "Country is required"),
   university: z.string().min(1, "University is required"),
+  dreamCompanies: z
+    .array(z.string())
+    .min(1, "Please pick at least 1 company")
+    .max(3, "Up to 3 companies"),
   skills: z.string().min(1, "Skills are required"),
 });
+export type FormSchemaType = z.infer<typeof FormSchema>;
 
-type FormSchemaType = z.infer<typeof FormSchema>;
-
-// This array helps us map step# -> field name
-const STEP_FIELD_NAMES = ["name", "email", "country", "university", "skills"];
+// 2) Step fields
+const STEP_FIELD_NAMES = [
+  "name",
+  "email_password",
+  "country",
+  "university",
+  "dreamCompanies",
+  "skills",
+];
 
 export default function OnboardingForm() {
-  // Setup react-hook-form
+  const router = useRouter();
+
+  // React Hook Form
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
       email: "",
+      password: "",
       country: "",
       university: "",
+      dreamCompanies: [],
       skills: "",
     },
   });
 
-  // Called once final step is done
-  const onSubmit: SubmitHandler<FormSchemaType> = (data) => {
-    console.log("Onboarding completed:", data);
+  // Final submission:
+  const onSubmit: SubmitHandler<FormSchemaType> = async (data) => {
+    try {
+      // 1) Register the user
+      const registerPayload = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        location: data.country,
+        collegeName: data.university,
+        dreamCompanies: data.dreamCompanies,
+        // parse comma-separated skills -> array
+        skills: data.skills.split(",").map((s) => s.trim()),
+      };
+
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registerPayload),
+      });
+
+      if (!res.ok) {
+        const { error } = await res.json();
+        alert(error || "Something went wrong with registration");
+        return;
+      }
+
+      // 2) If registration success, log them in via NextAuth
+      const signInResult = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false, // We handle redirect manually
+      });
+
+      if (signInResult?.error) {
+        // Something wrong with sign in
+        alert(signInResult.error);
+        return;
+      }
+
+      // 3) If sign in success, push to "/"
+      router.push("/");
+    } catch (err) {
+      console.error("Onboarding sign up error:", err);
+      alert("Something went wrong during onboarding.");
+    }
   };
 
-  // This function is called whenever user clicks "Next"
-  // *except* on the final step, where Stepper calls onFinalStepCompleted.
+  // Step validation
   const validateCurrentStep = async (currentStepNumber: number) => {
-    // Convert step # (1-based) to a field name
-    const fieldName = STEP_FIELD_NAMES[currentStepNumber - 1];
-    // Trigger validation for that single field
-    const isValid = await form.trigger(fieldName);
-    return isValid; // if false, user can't proceed
+    switch (STEP_FIELD_NAMES[currentStepNumber - 1]) {
+      case "email_password":
+        return form.trigger(["email", "password"]);
+      case "dreamCompanies":
+        return form.trigger("dreamCompanies");
+      default:
+        const fieldName = STEP_FIELD_NAMES[currentStepNumber - 1];
+        return form.trigger(fieldName);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <Card className="relative w-[70vw] h-[70vh] shadow-lg">
+      <Card className="relative w-[75vw] h-[75vh] shadow-lg">
         <div className="flex h-full">
-          {/* Left side (40%) container */}
-<div className="flex w-[40%] flex-col items-center justify-center relative">
-  {/* The magnet logos in the center */}
-  <div className="w-[80%] h-[70%] bg-transparent px-[10%] flex items-center justify-center">
-    <MagnetLogos />
-  </div>
+          {/* Left side */}
+          <div className="flex w-[40%] flex-col items-center justify-center relative">
+            <div className="w-[80%] h-[70%] bg-transparent px-[10%] flex items-center justify-center">
+              <Image
+                src={interviewImg}
+                alt="Interview"
+                className="w-full h-full object-cover object-center rounded-lg shadow-md"
+                priority
+              />
+            </div>
+            <div className="w-full flex flex-row items-center justify-center mt-4">
+              <p className="mb-2 text-xl mr-3 font-bold">
+                Get placed at companies like
+              </p>
+              <RotatingText
+                texts={["Google", "Microsoft", "Netflix", "Meta"]}
+                mainClassName="px-1 sm:px-2 md:px-3 bg-accent text-black overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
+                staggerFrom="last"
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "-120%" }}
+                staggerDuration={0.025}
+                splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1 font-bold text-xl"
+                transition={{ type: "spring", damping: 40, stiffness: 400 }}
+                rotationInterval={2000}
+              />
+            </div>
+          </div>
 
-  {/* Your "Get placed at" + RotatingText below (or wherever) */}
-  <div className="w-full flex flex-row items-center justify-center mt-4">
-    <p className="mb-2 text-xl mr-3 font-bold">Get placed at</p>
-    <RotatingText
-      texts={["Google", "Microsoft", "Netflix", "Meta"]}
-      mainClassName="px-1 sm:px-2 md:px-3 bg-accent text-black overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
-      staggerFrom="last"
-      initial={{ y: "100%" }}
-      animate={{ y: 0 }}
-      exit={{ y: "-120%" }}
-      staggerDuration={0.025}
-      splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1 font-bold text-xl"
-      transition={{ type: "spring", damping: 40, stiffness: 400 }}
-      rotationInterval={2000}
-    />
-  </div>
-</div>
+          {/* Right side */}
           <div className="w-[60%] flex flex-col justify-center p-6">
             <Form {...form}>
               <Stepper
@@ -96,10 +171,9 @@ export default function OnboardingForm() {
                 backButtonText="Previous"
                 nextButtonText="Next"
                 className="w-full h-full"
-                // Our new prop that runs per-step validation:
                 onNextStepValidate={validateCurrentStep}
               >
-                {/* Step 1: "name" */}
+                {/* Step 1: Name */}
                 <Step>
                   <FormField
                     control={form.control}
@@ -122,7 +196,7 @@ export default function OnboardingForm() {
                   />
                 </Step>
 
-                {/* Step 2: "email" */}
+                {/* Step 2: Email + Password */}
                 <Step>
                   <FormField
                     control={form.control}
@@ -143,9 +217,11 @@ export default function OnboardingForm() {
                       </FormItem>
                     )}
                   />
+                  <div className="my-4" />
+                  <PasswordField form={form} />
                 </Step>
 
-                {/* Step 3: "country" */}
+                {/* Step 3: Country */}
                 <Step>
                   <FormField
                     control={form.control}
@@ -174,7 +250,7 @@ export default function OnboardingForm() {
                   />
                 </Step>
 
-                {/* Step 4: "university" */}
+                {/* Step 4: University */}
                 <Step>
                   <FormField
                     control={form.control}
@@ -197,19 +273,24 @@ export default function OnboardingForm() {
                   />
                 </Step>
 
-                {/* Step 5: "skills" */}
+                {/* Step 5: Dream Companies */}
+                <Step>
+                  <DreamCompaniesComboBox control={form.control} name="dreamCompanies" />
+                </Step>
+
+                {/* Step 6: Skills */}
                 <Step>
                   <FormField
                     control={form.control}
                     name="skills"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Top 5 skills</FormLabel>
+                        <FormLabel>Your top skills</FormLabel>
                         <FormControl>
                           <input
                             {...field}
                             type="text"
-                            placeholder="List your top 5 skills (comma separated)"
+                            placeholder="List top skills (comma separated)"
                             autoComplete="off"
                             className="w-full p-3 border border-border rounded-md"
                           />
@@ -219,12 +300,46 @@ export default function OnboardingForm() {
                     )}
                   />
                 </Step>
-
               </Stepper>
             </Form>
           </div>
         </div>
       </Card>
     </div>
+  );
+}
+
+/** Simple password field with "eye" toggle icons */
+function PasswordField({ form }: { form: any }) {
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <FormField
+      control={form.control}
+      name="password"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Set a password</FormLabel>
+          <FormControl>
+            <div className="relative">
+              <input
+                {...field}
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                autoComplete="off"
+                className="w-full p-3 border border-border rounded-md pr-10"
+              />
+              <div
+                className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <IoEyeOff /> : <IoEye />}
+              </div>
+            </div>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 }
