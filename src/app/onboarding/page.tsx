@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import RotatingText from "@/components/reactbits/RotatingText";
 import Stepper, { Step } from "@/components/reactbits/Stepper"; 
 import { Card } from "@/components/ui/card";
+import MagnetLogos from "@/components/MagnetLogos";
 import {
   Form,
   FormField,
@@ -62,17 +63,20 @@ export default function OnboardingForm() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="relative w-[70vw] h-[70vh] shadow-lg">
         <div className="flex h-full">
-          {/* Left side (30%) blank */}
-          <div className="flex w-[40%] relative">
-  {/* Absolutely positioned container, 30% up from the bottom */}
-  <div className="absolute bottom-[15%] w-full flex flex-row items-center justify-center">
-    {/* "Get placed at" label */}
+          {/* Left side (40%) container */}
+<div className="flex w-[40%] flex-col items-center justify-center relative">
+  {/* The magnet logos in the center */}
+  <div className="w-[80%] h-[70%] bg-transparent px-[10%] flex items-center justify-center">
+    <MagnetLogos />
+  </div>
+
+  {/* Your "Get placed at" + RotatingText below (or wherever) */}
+  <div className="w-full flex flex-row items-center justify-center mt-4">
     <p className="mb-2 text-xl mr-3 font-bold">Get placed at</p>
-    {/* Your rotating text */}
     <RotatingText
-      texts={["Google", "Microsoft", "Apple", "Quizizz"]}
+      texts={["Google", "Microsoft", "Netflix", "Meta"]}
       mainClassName="px-1 sm:px-2 md:px-3 bg-accent text-black overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
-      staggerFrom={"last"}
+      staggerFrom="last"
       initial={{ y: "100%" }}
       animate={{ y: 0 }}
       exit={{ y: "-120%" }}
@@ -81,8 +85,8 @@ export default function OnboardingForm() {
       transition={{ type: "spring", damping: 40, stiffness: 400 }}
       rotationInterval={2000}
     />
+  </div>
 </div>
-          </div>
           <div className="w-[60%] flex flex-col justify-center p-6">
             <Form {...form}>
               <Stepper
