@@ -11,6 +11,9 @@ pnpm dev
 ``` 
 
 ## Info
+`/` - landing page for everyone
+
+`/dashboard` - d
 
 `/color_check`- color scheme of the website
 
