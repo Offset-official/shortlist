@@ -1,19 +1,21 @@
 import React, { useState, Children, useRef, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
+// 1) Add onNextStepValidate in the prop definitions
 export default function Stepper({
   children,
   initialStep = 1,
   onStepChange = () => {},
   onFinalStepCompleted = () => {},
-  disableStepIndicators = false,
+  disableStepIndicators = true,
   renderStepIndicator,
   backButtonProps = {},
   nextButtonProps = {},
   backButtonText = "Back",
   nextButtonText = "Continue",
   className = "",
+  onNextStepValidate, // <-- new prop
   ...rest
 }: {
   children: React.ReactNode;
@@ -31,6 +33,12 @@ export default function Stepper({
   backButtonText?: string;
   nextButtonText?: string;
   className?: string;
+  /**
+   * Optional callback to validate the current step.
+   * Return `true` to proceed, or `false` to block the transition.
+   * This can also be an async function returning a Promise<boolean>.
+   */
+  onNextStepValidate?: (currentStepNumber: number) => boolean | Promise<boolean>;
   [key: string]: any; // catches any other props
 }) {
   const [currentStep, setCurrentStep] = useState(initialStep);
@@ -57,33 +65,37 @@ export default function Stepper({
     }
   };
 
-  const handleNext = () => {
+  // 2) Call onNextStepValidate before proceeding
+  const handleNext = async () => {
     if (!isLastStep) {
+      if (onNextStepValidate) {
+        const valid = await onNextStepValidate(currentStep);
+        if (!valid) {
+          // If validation failed, stay here
+          return;
+        }
+      }
       setDirection(1);
       updateStep(currentStep + 1);
     }
   };
 
-  const handleComplete = () => {
+  // 3) Also validate before completing final step
+  const handleComplete = async () => {
+    if (onNextStepValidate) {
+      const valid = await onNextStepValidate(currentStep);
+      if (!valid) return;
+    }
     setDirection(1);
     updateStep(totalSteps + 1);
   };
 
   return (
-    // Container that fills its parent by default, 
-    // unless you override via className or parent styles
     <div
       className={`flex flex-col items-center justify-center w-full h-full ${className}`}
       {...rest}
     >
-      {/* Outer box that holds the step indicators, content, and footer. */}
-      <div
-        className="
-          flex flex-col
-          w-full h-full
-          rounded-2xl
-        "
-      >
+      <div className="flex flex-col w-full h-full rounded-2xl">
         {/* Step Indicator Row */}
         <div className="flex w-full items-center p-8">
           {stepsArray.map((_, index) => {
@@ -129,7 +141,6 @@ export default function Stepper({
           {stepsArray[currentStep - 1]}
         </StepContentWrapper>
 
-        {/* Footer (Previous & Next/Complete) */}
         {!isCompleted && (
           <div className="px-8 pb-8">
             <div
@@ -178,7 +189,7 @@ export default function Stepper({
   );
 }
 
-/** Wraps the step content in a framer-motion container for slide transitions. */
+/** StepContentWrapper: animates each step in/out */
 function StepContentWrapper({
   isCompleted,
   currentStep,
@@ -194,9 +205,7 @@ function StepContentWrapper({
 
   return (
     <motion.div
-      // Fill available space, with relative positioning for the slide animations.
       className="relative overflow-hidden flex-1"
-      // Animate the height to match content (if not completed)
       animate={{ height: isCompleted ? 0 : parentHeight }}
       transition={{ type: "spring", duration: 0.4 }}
     >
@@ -207,7 +216,6 @@ function StepContentWrapper({
             direction={direction}
             onHeightReady={(h) => setParentHeight(h)}
           >
-            {/* The actual step content children */}
             <div className="p-8">{children}</div>
           </SlideTransition>
         )}
@@ -216,7 +224,7 @@ function StepContentWrapper({
   );
 }
 
-/** Slides each step in/out from left/right using framer-motion. */
+/** SlideTransition: slides steps horizontally */
 function SlideTransition({
   children,
   direction,
@@ -265,12 +273,12 @@ const stepVariants = {
   }),
 };
 
-/** Simple container for step content. You can remove or replace this if you want. */
+/** Step container */
 export function Step({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/** Renders a clickable step indicator with three states: inactive, active, complete. */
+/** StepIndicator: inactive, active, or complete */
 function StepIndicator({
   step,
   currentStep,
@@ -306,7 +314,7 @@ function StepIndicator({
         variants={{
           inactive: {
             scale: 1,
-            backgroundColor: "rgb(34,34,34)", // or var(--border), etc.
+            backgroundColor: "rgb(34,34,34)", // Or var(--border), etc.
             color: "rgb(163,163,163)",
           },
           active: {
@@ -318,7 +326,7 @@ function StepIndicator({
             scale: 1,
             backgroundColor: "var(--accent)",
             // You can pick a different color for "complete" text
-            color: "rgb(59,130,246)", // e.g. a blue from Tailwind
+            color: "rgb(59,130,246)", // a blue from Tailwind
           },
         }}
         transition={{ duration: 0.3 }}
@@ -341,7 +349,7 @@ function StepIndicator({
   );
 }
 
-/** Connector line between step indicators. */
+/** StepConnector: line between indicators */
 function StepConnector({ isComplete }: { isComplete: boolean }) {
   const lineVariants = {
     incomplete: {
@@ -367,7 +375,7 @@ function StepConnector({ isComplete }: { isComplete: boolean }) {
   );
 }
 
-/** Animated check mark for completed steps. */
+/** Animated check icon for complete steps. */
 function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
