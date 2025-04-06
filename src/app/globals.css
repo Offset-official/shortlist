@@ -83,7 +83,7 @@
 
 .dark {
   --accent:  rgba(0,150, 255,1);
-  --accent-foreground: rgba(0,100,170,1);
+  --accent-foreground: rgb(3, 5, 6);
 
 
   --background: oklch(0.26 0 0);
