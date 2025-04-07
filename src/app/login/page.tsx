@@ -1,15 +1,23 @@
 // File: app/login/page.tsx
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // If the user is already authenticated, redirect to home
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,8 +33,13 @@ export default function LoginPage() {
       return;
     }
 
-    // If success, redirect
+    // If success, redirect to home
     router.push("/");
+  }
+
+  // Optionally, you can show a loading state while session is loading
+  if (status === "loading") {
+    return <p>Loading...</p>;
   }
 
   return (

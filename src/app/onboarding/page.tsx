@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,14 +19,13 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Country, CountryDropdown } from "@/components/country-dropdown";
-import { DreamCompaniesComboBox } from "@/components/DreamCompaniesComboBox"; // your Shadcn-based combo
-
+// Replace the previous country dropdown with a new AllCountriesDropdown component
+import { AllCountriesDropdown } from "@/components/AllCountriesDropdown";
+import { DreamCompaniesComboBox } from "@/components/DreamCompaniesComboBox";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react"; // <-- Import signIn from next-auth/react
+import { signIn, signOut, useSession } from "next-auth/react";
 
-// 1) Zod schema
-export const FormSchema = z.object({
+const FormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -38,9 +37,9 @@ export const FormSchema = z.object({
     .max(3, "Up to 3 companies"),
   skills: z.string().min(1, "Skills are required"),
 });
-export type FormSchemaType = z.infer<typeof FormSchema>;
 
-// 2) Step fields
+type FormSchemaType = z.infer<typeof FormSchema>;
+
 const STEP_FIELD_NAMES = [
   "name",
   "email_password",
@@ -52,8 +51,17 @@ const STEP_FIELD_NAMES = [
 
 export default function OnboardingForm() {
   const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const { data: session } = useSession();
 
-  // React Hook Form
+  // If the user is already logged in, log them out automatically.
+  useEffect(() => {
+    if (session) {
+      // You can customize options (like redirect URL) if needed.
+      signOut({ redirect: false });
+    }
+  }, [session]);
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -67,10 +75,9 @@ export default function OnboardingForm() {
     },
   });
 
-  // Final submission:
   const onSubmit: SubmitHandler<FormSchemaType> = async (data) => {
     try {
-      // 1) Register the user
+      // 1) Register user
       const registerPayload = {
         name: data.name,
         email: data.email,
@@ -78,7 +85,6 @@ export default function OnboardingForm() {
         location: data.country,
         collegeName: data.university,
         dreamCompanies: data.dreamCompanies,
-        // parse comma-separated skills -> array
         skills: data.skills.split(",").map((s) => s.trim()),
       };
 
@@ -94,20 +100,20 @@ export default function OnboardingForm() {
         return;
       }
 
-      // 2) If registration success, log them in via NextAuth
+      // 2) On successful registration, log the user in (saving session info)
       const signInResult = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: false, // We handle redirect manually
+        redirect: false,
       });
 
       if (signInResult?.error) {
-        // Something wrong with sign in
         alert(signInResult.error);
         return;
       }
 
-      // 3) If sign in success, push to "/"
+      // 3) Hold on the final step and then redirect
+      setIsRedirecting(true);
       router.push("/");
     } catch (err) {
       console.error("Onboarding sign up error:", err);
@@ -115,16 +121,38 @@ export default function OnboardingForm() {
     }
   };
 
-  // Step validation
+  // Validate each step—note that for the "email_password" step, we perform a server-side email check
   const validateCurrentStep = async (currentStepNumber: number) => {
-    switch (STEP_FIELD_NAMES[currentStepNumber - 1]) {
-      case "email_password":
-        return form.trigger(["email", "password"]);
+    const stepKey = STEP_FIELD_NAMES[currentStepNumber - 1];
+
+    switch (stepKey) {
+      case "email_password": {
+        const localIsValid = await form.trigger(["email", "password"]);
+        if (!localIsValid) return false;
+
+        const emailValue = form.getValues("email");
+        try {
+          const response = await fetch(`/api/check-email?email=${encodeURIComponent(emailValue)}`);
+          if (!response.ok) return false;
+          const data = await response.json();
+          if (data.exists) {
+            form.setError("email", {
+              type: "manual",
+              message: "Email is already in use.",
+            });
+            return false;
+          }
+        } catch (error) {
+          console.error("Error checking email uniqueness:", error);
+          return false;
+        }
+
+        return true;
+      }
       case "dreamCompanies":
         return form.trigger("dreamCompanies");
       default:
-        const fieldName = STEP_FIELD_NAMES[currentStepNumber - 1];
-        return form.trigger(fieldName);
+        return form.trigger(stepKey);
     }
   };
 
@@ -234,12 +262,10 @@ export default function OnboardingForm() {
                             control={form.control}
                             name="country"
                             render={({ field: { onChange, value } }) => (
-                              <CountryDropdown
+                              <AllCountriesDropdown
                                 placeholder="Select your country"
                                 defaultValue={value}
-                                onChange={(country: Country) =>
-                                  onChange(country.alpha3)
-                                }
+                                onChange={(selectedCountry: string) => onChange(selectedCountry)}
                               />
                             )}
                           />
