@@ -1,3 +1,5 @@
+"use client";
+
 import TextCard from "@/components/text-card"
 const Home = () => {
   return (
