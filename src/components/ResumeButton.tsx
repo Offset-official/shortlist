@@ -16,7 +16,7 @@ const ResumeButton: React.FC<ResumeButtonProps> = ({ resume }) => {
     // sessionStorage is only accessible in the browser (client side).
     // save system instruction as string of resume json 
     const resumeString = JSON.stringify(resume);
-    const finalResumeString = `You are an assitant which should interview the user based on their resume. Upon the user's greeting, start asking the user about things on their resume and grill them. Following is the resume in a JSON format ${resumeString}`;
+    const finalResumeString = `You are an assitant which should interview the user based on their resume. Upon the user's greeting, start asking the user about things on their resume and grill them. Go to depth of the topic and evaluate their understanding. If the user is not able to respond, ask them if they would like to move on to another topic. Following is the resume in a JSON format ${resumeString}`;
     sessionStorage.setItem("LLMsystemInstruction", finalResumeString);
     // console.log("System instruction set in session storage:", resumeString);
 
