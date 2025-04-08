@@ -38,6 +38,12 @@ export async function POST(req: NextRequest) {
     };
 
     const transformedHistory = historyMessages.map(transformMessage);
+    // add dummy to start of transformedHistory
+    transformedHistory.unshift({
+      role: "user",
+      parts: [{ text: "hi" }],
+    });
+    // 
 
     let promptText: string;
     if (typeof promptMessage.content === "string") {
