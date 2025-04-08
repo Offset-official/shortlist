@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +19,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-// Replace the previous country dropdown with a new AllCountriesDropdown component
+// Use the new AllCountriesDropdown component.
 import { AllCountriesDropdown } from "@/components/AllCountriesDropdown";
 import { DreamCompaniesComboBox } from "@/components/DreamCompaniesComboBox";
 import { useRouter } from "next/navigation";
@@ -54,13 +54,8 @@ export default function OnboardingForm() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const { data: session } = useSession();
 
-  // If the user is already logged in, log them out automatically.
-  useEffect(() => {
-    if (session) {
-      // You can customize options (like redirect URL) if needed.
-      signOut({ redirect: false });
-    }
-  }, [session]);
+  // Removed the auto sign out on mount.
+  // Instead, we will sign out any existing session after registration.
 
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
@@ -77,7 +72,7 @@ export default function OnboardingForm() {
 
   const onSubmit: SubmitHandler<FormSchemaType> = async (data) => {
     try {
-      // 1) Register user
+      // 1) Register the new user
       const registerPayload = {
         name: data.name,
         email: data.email,
@@ -100,7 +95,15 @@ export default function OnboardingForm() {
         return;
       }
 
-      // 2) On successful registration, log the user in (saving session info)
+      // 2) Set the UI to "Signing Up..." state.
+      setIsRedirecting(true);
+
+      // 3) If there is an existing session, sign out first.
+      if (session) {
+        await signOut({ redirect: false });
+      }
+
+      // 4) Sign in the new user with credentials.
       const signInResult = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -112,8 +115,7 @@ export default function OnboardingForm() {
         return;
       }
 
-      // 3) Hold on the final step and then redirect
-      setIsRedirecting(true);
+      // 5) Redirect to home.
       router.push("/");
     } catch (err) {
       console.error("Onboarding sign up error:", err);
@@ -121,7 +123,7 @@ export default function OnboardingForm() {
     }
   };
 
-  // Validate each step—note that for the "email_password" step, we perform a server-side email check
+  // Validate individual fields in each step. For the "email_password" step, also verify if email already exists.
   const validateCurrentStep = async (currentStepNumber: number) => {
     const stepKey = STEP_FIELD_NAMES[currentStepNumber - 1];
 
@@ -132,7 +134,9 @@ export default function OnboardingForm() {
 
         const emailValue = form.getValues("email");
         try {
-          const response = await fetch(`/api/check-email?email=${encodeURIComponent(emailValue)}`);
+          const response = await fetch(
+            `/api/check-email?email=${encodeURIComponent(emailValue)}`
+          );
           if (!response.ok) return false;
           const data = await response.json();
           if (data.exists) {
@@ -146,7 +150,6 @@ export default function OnboardingForm() {
           console.error("Error checking email uniqueness:", error);
           return false;
         }
-
         return true;
       }
       case "dreamCompanies":
@@ -191,143 +194,154 @@ export default function OnboardingForm() {
 
           {/* Right side */}
           <div className="w-[60%] flex flex-col justify-center p-6">
-            <Form {...form}>
-              <Stepper
-                initialStep={1}
-                onStepChange={(step) => console.log("Current Step:", step)}
-                onFinalStepCompleted={() => form.handleSubmit(onSubmit)()}
-                backButtonText="Previous"
-                nextButtonText="Next"
-                className="w-full h-full"
-                onNextStepValidate={validateCurrentStep}
-              >
-                {/* Step 1: Name */}
-                <Step>
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>What is your name?</FormLabel>
-                        <FormControl>
-                          <input
-                            {...field}
-                            type="text"
-                            placeholder="Enter your name"
-                            autoComplete="off"
-                            className="w-full p-3 border border-border rounded-md"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </Step>
+            {isRedirecting ? (
+              <div className="flex flex-col items-center justify-center h-full">
+                <p className="text-2xl font-bold">Signing Up...</p>
+              </div>
+            ) : (
+              <Form {...form}>
+                <Stepper
+                  initialStep={1}
+                  onStepChange={(step) => console.log("Current Step:", step)}
+                  onFinalStepCompleted={() => form.handleSubmit(onSubmit)()}
+                  backButtonText="Previous"
+                  nextButtonText="Next"
+                  className="w-full h-full"
+                  onNextStepValidate={validateCurrentStep}
+                >
+                  {/* Step 1: Name */}
+                  <Step>
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>What is your name?</FormLabel>
+                          <FormControl>
+                            <input
+                              {...field}
+                              type="text"
+                              placeholder="Enter your name"
+                              autoComplete="off"
+                              className="w-full p-3 border border-border rounded-md"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </Step>
 
-                {/* Step 2: Email + Password */}
-                <Step>
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>What is your email?</FormLabel>
-                        <FormControl>
-                          <input
-                            {...field}
-                            type="email"
-                            placeholder="Enter your email"
-                            autoComplete="off"
-                            className="w-full p-3 border border-border rounded-md"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="my-4" />
-                  <PasswordField form={form} />
-                </Step>
+                  {/* Step 2: Email + Password */}
+                  <Step>
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>What is your email?</FormLabel>
+                          <FormControl>
+                            <input
+                              {...field}
+                              type="email"
+                              placeholder="Enter your email"
+                              autoComplete="off"
+                              className="w-full p-3 border border-border rounded-md"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="my-4" />
+                    <PasswordField form={form} />
+                  </Step>
 
-                {/* Step 3: Country */}
-                <Step>
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>Which country are you from?</FormLabel>
-                        <FormControl>
-                          <Controller
-                            control={form.control}
-                            name="country"
-                            render={({ field: { onChange, value } }) => (
-                              <AllCountriesDropdown
-                                placeholder="Select your country"
-                                defaultValue={value}
-                                onChange={(selectedCountry: string) => onChange(selectedCountry)}
-                              />
-                            )}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </Step>
+                  {/* Step 3: Country */}
+                  <Step>
+                    <FormField
+                      control={form.control}
+                      name="country"
+                      render={() => (
+                        <FormItem>
+                          <FormLabel>Which country are you from?</FormLabel>
+                          <FormControl>
+                            <Controller
+                              control={form.control}
+                              name="country"
+                              render={({ field: { onChange, value } }) => (
+                                <AllCountriesDropdown
+                                  placeholder="Select your country"
+                                  defaultValue={value}
+                                  onChange={(selectedCountry: string) =>
+                                    onChange(selectedCountry)
+                                  }
+                                />
+                              )}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </Step>
 
-                {/* Step 4: University */}
-                <Step>
-                  <FormField
-                    control={form.control}
-                    name="university"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name of university</FormLabel>
-                        <FormControl>
-                          <input
-                            {...field}
-                            type="text"
-                            placeholder="Enter your university"
-                            autoComplete="off"
-                            className="w-full p-3 border border-border rounded-md"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </Step>
+                  {/* Step 4: University */}
+                  <Step>
+                    <FormField
+                      control={form.control}
+                      name="university"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name of university</FormLabel>
+                          <FormControl>
+                            <input
+                              {...field}
+                              type="text"
+                              placeholder="Enter your university"
+                              autoComplete="off"
+                              className="w-full p-3 border border-border rounded-md"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </Step>
 
-                {/* Step 5: Dream Companies */}
-                <Step>
-                  <DreamCompaniesComboBox control={form.control} name="dreamCompanies" />
-                </Step>
+                  {/* Step 5: Dream Companies */}
+                  <Step>
+                    <DreamCompaniesComboBox
+                      control={form.control}
+                      name="dreamCompanies"
+                    />
+                  </Step>
 
-                {/* Step 6: Skills */}
-                <Step>
-                  <FormField
-                    control={form.control}
-                    name="skills"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Your top skills</FormLabel>
-                        <FormControl>
-                          <input
-                            {...field}
-                            type="text"
-                            placeholder="List top skills (comma separated)"
-                            autoComplete="off"
-                            className="w-full p-3 border border-border rounded-md"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </Step>
-              </Stepper>
-            </Form>
+                  {/* Step 6: Skills */}
+                  <Step>
+                    <FormField
+                      control={form.control}
+                      name="skills"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Your top skills</FormLabel>
+                          <FormControl>
+                            <input
+                              {...field}
+                              type="text"
+                              placeholder="List top skills (comma separated)"
+                              autoComplete="off"
+                              className="w-full p-3 border border-border rounded-md"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </Step>
+                </Stepper>
+              </Form>
+            )}
           </div>
         </div>
       </Card>
