@@ -46,7 +46,7 @@ type ResumeData = {
   }>;
 };
 
-export function ResumeUploader(userId: Number) {
+export function ResumeUploader(userId: any) {
   const [extractedText, setExtractedText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
