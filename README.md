@@ -12,6 +12,8 @@ pnpm dev
 
 ## Info
 
+`/dashboard` - d
+
 `/color_check`- color scheme of the website
 
 `/resume` - resume parsing
@@ -21,6 +23,12 @@ pnpm dev
 `/jobs` - joblisting page
 
 `/chat` - chat
+
+`/omboarding` - signup
+
+`/login` - login
+
+`/` - login details (for now)
 
 ## Debugging
 
