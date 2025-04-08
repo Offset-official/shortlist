@@ -11,7 +11,6 @@ pnpm dev
 ``` 
 
 ## Info
-`/` - landing page for everyone
 
 `/dashboard` - d
 
@@ -24,6 +23,12 @@ pnpm dev
 `/jobs` - joblisting page
 
 `/chat` - chat
+
+`/omboarding` - signup
+
+`/login` - login
+
+`/` - login details (for now)
 
 ## Debugging
 
