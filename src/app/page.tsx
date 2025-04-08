@@ -1,24 +1,45 @@
-import TextCard from "@/components/text-card"
-const Home = () => {
-  return (
-    <div className="min-h-screen p-8 bg-background text-foreground">
-      <h1 className="text-3xl font-bold mb-6">ShortList</h1>
-      <p className="mb-8">Welcome to ShortList! Please select an option below to get started.</p>
-      <div className="mt-8 ">
-        <div className="grid grid-cols-2 gap-6">
-          <TextCard href="/color_check" text="Color Check" glowColor="primary" />
-          <TextCard href="/resume" text="Upload Resume" glowColor="secondary" />
-          <TextCard href="/chat" text="DSA Chatbot" glowColor="tertiary" />
-          <TextCard href="/chat" text="Resume Chatbot" glowColor="tertiary-1" />
-          <TextCard href="/candidate/1" text="Profile" glowColor="tertiary-2" />
-          <TextCard href="/jobs" text="Job Listings" glowColor="foreground" />
-        </div>
+// app/page.tsx
+"use client";
+
+import React from "react";
+import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
+
+export default function HomePage() {
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return <p>Loading...</p>;
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-bold mb-4">You are not signed in</h1>
+        <Link href="/login" className="text-blue-500 underline">
+          Sign In
+        </Link>
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <h1 className="text-3xl font-bold mb-6">Welcome, {session.user?.name}</h1>
+      <p className="text-lg mb-2">Email: {session.user?.email}</p>
+      {session.user?.image && (
+        <img
+          src={session.user.image}
+          alt="User Profile"
+          className="w-32 h-32 rounded-full mb-4"
+        />
+      )}
+      <button
+        onClick={() => signOut({ redirect: false })}
+        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+      >
+        Sign Out
+      </button>
     </div>
-  )
+  );
 }
-
-
-
-export default Home
-
