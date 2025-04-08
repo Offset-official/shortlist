@@ -11,6 +11,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  var messageSent = false;
 
   // Ensure there's a systemInstruction in sessionStorage
   useEffect(() => {
@@ -21,6 +22,11 @@ export default function ChatPage() {
     if (!storedInstruction) {
       sessionStorage.setItem("LLMsystemInstruction", "You are a chatbot which will help candidates practice guided DSA questions. You will ask the candidate which topic they would like to practice (from linked lists, stack, queue, priority queue, trees) and then ask a DSA easy question from that topic. Then, you have to guide the conversation in such a way that the user is giving you the answer step by step. You will not give the answer to the question directly. You will only give hints and ask questions to guide the user to the answer. The user should build up the answer from brute force to optimized methods.");
     }
+    if (!messageSent) {
+      sendHiddenMessage("Hi");
+      messageSent = true;
+    }
+    
   }, []);
 
   const handleSend = async () => {
@@ -66,6 +72,37 @@ export default function ChatPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // do this when page loads
+  const sendHiddenMessage = async (hiddenMessage: String) => {
+    // 
+    const userMessage = { role: "user", content: hiddenMessage };
+    setLoading(true);
+    try {
+      // Read the systemInstruction from sessionStorage each time
+      const systemInstruction = sessionStorage.getItem("LLMsystemInstruction") || "";
+      // console.log("sending prompt with the system instruction");
+      // console.log(systemInstruction);
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          systemInstruction,
+        }),
+      });
+
+      const data = await res.json();
+      const assistantMessage = { role: "assistant", content: data.reply };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
     <div className="flex min-h-screen bg-background text-foreground relative">

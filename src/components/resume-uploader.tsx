@@ -46,7 +46,7 @@ type ResumeData = {
   }>;
 };
 
-export function ResumeUploader() {
+export function ResumeUploader(userId: any) {
   const [extractedText, setExtractedText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -65,7 +65,7 @@ export function ResumeUploader() {
       const formData = new FormData();
       formData.append("file", file);
       
-      // Send the file to the API endpoint
+      // Send the file to the API 
       const response = await fetch("/api/parsedoc", {
         method: "POST",
         body: formData,
@@ -100,13 +100,14 @@ export function ResumeUploader() {
     try {
       setIsAnalyzing(true);
       setError(null);
-      
+      // console.log(userId);
+
       const response = await fetch("/api/extract_save_resume", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: extractedText, candidateId: "1" }), // hard coded for now. Waiting for Auth. 
+        body: JSON.stringify({ text: extractedText, candidateId: userId.userId }), // hard coded for now. Waiting for Auth. 
       });
       
       if (!response.ok) {
