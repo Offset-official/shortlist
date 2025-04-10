@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 model Candidate {
   id             Int      @id @default(autoincrement())
@@ -89,11 +90,7 @@ model CodingProblem {
 
   companiesAskedIn String[]
 
-  timeComplexity  String? // Expected time complexity like "O(n)"
-  spaceComplexity String? // Expected space complexity like "O(1)"
-
-  solutionApproach String? @db.Text
-  solutionCode     String? @db.Text
+  approaches Json? // Array of approaches or methods to solve the problem
 
   @@index([title])
   @@index([difficulty])
