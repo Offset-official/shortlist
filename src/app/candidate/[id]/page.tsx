@@ -1,8 +1,10 @@
 // app/candidates/[id]/page.tsx
+import { Button } from '@/components/ui/button';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-
+import { notFound, redirect } from 'next/navigation'
+import ResumeButton from '@/components/ResumeButton'; // Adjust the import path as necessary
+// import { useRouter } from 'next/navigation';
 type Candidate = {
   id: number
   name: string
@@ -44,6 +46,16 @@ export default async function CandidateDetails({ params }: { params: { id: strin
   if (!candidate) {
     notFound()
   }
+
+  function openResumeChat() {
+    // save resume in session storage as system instruction
+    if (candidate && candidate.resume) {
+      sessionStorage.setItem("LLMsystemInstruction", JSON.stringify(candidate.resume));
+      console.log("System instruction set in session storage:", candidate.resume);
+    }
+    // navigate to chat
+    redirect("/chat");
+  }
   
   return (
     <div className="min-h-screen bg-background">
@@ -70,7 +82,7 @@ export default async function CandidateDetails({ params }: { params: { id: strin
                   </p>
                 )}
               </div>
-
+              {candidate && candidate.resume && <ResumeButton resume={candidate.resume} />}
             </div>
           </div>
 
