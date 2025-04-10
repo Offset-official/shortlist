@@ -13,6 +13,7 @@
     "@google/generative-ai": "^0.24.0",
     "@langchain/community": "^0.3.38",
     "@langchain/core": "^0.3.43",
+    "@met4citizen/talkinghead": "^1.4.0",
     "@prisma/client": "6.5.0",
     "@radix-ui/react-dropdown-menu": "^2.1.6",
     "@radix-ui/react-slot": "^1.1.2",
