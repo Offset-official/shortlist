@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export default function TalkingHeadComponent() {
+export default function TalkingHeadComponent({ text: externalText } : { text: string }) {
   const avatarRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState("Loading...");
-  const [text, setText] = useState("Hi there. How are you? I'm fine.");
+  const [text, setText] = useState(externalText);
   const [head, setHead] = useState<any>(null);
   const [showLoading, setShowLoading] = useState(true);
+  const [isAvatarReady, setIsAvatarReady] = useState(false); // prevents unwanted calls to headinstance before it's ready
+
 
   useEffect(() => {
     let headInstance: any;
@@ -48,6 +50,9 @@ export default function TalkingHeadComponent() {
           }
         );
 
+        setHead(headInstance);
+        setIsAvatarReady(true);
+
         setShowLoading(false);
       } catch (error) {
         console.error(error);
@@ -85,27 +90,25 @@ export default function TalkingHeadComponent() {
     };
   }, []);
 
-  const handleSpeak = () => {
-    if (head && text) head.speakText(text);
-  };
+  const lastSpokenText = useRef<string | null>(null); // to handle repeated calls during development
+
+  const handleSpeak = useCallback(() => {
+    if (head && isAvatarReady && externalText && externalText !== lastSpokenText.current) {
+      head.speakText(externalText);
+      lastSpokenText.current = externalText;
+    }
+  }, [head, isAvatarReady, externalText]);
+
+  useEffect(() => {
+    if (isAvatarReady && externalText) {
+      handleSpeak();
+      setText(externalText);
+    }
+  }, [externalText, isAvatarReady, handleSpeak]);
 
   return (
-    <div className="bg-gray-800 text-white w-full h-full max-w-3xl mx-auto relative">
+    <div className="text-white w-full h-full max-w-3xl mx-auto relative">
       <div ref={avatarRef} className="block w-full h-full"></div>
-      <div className="absolute top-10 left-10 right-10 h-12">
-        <input
-          className="absolute w-full h-full text-xl right-28"
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-        <button
-          className="absolute right-0 h-full w-24 text-xl"
-          onClick={handleSpeak}
-        >
-          Speak
-        </button>
-      </div>
       {showLoading && (
         <div className="absolute bottom-10 left-10 right-10 h-12 text-xl">{loading}</div>
       )}
