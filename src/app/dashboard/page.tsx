@@ -14,6 +14,7 @@ const Home = () => {
           <TextCard href="/chat" text="Resume Chatbot" glowColor="tertiary-1" />
           <TextCard href="/candidate/1" text="Profile" glowColor="tertiary-2" />
           <TextCard href="/jobs" text="Job Listings" glowColor="foreground" />
+          <TextCard href="/interview" text="Interview Prep" glowColor="foreground-1" />
         </div>
       </div>
     </div>
