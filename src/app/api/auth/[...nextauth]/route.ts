@@ -1,7 +1,5 @@
-import NextAuth, { Session } from "next-auth";
-import { PrismaClient } from "@prisma/client";
+import NextAuth  from "next-auth";
 import { authOptions } from "@/lib/authOptions";
-const prisma = new PrismaClient();
 
 
 
