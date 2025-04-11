@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import Markdown from "react-markdown";
 import CodeEditor from "../components/CodeEditor";
 import CameraRecorder from "../components/CameraRecorder"; // ✅ import here
+import TalkingHeadComponent from '@/components/TalkingAvatar';
+import { Assistant } from "next/font/google";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
@@ -26,7 +28,7 @@ export default function ChatPage() {
       sendHiddenMessage("Hi");
       messageSent = true;
     }
-    
+
   }, []);
 
   const handleSend = async () => {
@@ -165,6 +167,16 @@ export default function ChatPage() {
 
       {/* ✅ Webcam */}
       <CameraRecorder />
+
+      <div className="fixed bottom-6 right-6 w-[300px] h-[300px] z-50">
+      {messages.length > 0 && (
+        <div className="w-[300px] h-[300px] relative overflow-hidden rounded-lg shadow-xl">
+          <TalkingHeadComponent text={messages.findLast((msg) => msg.role === "assistant")?.content || "Thinking..."} />
+        </div>
+      )}
+      </div>
+
+      {/* Custom scrollbar styles */}
 
       <style jsx>{`
         .chat-scroll::-webkit-scrollbar {
