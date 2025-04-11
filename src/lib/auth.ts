@@ -1,10 +1,9 @@
 // lib/auth.ts
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma"
 import bcrypt from "bcrypt";
 
-const prisma = new PrismaClient();
 
 export const authOptions: AuthOptions = {
   session: {
@@ -32,7 +31,7 @@ export const authOptions: AuthOptions = {
           throw new Error("Invalid password");
         }
         return {
-          id: candidate.id,
+          id: candidate.id.toString(),
           name: candidate.name,
           email: candidate.email,
         };
@@ -48,7 +47,7 @@ export const authOptions: AuthOptions = {
     },
     async session({ session, token }) {
       if (token?.id && session.user) {
-        session.user.id = token.id;
+        (session.user as { id: string }).id = token.id as string;
       }
       return session;
     },

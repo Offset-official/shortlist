@@ -15,7 +15,7 @@ export default function CameraRecorder() {
 
   useEffect(() => {
     navigator.mediaDevices
-      .getUserMedia({ video: true })
+      ?.getUserMedia({ video: true })
       .then((mediaStream) => {
         setStream(mediaStream);
         setPermissionStatus("granted");
