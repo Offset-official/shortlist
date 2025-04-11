@@ -125,12 +125,12 @@ export default function OnboardingForm() {
 
   // Validate individual fields in each step. For the "email_password" step, also verify if email already exists.
   const validateCurrentStep = async (currentStepNumber: number) => {
-    const stepKey = STEP_FIELD_NAMES[currentStepNumber - 1];
+    const stepKey = STEP_FIELD_NAMES[currentStepNumber - 1] as keyof FormSchemaType;
 
     switch (stepKey) {
-      case "email_password": {
-        const localIsValid = await form.trigger(["email", "password"]);
-        if (!localIsValid) return false;
+      case "email": {
+        const isEmailValid = await form.trigger("email");
+        if (!isEmailValid) return false;
 
         const emailValue = form.getValues("email");
         try {
@@ -152,10 +152,13 @@ export default function OnboardingForm() {
         }
         return true;
       }
+      case "password": {
+        return form.trigger("password");
+      }
       case "dreamCompanies":
         return form.trigger("dreamCompanies");
       default:
-        return form.trigger(stepKey);
+        return form.trigger(stepKey as keyof FormSchemaType);
     }
   };
 
@@ -178,6 +181,7 @@ export default function OnboardingForm() {
                 Get placed at companies like
               </p>
               <RotatingText
+               // @ts-ignore
                 texts={["Google", "Microsoft", "Netflix", "Meta"]}
                 mainClassName="px-1 sm:px-2 md:px-3 bg-accent text-black overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
                 staggerFrom="last"

@@ -72,10 +72,13 @@ export async function POST(req: NextRequest) {
     let parsedJson;
     try {
       // First, attempt to extract just the JSON portion if there's any text around it
-      const jsonMatch = response.text.match(/```json\s*([\s\S]*)\s*```/) || 
-                        response.text.match(/\{[\s\S]*\}/);
+      const jsonMatch = (response.text ?? "").match(/```json\s*([\s\S]*)\s*```/) || 
+                        (response.text ?? "").match(/\{[\s\S]*\}/);
       
       const jsonText = jsonMatch ? jsonMatch[0].replace(/```json|```/g, '') : response.text;
+      if (!jsonText) {
+        throw new Error("JSON text is undefined or empty");
+      }
       parsedJson = JSON.parse(jsonText);
     } catch (parseError) {
       // If parsing fails, return the raw text with an error flag

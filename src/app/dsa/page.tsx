@@ -11,9 +11,10 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 export default async function DsaPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   // Retrieve the session on the server using your auth options.
+  const searchParam = await searchParams;
   let session;
   try {
     session = await getServerSession(authOptions);
@@ -27,7 +28,7 @@ export default async function DsaPage({
   }
 
   // Determine the current page using query params (default is page 1)
-  const page = searchParams.page ? Number(searchParams.page) || 1 : 1;
+  const page = searchParam.page ? Number(searchParam.page) || 1 : 1;
   const pageSize = 9;
   const skip = (page - 1) * pageSize;
 

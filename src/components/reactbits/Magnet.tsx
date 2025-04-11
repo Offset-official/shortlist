@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-
 const Magnet = ({
+  // @ts-ignore
   children,
   padding = 100,
   disabled = false,

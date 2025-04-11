@@ -99,7 +99,7 @@ function MultiSelectPopover({
           <CommandInput
             placeholder="Search companies..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onValueChange={(value) => setQuery(value)}
           />
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandList>

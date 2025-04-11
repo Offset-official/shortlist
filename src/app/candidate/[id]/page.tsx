@@ -1,10 +1,6 @@
-// app/candidates/[id]/page.tsx
-import { Button } from '@/components/ui/button';
 import { prisma } from '@/lib/prisma';
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import ResumeButton from '@/components/ResumeButton'; // Adjust the import path as necessary
-// import { useRouter } from 'next/navigation';
 type Candidate = {
   id: number
   name: string
@@ -34,8 +30,9 @@ async function getCandidateData(id: number): Promise<Candidate | null> {
   }
 }
 
-export default async function CandidateDetails({ params }: { params: { id: string } }) {
-  const id = Number(params.id)
+export default async function CandidateDetails({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params
+  const id = Number(resolvedParams.id)
   
   if (isNaN(id)) {
     notFound()
