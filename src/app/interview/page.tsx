@@ -25,7 +25,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-[300px] h-[300px] relative overflow-hidden rounded-lg shadow-xl">
-        <TalkingHeadComponent text="it'll be fine"/>
+        <TalkingHeadComponent text="it'll be fine" gender='man'/>
       </div>
     </main>
   );
