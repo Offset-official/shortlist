@@ -41,6 +41,7 @@ export const authOptions: AuthOptions = {
             id: candidate.id.toString(),
             name: candidate.name,
             email: candidate.email,
+            
           };
         },
       }),

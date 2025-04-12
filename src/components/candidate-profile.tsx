@@ -50,7 +50,7 @@ const CandidateProfile = () => {
 
       fetchCandidate();
     }
-  }, [session, status]);
+  }, [status]);
 
   if (status === 'loading' || loading || !session) {
     return <p>Loading...</p>;

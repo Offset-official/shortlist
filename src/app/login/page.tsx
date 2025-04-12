@@ -15,7 +15,7 @@ export default function LoginPage() {
   // If the user is already authenticated, redirect to home
   useEffect(() => {
     if (status === "authenticated") {
-      router.push("/");
+      router.push("/dashboard");
     }
   }, [status, router]);
 
@@ -26,6 +26,7 @@ export default function LoginPage() {
       email,
       password,
       redirect: false, // handle manually
+      type: "candidate",
     });
 
     if (result?.error) {

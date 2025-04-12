@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import TextCard from "@/components/text-card";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/authOptions";
 
 export default async function Home() {
   // Retrieve the session on the server
