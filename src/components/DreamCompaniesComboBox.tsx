@@ -11,9 +11,16 @@ import {
   CommandInput,
 } from "@/components/ui/command";
 import { Check } from "lucide-react"; // or any icon you like from lucide
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Controller } from "react-hook-form";
 
+// Added 10 more companies
 const COMPANIES = [
   "Google",
   "Meta",
@@ -24,9 +31,25 @@ const COMPANIES = [
   "Amazon",
   "NVIDIA",
   "Other",
+  "Apple",
+  "Adobe",
+  "Tesla",
+  "Airbnb",
+  "Twitter",
+  "Salesforce",
+  "Oracle",
+  "Uber",
+  "Atlassian",
+  "Slack",
 ];
 
-export function DreamCompaniesComboBox({ control, name }: { control: any; name: string }) {
+export function DreamCompaniesComboBox({
+  control,
+  name,
+}: {
+  control: any;
+  name: string;
+}) {
   return (
     <Controller
       control={control}
@@ -86,8 +109,12 @@ function MultiSelectPopover({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
+      {/* 
+        PopoverTrigger with a consistent height (h-10) and padding.
+        You can adjust these classes to match your UI design system.
+      */}
       <PopoverTrigger
-        className="w-full rounded-md border bg-transparent px-3 py-2 text-left text-sm focus:outline-none"
+        className="h-10 w-full rounded-md border border-border bg-transparent px-3 py-2 text-left text-sm focus:outline-none"
       >
         {/* Display the selected items or a placeholder */}
         {selectedValues.length > 0
@@ -96,10 +123,15 @@ function MultiSelectPopover({
       </PopoverTrigger>
       <PopoverContent className="p-0 w-[250px]">
         <Command>
+          {/* 
+            CommandInput is given a height, padding, and text size 
+            to be consistent with typical input fields.
+          */}
           <CommandInput
             placeholder="Search companies..."
             value={query}
-            onValueChange={(value) => setQuery(value)}
+            onValueChange={setQuery}
+            className="h-10 px-3 text-sm focus:outline-none"
           />
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandList>
@@ -107,14 +139,9 @@ function MultiSelectPopover({
               {filteredCompanies.map((company) => {
                 const isSelected = selectedValues.includes(company);
                 return (
-                  <CommandItem
-                    key={company}
-                    onSelect={() => handleSelect(company)}
-                  >
+                  <CommandItem key={company} onSelect={() => handleSelect(company)}>
                     {company}
-                    {isSelected && (
-                      <Check className="ml-auto h-4 w-4" />
-                    )}
+                    {isSelected && <Check className="ml-auto h-4 w-4" />}
                   </CommandItem>
                 );
               })}
