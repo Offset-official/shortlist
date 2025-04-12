@@ -4,7 +4,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const response = await fetch("https://eu-texttospeech.googleapis.com/v1beta1/text:synthesize?key=" + process.env.GOOGLE_TTS_API_KEY, {
+    const response = await fetch("https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=" + process.env.GOOGLE_TTS_API_KEY, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
