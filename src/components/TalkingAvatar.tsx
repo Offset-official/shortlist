@@ -41,7 +41,7 @@ export default function TalkingHeadComponent({
 
         await headInstance.showAvatar(
           {
-            url: `/models/${gender}.glb`,
+            url: `/assets/models/${gender}.glb`,
             body: "F",
             avatarMood: "neutral",
             ttsLang: "en-GB",

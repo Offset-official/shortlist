@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
           - institution: String
           - location: String
           - dates: String
-          - gpa: String (if available)
+          - gpa_or_percentage: String (if available)
           - achievements: Array of strings
       - experience: Array of objects, each containing:
           - title: String

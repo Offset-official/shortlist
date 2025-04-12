@@ -18,7 +18,7 @@ pnpm dev
 
 `/resume` - resume parsing
 
-`/candidate/[id]` - candidate's page
+`/profile` - candidate's page
 
 `/jobs` - joblisting page
 
