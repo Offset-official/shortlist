@@ -25,6 +25,12 @@ import { DreamCompaniesComboBox } from "@/components/DreamCompaniesComboBox";
 import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
 
+// Import your SkillsPicker component and its Skill type.
+import SkillsPicker, { type Skill } from "@/components/SkillsPicker";
+
+// ----------------------------
+// 1) Update the Zod Schema
+// ----------------------------
 const FormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
@@ -35,11 +41,13 @@ const FormSchema = z.object({
     .array(z.string())
     .min(1, "Please pick at least 1 company")
     .max(3, "Up to 3 companies"),
-  skills: z.string().min(1, "Skills are required"),
+  // Changed to an array of strings instead of a single string.
+  skills: z.array(z.string()).min(1, "Please select at least one skill"),
 });
 
 type FormSchemaType = z.infer<typeof FormSchema>;
 
+// Keep the same step identifiers, but ensure the last step references "skills"
 const STEP_FIELD_NAMES = [
   "name",
   "email_password",
@@ -54,9 +62,9 @@ export default function OnboardingForm() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const { data: session } = useSession();
 
-  // Removed the auto sign out on mount.
-  // Instead, we will sign out any existing session after registration.
-
+  // -----------------------------------------
+  // 2) Update the default values for `skills`
+  // -----------------------------------------
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -66,13 +74,16 @@ export default function OnboardingForm() {
       country: "",
       university: "",
       dreamCompanies: [],
-      skills: "",
+      skills: [], // It's now an array instead of a string
     },
   });
 
+  // -----------------------------------------
+  // 3) Update the onSubmit method
+  // -----------------------------------------
   const onSubmit: SubmitHandler<FormSchemaType> = async (data) => {
     try {
-      // 1) Register the new user
+      // 1) Prepare the registration payload
       const registerPayload = {
         name: data.name,
         email: data.email,
@@ -80,7 +91,8 @@ export default function OnboardingForm() {
         location: data.country,
         collegeName: data.university,
         dreamCompanies: data.dreamCompanies,
-        skills: data.skills.split(",").map((s) => s.trim()),
+        // data.skills is already an array of strings
+        skills: data.skills,
       };
 
       const res = await fetch("/api/register", {
@@ -123,42 +135,42 @@ export default function OnboardingForm() {
     }
   };
 
-  // Validate individual fields in each step. For the "email_password" step, also verify if email already exists.
+  // -----------------------------------------
+  // 4) Validate the current step
+  // -----------------------------------------
   const validateCurrentStep = async (currentStepNumber: number) => {
-    const stepKey = STEP_FIELD_NAMES[currentStepNumber - 1] as keyof FormSchemaType;
+    // Retrieve the special step identifier.
+    const stepKey = STEP_FIELD_NAMES[currentStepNumber - 1];
 
-    switch (stepKey) {
-      case "email": {
-        const isEmailValid = await form.trigger("email");
-        if (!isEmailValid) return false;
+    if (stepKey === "email_password") {
+      // Validate both 'email' and 'password' fields.
+      const localIsValid = await form.trigger(["email", "password"]);
+      if (!localIsValid) return false;
 
-        const emailValue = form.getValues("email");
-        try {
-          const response = await fetch(
-            `/api/check-email?email=${encodeURIComponent(emailValue)}`
-          );
-          if (!response.ok) return false;
-          const data = await response.json();
-          if (data.exists) {
-            form.setError("email", {
-              type: "manual",
-              message: "Email is already in use.",
-            });
-            return false;
-          }
-        } catch (error) {
-          console.error("Error checking email uniqueness:", error);
+      const emailValue = form.getValues("email");
+      try {
+        const response = await fetch(
+          `/api/check-email?email=${encodeURIComponent(emailValue)}`
+        );
+        if (!response.ok) return false;
+        const data = await response.json();
+        if (data.exists) {
+          form.setError("email", {
+            type: "manual",
+            message: "Email is already in use.",
+          });
           return false;
         }
-        return true;
+      } catch (error) {
+        console.error("Error checking email uniqueness:", error);
+        return false;
       }
-      case "password": {
-        return form.trigger("password");
-      }
-      case "dreamCompanies":
-        return form.trigger("dreamCompanies");
-      default:
-        return form.trigger(stepKey as keyof FormSchemaType);
+      return true;
+    } else if (stepKey === "dreamCompanies") {
+      return form.trigger("dreamCompanies");
+    } else {
+      // For all other cases, assume the key is directly in the schema.
+      return form.trigger(stepKey as keyof FormSchemaType);
     }
   };
 
@@ -326,16 +338,19 @@ export default function OnboardingForm() {
                     <FormField
                       control={form.control}
                       name="skills"
-                      render={({ field }) => (
+                      render={({ field: { onChange, value } }) => (
                         <FormItem>
                           <FormLabel>Your top skills</FormLabel>
                           <FormControl>
-                            <input
-                              {...field}
-                              type="text"
-                              placeholder="List top skills (comma separated)"
-                              autoComplete="off"
-                              className="w-full p-3 border border-border rounded-md"
+                            {/* -----------------------------------------
+                                Replace text input with SkillsPicker 
+                            ----------------------------------------- */}
+                            <SkillsPicker
+                              // Convert the array of Skill objects to an array of strings
+                              // whenever the user selects or removes a skill.
+                              onChange={(selectedSkills: Skill[]) => {
+                                onChange(selectedSkills.map((s) => s.value));
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
