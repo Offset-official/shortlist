@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export default function TalkingHeadComponent({ text: externalText } : { text: string }) {
+export default function TalkingHeadComponent({ text: externalText, gender } : { text: string, gender: string }) {
   const avatarRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState("Loading...");
   const [text, setText] = useState(externalText);
@@ -35,7 +35,7 @@ export default function TalkingHeadComponent({ text: externalText } : { text: st
 
         await headInstance.showAvatar(
           {
-            url: "https://models.readyplayer.me/64bfa15f0e72c63d7c3934a6.glb?morphTargets=ARKit,Oculus+Visemes,mouthOpen,mouthSmile,eyesClosed,eyesLookUp,eyesLookDown&textureSizeLimit=1024&textureFormat=png",
+            url: `/models/${gender}.glb`,
             body: "F",
             avatarMood: "neutral",
             ttsLang: "en-GB",
