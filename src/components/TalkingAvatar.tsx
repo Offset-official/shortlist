@@ -41,6 +41,8 @@ export default function TalkingHeadComponent({ text: externalText, gender } : { 
             ttsLang: "en-GB",
             ttsVoice: "en-GB-Standard-A",
             lipsyncLang: "en",
+            ttsRate: 1.15,
+            ttsVolume: 16,
           },
           (ev: ProgressEvent) => {
             if (ev.lengthComputable) {
