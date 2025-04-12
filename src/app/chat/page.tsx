@@ -10,15 +10,16 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [started, setStarted] = useState(false); // Tracks if chat has started
 
   const [activeTab, setActiveTab] = useState<"code" | "camera">("code");
+
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Ensure there's a systemInstruction in sessionStorage
   useEffect(() => {
     const storedInstruction = sessionStorage.getItem("LLMsystemInstruction");
-
     // If no system instruction found, set a default one
     if (!storedInstruction) {
       sessionStorage.setItem(
@@ -26,14 +27,36 @@ export default function ChatPage() {
         "You are a chatbot which will help candidates practice guided DSA questions. You will ask the candidate which topic they would like to practice (from linked lists, stack, queue, priority queue, trees) and then ask a DSA easy question from that topic. Then, you have to guide the conversation in such a way that the user is giving you the answer step by step. You will not give the answer to the question directly. You will only give hints and ask questions to guide the user to the answer. The user should build up the answer from brute force to optimized methods."
       );
     }
-
-    // Automatically send a hidden initial message once
-    sendHiddenMessage("Hi");
   }, []);
+
+  // Send a hidden "initial" message (like a conversation starter)
+  const sendHiddenMessage = async (hiddenMessage: string) => {
+    const userMessage = { role: "user", content: hiddenMessage };
+    setLoading(true);
+    try {
+      const systemInstruction = sessionStorage.getItem("LLMsystemInstruction") || "";
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          systemInstruction,
+        }),
+      });
+      const data = await res.json();
+      const assistantMessage = { role: "assistant", content: data.reply };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Send a chat message to the API
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!started) return;          // Do nothing if chat hasn't started
+    if (!input.trim()) return;     // Do nothing if input is empty
 
     const userMessage = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
@@ -43,7 +66,6 @@ export default function ChatPage() {
     try {
       // Read the systemInstruction from sessionStorage each time
       const systemInstruction = sessionStorage.getItem("LLMsystemInstruction") || "";
-
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,30 +98,11 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send a hidden "initial" message (like a conversation starter)
-  const sendHiddenMessage = async (hiddenMessage: string) => {
-    const userMessage = { role: "user", content: hiddenMessage };
-    setLoading(true);
-
-    try {
-      const systemInstruction = sessionStorage.getItem("LLMsystemInstruction") || "";
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-          systemInstruction,
-        }),
-      });
-
-      const data = await res.json();
-      const assistantMessage = { role: "assistant", content: data.reply };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      console.error("Error:", err);
-    } finally {
-      setLoading(false);
-    }
+  // Handle "Start Chat" button
+  const handleStartChat = async () => {
+    setStarted(true);
+    // Send a hidden initial message
+    await sendHiddenMessage("Hi");
   };
 
   return (
@@ -110,31 +113,44 @@ export default function ChatPage() {
           <h1 className="text-2xl font-bold">Chat</h1>
         </header>
 
-        <div className="flex-1 overflow-y-auto space-y-4 chat-scroll">
-          {messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`grid grid-cols-[2.5rem_1fr_2.5rem] items-center gap-2 mx-4 ${
-                idx === 0 ? "mt-4" : ""
-              }`}
+        {/* If not started, show Start Chat button. Otherwise, show messages. */}
+        {!started ? (
+          <div className="flex-1 flex items-center justify-center">
+            <button
+              onClick={handleStartChat}
+              className="px-6 py-3 bg-primary text-foreground rounded hover:bg-primary/80"
             >
-              <div className="w-10 h-10 flex items-center justify-center">
-                {msg.role === "assistant" && <span className="text-xl">🤖</span>}
-              </div>
-              <div className="p-3 rounded-lg border shadow-md bg-background outline outline-1 outline-ring text-white">
-                <div className="whitespace-pre-wrap">
-                  <Markdown>{msg.content}</Markdown>
+              Start Chat
+            </button>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto space-y-4 chat-scroll">
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`grid grid-cols-[2.5rem_1fr_2.5rem] items-center gap-2 mx-4 ${
+                  idx === 0 ? "mt-4" : ""
+                }`}
+              >
+                <div className="w-10 h-10 flex items-center justify-center">
+                  {msg.role === "assistant" && <span className="text-xl">🤖</span>}
+                </div>
+                <div className="p-3 rounded-lg border shadow-md bg-background outline outline-1 outline-ring text-white">
+                  <div className="whitespace-pre-wrap">
+                    <Markdown>{msg.content}</Markdown>
+                  </div>
+                </div>
+                <div className="w-10 h-10 flex items-center justify-center">
+                  {msg.role === "user" && <span className="text-xl">🧑</span>}
                 </div>
               </div>
-              <div className="w-10 h-10 flex items-center justify-center">
-                {msg.role === "user" && <span className="text-xl">🧑</span>}
-              </div>
-            </div>
-          ))}
-          {loading && <div className="text-muted-foreground text-center">Thinking...</div>}
-          <div ref={bottomRef} />
-        </div>
+            ))}
+            {loading && <div className="text-muted-foreground text-center">Thinking...</div>}
+            <div ref={bottomRef} />
+          </div>
+        )}
 
+        {/* Message input row */}
         <div className="mt-4 flex items-end gap-2 bg-muted p-2 rounded-lg">
           <textarea
             ref={textareaRef}
@@ -147,11 +163,18 @@ export default function ChatPage() {
               }
             }}
             placeholder="Ask something..."
-            className="flex-1 p-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground resize-none overflow-hidden"
+            disabled={!started}
+            className="flex-1 p-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground resize-none overflow-hidden disabled:opacity-50"
           />
           <button
             onClick={handleSend}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-foreground text-2xl"
+            disabled={!started}
+            className={`w-10 h-10 flex items-center justify-center rounded-full text-foreground text-2xl 
+              ${
+                started
+                  ? "bg-primary hover:bg-primary/90"
+                  : "bg-muted cursor-not-allowed opacity-50"
+              }`}
           >
             ↑
           </button>
@@ -194,11 +217,17 @@ export default function ChatPage() {
 
       {/* Avatar in bottom-right */}
       <div className="fixed bottom-6 right-6 w-[300px] h-[300px] z-50">
-      {messages.length > 0 && (
-        <div className="w-[300px] h-[300px] relative overflow-hidden">
-          <TalkingHeadComponent text={messages.findLast((msg) => msg.role === "assistant")?.content || "Thinking..."} gender="man" />
-        </div>
-      )}
+        {messages.length > 0 && (
+          <div className="w-[300px] h-[300px] relative overflow-hidden">
+            <TalkingHeadComponent
+              text={
+                messages.findLast((msg) => msg.role === "assistant")?.content ||
+                "Thinking..."
+              }
+              gender="man"
+            />
+          </div>
+        )}
       </div>
 
       {/* Custom scrollbar styles */}
