@@ -10,28 +10,23 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [avatarLoaded, setAvatarLoaded] = useState(false); // New state
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [activeTab, setActiveTab] = useState<"code" | "camera">("code");
 
-  // Ensure there's a systemInstruction in sessionStorage
   useEffect(() => {
     const storedInstruction = sessionStorage.getItem("LLMsystemInstruction");
-
-    // If no system instruction found, set a default one
     if (!storedInstruction) {
       sessionStorage.setItem(
         "LLMsystemInstruction",
-        "You are a chatbot which will help candidates practice guided DSA questions. You will ask the candidate which topic they would like to practice (from linked lists, stack, queue, priority queue, trees) and then ask a DSA easy question from that topic. Then, you have to guide the conversation in such a way that the user is giving you the answer step by step. You will not give the answer to the question directly. You will only give hints and ask questions to guide the user to the answer. The user should build up the answer from brute force to optimized methods."
+        "You are a chatbot which will help candidates practice guided DSA questions..."
       );
     }
-
-    // Automatically send a hidden initial message once
     sendHiddenMessage("Hi");
   }, []);
 
-  // Send a chat message to the API
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -41,7 +36,6 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      // Read the systemInstruction from sessionStorage each time
       const systemInstruction = sessionStorage.getItem("LLMsystemInstruction") || "";
 
       const res = await fetch("/api/chat", {
@@ -63,7 +57,6 @@ export default function ChatPage() {
     }
   };
 
-  // Adjust textarea height to content
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -71,12 +64,10 @@ export default function ChatPage() {
     }
   }, [input]);
 
-  // Always scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Send a hidden "initial" message (like a conversation starter)
   const sendHiddenMessage = async (hiddenMessage: string) => {
     const userMessage = { role: "user", content: hiddenMessage };
     setLoading(true);
@@ -104,8 +95,16 @@ export default function ChatPage() {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground relative">
+      {/* Loading overlay */}
+      {!avatarLoaded && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 text-white text-xl">
+          Loading Avatar...
+        </div>
+      )}
+
       {/* Left: Chat Section */}
       <div className="w-1/2 flex flex-col h-screen p-4">
+        {/* ... header, messages, input ... */}
         <header className="mb-4">
           <h1 className="text-2xl font-bold">Chat</h1>
         </header>
@@ -158,9 +157,8 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Right: Tabbed Section */}
+      {/* Right: Tabs */}
       <div className="w-1/2 flex flex-col h-screen border-l border-border">
-        {/* Top Bar with tabs */}
         <div className="flex items-center p-2 border-b border-border">
           <button
             className={`px-4 py-2 mr-2 rounded cursor-pointer ${
@@ -179,8 +177,6 @@ export default function ChatPage() {
             Camera
           </button>
         </div>
-
-        {/* Main Content: either CodeEditor or Camera in center */}
         <div className="flex-1">
           {activeTab === "code" ? (
             <CodeEditor />
@@ -192,16 +188,20 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Avatar in bottom-right */}
+      {/* Avatar */}
       <div className="fixed bottom-6 right-6 w-[300px] h-[300px] z-50">
-      {messages.length > 0 && (
-        <div className="w-[300px] h-[300px] relative overflow-hidden rounded-lg shadow-xl">
-          <TalkingHeadComponent text={messages.findLast((msg) => msg.role === "assistant")?.content || "Thinking..."} gender="woman" />
-        </div>
-      )}
+        {messages.length > 0 && (
+          <div className="w-[300px] h-[300px] relative overflow-hidden">
+            <TalkingHeadComponent
+              text={messages.findLast((msg) => msg.role === "assistant")?.content || "Thinking..."}
+              gender="woman"
+              onLoad={() => setAvatarLoaded(true)} // When avatar is ready
+            />
+          </div>
+        )}
       </div>
 
-      {/* Custom scrollbar styles */}
+      {/* Custom scrollbar */}
       <style jsx>{`
         .chat-scroll::-webkit-scrollbar {
           width: 8px;
