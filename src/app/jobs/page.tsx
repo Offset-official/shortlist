@@ -1,25 +1,44 @@
 "use client";
-// app/jobs/page.tsx
-import Link from 'next/link';
+import { useState,useEffect } from 'react';
 import { prisma } from '@/lib/prisma';
 import JobCard from '@/components/JobCard';
 
 
-export default async function JobListings() {
-  const jobs = await prisma.jobListing.findMany({
-    where: {
-      status: 'active',
-      expiryDate: {
-        gt: new Date(),
-      },
-    },
-    include: {
-      Recruiter: true,
-    },
-    orderBy: {
-      postedDate: 'desc',
-    },
-  });
+const JobListings = async ()=>{
+
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setIsLoading(true);
+        const data = await prisma.jobListing.findMany({
+          where: {
+            status: 'active',
+            expiryDate: {
+              gt: new Date(),
+            },
+          },
+          include: {
+            Recruiter: true,
+          },
+          orderBy: {
+            postedDate: 'desc',
+          },
+        });
+        setJobs(data);
+      } catch (e) {
+        console.error("Failed to fetch jobs:", e);
+        setError("Failed to load job listings. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -40,3 +59,5 @@ export default async function JobListings() {
     </div>
   );
 }
+
+export default JobListings;
