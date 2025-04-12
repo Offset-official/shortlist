@@ -10,17 +10,20 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [started, setStarted] = useState(false); // Tracks if chat has started
 
+  // Tracks if the user has started the chat yet
+  const [started, setStarted] = useState(false);
+
+  // Tab switching
   const [activeTab, setActiveTab] = useState<"code" | "camera">("code");
 
+  // Refs for scrolling and auto-resizing the textarea
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Ensure there's a systemInstruction in sessionStorage
   useEffect(() => {
     const storedInstruction = sessionStorage.getItem("LLMsystemInstruction");
-    // If no system instruction found, set a default one
     if (!storedInstruction) {
       sessionStorage.setItem(
         "LLMsystemInstruction",
@@ -29,13 +32,17 @@ export default function ChatPage() {
     }
   }, []);
 
-  // Send a hidden "initial" message (like a conversation starter)
-  const sendHiddenMessage = async (hiddenMessage: string) => {
+  // ---------------------------------------
+  // Hidden "initial" message function
+  // ---------------------------------------
+  const sendHiddenMessage = async (hiddenMessage: string = "Hi") => {
+    // Construct a "user" role message, but this won't come from user input.
     const userMessage = { role: "user", content: hiddenMessage };
     setLoading(true);
+
     try {
       const systemInstruction = sessionStorage.getItem("LLMsystemInstruction") || "";
-      const res = await fetch("/api/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -43,20 +50,35 @@ export default function ChatPage() {
           systemInstruction,
         }),
       });
-      const data = await res.json();
+
+      const data = await response.json();
       const assistantMessage = { role: "assistant", content: data.reply };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Error sending hidden message:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Send a chat message to the API
+  // ---------------------------------------
+  // Manually Start the Chat
+  // ---------------------------------------
+  const handleStartChat = async () => {
+    setStarted(true);
+    // Automatically send a hidden initial message after the user starts the chat
+    await sendHiddenMessage();
+  };
+
+  // ---------------------------------------
+  // Sending normal user messages
+  // ---------------------------------------
   const handleSend = async () => {
-    if (!started) return;          // Do nothing if chat hasn't started
-    if (!input.trim()) return;     // Do nothing if input is empty
+    // Only proceed if chat has started
+    if (!started) return;
+
+    // Only send non-empty input
+    if (!input.trim()) return;
 
     const userMessage = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
@@ -64,8 +86,8 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      // Read the systemInstruction from sessionStorage each time
       const systemInstruction = sessionStorage.getItem("LLMsystemInstruction") || "";
+
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,7 +107,7 @@ export default function ChatPage() {
     }
   };
 
-  // Adjust textarea height to content
+  // Auto-resize the textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -93,17 +115,10 @@ export default function ChatPage() {
     }
   }, [input]);
 
-  // Always scroll to bottom when messages change
+  // Scroll to bottom whenever messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  // Handle "Start Chat" button
-  const handleStartChat = async () => {
-    setStarted(true);
-    // Send a hidden initial message
-    await sendHiddenMessage("Hi");
-  };
 
   return (
     <div className="flex min-h-screen bg-background text-foreground relative">
@@ -113,7 +128,7 @@ export default function ChatPage() {
           <h1 className="text-2xl font-bold">Chat</h1>
         </header>
 
-        {/* If not started, show Start Chat button. Otherwise, show messages. */}
+        {/* If chat is not started, show "Start Chat" button. Otherwise, show the conversation. */}
         {!started ? (
           <div className="flex-1 flex items-center justify-center">
             <button
@@ -145,12 +160,13 @@ export default function ChatPage() {
                 </div>
               </div>
             ))}
+
             {loading && <div className="text-muted-foreground text-center">Thinking...</div>}
             <div ref={bottomRef} />
           </div>
         )}
 
-        {/* Message input row */}
+        {/* Message Input Row */}
         <div className="mt-4 flex items-end gap-2 bg-muted p-2 rounded-lg">
           <textarea
             ref={textareaRef}
@@ -217,17 +233,15 @@ export default function ChatPage() {
 
       {/* Avatar in bottom-right */}
       <div className="fixed bottom-6 right-6 w-[300px] h-[300px] z-50">
-        {messages.length > 0 && (
-          <div className="w-[300px] h-[300px] relative overflow-hidden">
-            <TalkingHeadComponent
-              text={
-                messages.findLast((msg) => msg.role === "assistant")?.content ||
-                "Thinking..."
-              }
-              gender="man"
-            />
-          </div>
-        )}
+        {/* The avatar is always visible (no overlay). */}
+        <div className="w-[300px] h-[300px] relative overflow-hidden">
+          <TalkingHeadComponent
+            text={
+              messages.findLast((msg) => msg.role === "assistant")?.content || "..."
+            }
+            gender="woman"
+          />
+        </div>
       </div>
 
       {/* Custom scrollbar styles */}
