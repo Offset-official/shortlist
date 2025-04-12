@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ReactNode } from "react";
 
-const LinkButton = ({ href, text, className = "",children}:{href:string,text:string,className?:string,children:ReactNode}) => {
+const LinkButton = ({ href, text, className = "",children}:{href:string,text:string,className?:string,children?:ReactNode}) => {
     return (
         <Link
 
