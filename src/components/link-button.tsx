@@ -1,13 +1,14 @@
 import Link from "next/link";
+import { ReactNode } from "react";
 
-const LinkButton = ({ href, text, className = ""}:{href:string,text:string,className?:string}) => {
+const LinkButton = ({ href, text, className = "",children}:{href:string,text:string,className?:string,children:ReactNode}) => {
     return (
         <Link
 
             href={href}
-            className={`bg-primary text-foreground hover:bg-primary/80 px-4 py-2 rounded inline-flex ${className}`}
+            className={`bg-primary text-white hover:bg-primary/80 font-medium px-5 py-2 rounded-md inline-flex ${className}`}
         >
-            {text}
+            {children}{text}
         </Link>
     );
 };

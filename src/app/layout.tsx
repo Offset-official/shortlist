@@ -3,11 +3,12 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Providers } from "./providers";
 import type { Metadata, Viewport } from "next";
+import { ModeToggle } from "@/components/mode-toggle"
 
-const APP_NAME = "ShortList";
-const APP_DEFAULT_TITLE = "My Awesome PWA App";
-const APP_TITLE_TEMPLATE = "%s - PWA App";
-const APP_DESCRIPTION = "Best PWA app in the world!";
+const APP_NAME = "Shortlist";
+const APP_DEFAULT_TITLE = "Shortlist - Connecting Talent with Opportunities";
+const APP_TITLE_TEMPLATE = "%s - Shortlist App";
+const APP_DESCRIPTION = "A platform for recruiters and candidates to connect and grow";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
@@ -75,7 +76,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+            <ModeToggle />
+          </Providers>
         </ThemeProvider>
       </body>
     </html>
