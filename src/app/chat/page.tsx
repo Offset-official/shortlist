@@ -171,7 +171,7 @@ export default function ChatPage() {
       <div className="fixed bottom-6 right-6 w-[300px] h-[300px] z-50">
       {messages.length > 0 && (
         <div className="w-[300px] h-[300px] relative overflow-hidden rounded-lg shadow-xl">
-          <TalkingHeadComponent text={messages.findLast((msg) => msg.role === "assistant")?.content || "Thinking..."} />
+          <TalkingHeadComponent text={messages.findLast((msg) => msg.role === "assistant")?.content || "Thinking..."} gender="woman" />
         </div>
       )}
       </div>
