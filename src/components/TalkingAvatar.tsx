@@ -2,14 +2,21 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export default function TalkingHeadComponent({ text: externalText, gender } : { text: string, gender: string }) {
+export default function TalkingHeadComponent({
+  text: externalText,
+  gender,
+  onLoad,
+}: {
+  text: string;
+  gender: string;
+  onLoad?: () => void; // New prop
+}) {
   const avatarRef = useRef<HTMLDivElement>(null);
-  const [loading, setLoading] = useState("Loading...");
+  const [loading, setLoading] = useState("");
   const [text, setText] = useState(externalText);
   const [head, setHead] = useState<any>(null);
   const [showLoading, setShowLoading] = useState(true);
-  const [isAvatarReady, setIsAvatarReady] = useState(false); // prevents unwanted calls to headinstance before it's ready
-
+  const [isAvatarReady, setIsAvatarReady] = useState(false);
 
   useEffect(() => {
     let headInstance: any;
@@ -24,12 +31,11 @@ export default function TalkingHeadComponent({ text: externalText, gender } : { 
         console.log("Initializing TalkingHead:", TalkingHead);
 
         headInstance = new TalkingHead(avatarRef.current, {
-            ttsEndpoint: "/api/tts", 
-            ttsApikey: "", 
-            lipsyncModules: ["en"],
-            cameraView: "upper",
-          });
-          
+          ttsEndpoint: "/api/tts",
+          ttsApikey: "",
+          lipsyncModules: ["en"],
+          cameraView: "upper",
+        });
 
         setHead(headInstance);
 
@@ -47,15 +53,15 @@ export default function TalkingHeadComponent({ text: externalText, gender } : { 
           (ev: ProgressEvent) => {
             if (ev.lengthComputable) {
               const percent = Math.min(100, Math.round((ev.loaded / ev.total) * 100));
-              setLoading(`Loading ${percent}%`);
+              setLoading(``);
             }
           }
         );
 
-        setHead(headInstance);
         setIsAvatarReady(true);
-
         setShowLoading(false);
+
+        if (onLoad) onLoad(); // Trigger onLoad once avatar is ready
       } catch (error) {
         console.error(error);
         setLoading(error instanceof Error ? error.message : String(error));
@@ -63,9 +69,8 @@ export default function TalkingHeadComponent({ text: externalText, gender } : { 
     };
 
     if (typeof window !== "undefined") {
-      // Poll for TalkingHead availability
       let attempts = 0;
-      const maxAttempts = 100; 
+      const maxAttempts = 100;
       intervalId = setInterval(() => {
         console.log("Checking TalkingHead:", (window as any).TalkingHead);
         if ((window as any).TalkingHead) {
@@ -90,9 +95,9 @@ export default function TalkingHeadComponent({ text: externalText, gender } : { 
       clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, [onLoad, gender]);
 
-  const lastSpokenText = useRef<string | null>(null); // to handle repeated calls during development
+  const lastSpokenText = useRef<string | null>(null);
 
   const handleSpeak = useCallback(() => {
     if (head && isAvatarReady && externalText && externalText !== lastSpokenText.current) {
