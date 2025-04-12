@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Remove system messages
     messages = messages.filter((msg: any) => msg.role !== "system");
 
     const promptMessage = messages[messages.length - 1];
@@ -29,36 +30,42 @@ export async function POST(req: NextRequest) {
       const role = msg.role === "assistant" ? "model" : msg.role;
       return {
         role,
-        parts: typeof msg.content === "string"
-          ? [{ text: msg.content }]
-          : Array.isArray(msg.content?.parts)
-          ? msg.content.parts
-          : [{ text: String(msg.content) }],
+        parts:
+          typeof msg.content === "string"
+            ? [{ text: msg.content }]
+            : Array.isArray(msg.content?.parts)
+            ? msg.content.parts
+            : [{ text: String(msg.content) }],
       };
     };
 
     const transformedHistory = historyMessages.map(transformMessage);
-    // add dummy to start of transformedHistory
+
+    // Add a dummy "hi" from user to start of transformed history (if you want/need it)
     transformedHistory.unshift({
       role: "user",
       parts: [{ text: "hi" }],
     });
-    // 
 
     let promptText: string;
     if (typeof promptMessage.content === "string") {
       promptText = promptMessage.content;
     } else if (Array.isArray(promptMessage.content?.parts)) {
-      promptText = promptMessage.content.parts.map((part: any) => part.text).join(" ");
+      promptText = promptMessage.content.parts
+        .map((part: any) => part.text)
+        .join(" ");
     } else {
       promptText = String(promptMessage.content);
     }
 
+    // Create the chat with model and history
     const chat = ai.chats.create({
       model: "gemini-2.0-flash-lite",
       history: transformedHistory,
       config: {
         systemInstruction: systemInstruction || "You are a helpful assistant.",
+        // Limit output to 100 tokens
+        maxOutputTokens: 100,
       },
     });
 
