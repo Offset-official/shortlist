@@ -8,13 +8,6 @@ type TalkingHeadProps = {
   onLoad?: () => void;
 };
 
-declare global {
-  interface Window {
-    TalkingHead?: any;
-    talkingHeadLoaded?: boolean;
-    talkingHeadError?: any;
-  }
-}
 
 // --- Hook: dynamically load the TalkingHead library ---
 function useTalkingHeadLoader() {
