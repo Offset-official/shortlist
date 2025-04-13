@@ -1,73 +1,76 @@
-import { prisma } from '@/lib/prisma';
-import { notFound, redirect } from 'next/navigation'
-import ResumeButton from '@/components/ResumeButton'; // Adjust the import path as necessary
+'use client'
+
+import axios from 'axios';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import ResumeButton from '@/components/ResumeButton';
+
 type Candidate = {
-  id: number
-  name: string
-  email: string
-  year?: number | null
-  collegeName?: string | null
-  location?: string | null
-  resume?: any
-  dreamCompanies: string[]
-  skills: string[]
-  createdAt: Date
-  jobListingId?: number | null
-  shortlistedJobListingId?: number | null
-}
+  id: number;
+  name: string;
+  email: string;
+  year?: number | null;
+  collegeName?: string | null;
+  location?: string | null;
+  resume?: any;
+  dreamCompanies: string[];
+  skills: string[];
+  createdAt: string; // coming as ISO string from JSON
+  jobListingId?: number | null;
+  shortlistedJobListingId?: number | null;
+};
 
+const CandidateProfile = () => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [candidate, setCandidate] = useState<Candidate | null>(null);
+  const [loading, setLoading] = useState(true);
 
-async function getCandidateData(id: number): Promise<Candidate | null> {
-  try {
-    const candidate = await prisma.candidate.findUnique({
-      where: { id }
-    })
-    await prisma.$disconnect()
-    return candidate as Candidate | null
-  } catch (error) {
-    console.error("Error fetching candidate:", error)
-    throw new Error("Failed to fetch candidate data")
-  }
-}
-
-export default async function CandidateDetails({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = await params
-  const id = Number(resolvedParams.id)
-  
-  if (isNaN(id)) {
-    notFound()
-  }
-  
-  const candidate = await getCandidateData(id)
-  
-  if (!candidate) {
-    notFound()
-  }
-
-  function openResumeChat() {
-    // save resume in session storage as system instruction
-    if (candidate && candidate.resume) {
-      sessionStorage.setItem("LLMsystemInstruction", JSON.stringify(candidate.resume));
-      console.log("System instruction set in session storage:", candidate.resume);
+  useEffect(() => {
+    if (status !== 'loading' && !session) {
+      router.push('/login');
     }
-    // navigate to chat
-    redirect("/chat");
+
+    if (session?.user?.id) {
+      const fetchCandidate = async () => {
+        try {
+          const response = await axios.get('/api/getCandidate', {
+            params: {
+              user_id: session.user.id
+            }
+          });
+          setCandidate(response.data);
+        } catch (error) {
+          console.error('Failed to fetch candidate', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchCandidate();
+    }
+  }, [status]);
+
+  if (status === 'loading' || loading || !session) {
+    return <p>Loading...</p>;
   }
-  
+
+  if (!candidate) {
+    return <p>Candidate data not found.</p>;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-8">
-
-
         <div className="bg-card shadow rounded-lg overflow-hidden">
-          {/* Header with basic info */}
           <div className="px-6 py-8 border-b border-border">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-foreground">{candidate.name}</h1>
                 <p className="mt-1 text-lg text-foreground">
-                  {candidate.year && `Class of ${candidate.year}`} 
-                  {candidate.collegeName && candidate.year && ` • `}
+                  {candidate.year && `Class of ${candidate.year}`}
+                  {candidate.collegeName && candidate.year && ' • '}
                   {candidate.collegeName}
                 </p>
                 {candidate.location && (
@@ -79,15 +82,12 @@ export default async function CandidateDetails({ params }: { params: Promise<{ i
                   </p>
                 )}
               </div>
-              {candidate && candidate.resume && <ResumeButton resume={candidate.resume} />}
+              {candidate.resume && <ResumeButton resume={candidate.resume} />}
             </div>
           </div>
 
-          {/* Main content */}
           <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Left column */}
             <div>
-              {/* Skills */}
               <div className="mb-8">
                 <h2 className="text-xl font-semibold text-foreground mb-4">Skills</h2>
                 <div className="flex flex-wrap gap-2">
@@ -98,8 +98,6 @@ export default async function CandidateDetails({ params }: { params: Promise<{ i
                   ))}
                 </div>
               </div>
-
-              {/* Dream Companies */}
               <div>
                 <h2 className="text-xl font-semibold text-foreground mb-4">Dream Companies</h2>
                 <div className="flex flex-wrap gap-2">
@@ -112,9 +110,7 @@ export default async function CandidateDetails({ params }: { params: Promise<{ i
               </div>
             </div>
 
-            {/* Right column */}
             <div>
-              {/* Application Status */}
               {(candidate.jobListingId || candidate.shortlistedJobListingId) && (
                 <div className="mb-8">
                   <h2 className="text-xl font-semibold text-foreground mb-4">Application Status</h2>
@@ -133,7 +129,6 @@ export default async function CandidateDetails({ params }: { params: Promise<{ i
                 </div>
               )}
 
-              {/* Resume Preview */}
               {candidate.resume && (
                 <div>
                   <h2 className="text-xl font-semibold text-foreground mb-4">Resume</h2>
@@ -147,7 +142,6 @@ export default async function CandidateDetails({ params }: { params: Promise<{ i
             </div>
           </div>
 
-          {/* Footer */}
           <div className="px-6 py-4 bg-card border-t border-border">
             <p className="text-sm text-foreground">
               Candidate registered on {new Date(candidate.createdAt).toLocaleDateString()}
@@ -156,5 +150,7 @@ export default async function CandidateDetails({ params }: { params: Promise<{ i
         </div>
       </div>
     </div>
-  )
+  );
 }
+
+export default CandidateProfile;

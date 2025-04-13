@@ -25,19 +25,7 @@ import { CircleFlag } from "react-circle-flags";
 
 // data
 import { countries } from "country-data-list";
-
-// Country interface
-export interface Country {
-  alpha2: string;
-  alpha3: string;
-  countryCallingCodes: string[];
-  currencies: string[];
-  emoji?: string;
-  ioc: string;
-  languages: string[];
-  name: string;
-  status: string;
-}
+import { Country} from "@/interfaces/misc_interfaces";
 
 // Dropdown props
 interface CountryDropdownProps {
