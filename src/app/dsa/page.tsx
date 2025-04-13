@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import prisma from "@/lib/prisma"; // Your Prisma client instance
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/authOptions";
 
 // Import shadcn Card components
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
