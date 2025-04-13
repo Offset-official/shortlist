@@ -18,7 +18,7 @@ pnpm dev
 
 `/resume` - resume parsing
 
-`/profile` - candidate's page
+`/profile` - user's page
 
 `/jobs` - joblisting page
 
@@ -28,7 +28,7 @@ pnpm dev
 
 `/login` - login
 
-`/` - login details (for now)
+`/` - landing page
 
 ## Debugging
 
@@ -37,5 +37,9 @@ pnpm dev
 ## TODOs
 
 - Toasts
-- 3D avatar
-- Resume chat
+- UI
+- Job listings needs to made server sided
+- Secure Routes
+- Add animation
+- Responsive 
+- Navigation and footer separation from main content

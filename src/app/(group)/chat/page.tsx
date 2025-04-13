@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import Markdown from "react-markdown";
-import CodeEditor from "../components/CodeEditor";
-import CameraRecorder from "../components/CameraRecorder";
+import CodeEditor from "@/components/CodeEditor";
+import CameraRecorder from "@/components/CameraRecorder";
 import TalkingHeadComponent from "@/components/TalkingAvatar";
 
 export default function ChatPage() {
