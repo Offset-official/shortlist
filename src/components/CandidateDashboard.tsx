@@ -1,26 +1,332 @@
-import TextCard from "@/components/text-card";
+"use client"
 
-const CandidateDashboard = ()=>{
+import { useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { useSession } from "next-auth/react"
+import {
+  Activity,
+  BarChart3,
+  Briefcase,
+  Calendar,
+  CheckCircle,
+  ChevronDown,
+  Code,
+  FileText,
+  Layers,
+  LogOut,
+  MessageSquare,
+  Search,
+  Settings,
+  User,
+  Video,
+} from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { ModeToggle } from "@/components/mode-toggle"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+export default function CandidateDashboard() {
+  const { data: session } = useSession()
+  const [profileCompletion] = useState(85)
+
+  // Sample data for the dashboard
+  const stats = [
+    { label: "Applications", value: "12", icon: Briefcase, color: "text-[var(--color-secondary)]" },
+    { label: "Interviews", value: "3", icon: Calendar, color: "text-[var(--color-tertiary)]" },
+    { label: "Skills Score", value: "78%", icon: BarChart3, color: "text-[var(--color-tertiary-1)]" },
+    { label: "Saved Jobs", value: "8", icon: CheckCircle, color: "text-[var(--color-tertiary-2)]" },
+  ]
+
+  const featureCards = [
+    {
+      title: "AI Interview Prep",
+      description: "Practice interviews with AI feedback",
+      icon: Video,
+      href: "/interview",
+      color: "bg-[var(--color-secondary)]/10 text-[var(--color-secondary)]",
+      badge: "Popular",
+    },
+    {
+      title: "Resume Analyzer",
+      description: "Get AI-powered feedback on your resume",
+      icon: FileText,
+      href: "/resume",
+      color: "bg-[var(--color-tertiary)]/10 text-[var(--color-tertiary)]",
+    },
+    {
+      title: "Mock Interviews",
+      description: "Schedule practice interviews with professionals",
+      icon: MessageSquare,
+      href: "/mock-interview",
+      color: "bg-[var(--color-tertiary-1)]/10 text-[var(--color-tertiary-1)]",
+    },
+    {
+      title: "DSA Preparation",
+      description: "Practice coding problems and algorithms",
+      icon: Code,
+      href: "/dsa",
+      color: "bg-[var(--color-tertiary-2)]/10 text-[var(--color-tertiary-2)]",
+    },
+    {
+      title: "Career Roadmaps",
+      description: "Personalized career development paths",
+      icon: Layers,
+      href: "/roadmaps",
+      color: "bg-[var(--color-secondary)]/10 text-[var(--color-secondary)]",
+    },
+    {
+      title: "Job Listings",
+      description: "Browse and apply to matching opportunities",
+      icon: Briefcase,
+      href: "/jobs",
+      color: "bg-[var(--color-tertiary)]/10 text-[var(--color-tertiary)]",
+      badge: "New",
+    },
+    {
+      title: "Skills Assessment",
+      description: "Test your technical and soft skills",
+      icon: Activity,
+      href: "/skills",
+      color: "bg-[var(--color-tertiary-1)]/10 text-[var(--color-tertiary-1)]",
+    },
+    {
+      title: "Profile",
+      description: "Manage your professional profile",
+      icon: User,
+      href: "/profile",
+      color: "bg-[var(--color-tertiary-2)]/10 text-[var(--color-tertiary-2)]",
+    },
+  ]
+
+  const recentActivity = [
+    { action: "Applied to", target: "Senior Frontend Developer at TechCorp", time: "2 hours ago" },
+    { action: "Completed", target: "React Assessment Test", time: "Yesterday" },
+    { action: "Saved", target: "Full Stack Engineer at StartupX", time: "2 days ago" },
+  ]
 
   return (
-    <div className="min-h-screen p-8 bg-background text-foreground">
-      <h1 className="text-5xl font-bold mb-6">ShortList</h1>
-      <p className="mb-8 text-xl text-secondary font-bold">
-        Candidate Dashboard!
-      </p>
-      <div className="mt-8">
-        <div className="grid grid-cols-2 gap-6">
-          <TextCard href="/color_check" text="Color Check" glowColor="primary" />
-          <TextCard href="/resume" text="Upload Resume" glowColor="secondary" />
-          <TextCard href="/chat" text="DSA Chatbot" glowColor="tertiary" />
-          <TextCard href="/chat" text="Resume Chatbot" glowColor="tertiary-1" />
-          <TextCard href="/candidate/1" text="Profile" glowColor="tertiary-2" />
-          <TextCard href="/jobs" text="Job Listings" glowColor="foreground" />
-          <TextCard href="/interview" text="Interview Prep" glowColor="foreground-1" />
+    <div className="min-h-screen flex flex-col bg-background ">
+      {/* Navbar */}
+      <header className="border-b sticky top-0 z-50 bg-card px-5">
+        <div className="container flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/assets/interview1.png?height=40&width=40"
+                alt="Shortlist Logo"
+                width={40}
+                height={40}
+                className="rounded"
+              />
+              <span className="text-xl font-bold">shortlist</span>
+            </Link>
+          </div>
+
+          <div className="flex-1 px-8 hidden md:block">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
+                placeholder="Search jobs, companies, skills..."
+                className="w-full rounded-md border border-input bg-background py-2 pl-8 pr-4 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="hidden md:flex">
+              <Calendar className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="hidden md:flex">
+              <MessageSquare className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="hidden md:flex">
+              <Bell className="h-5 w-5" />
+            </Button>
+
+            <ModeToggle />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 flex items-center gap-2 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} />
+                    <AvatarFallback>{session?.user?.name?.charAt(0) || "U"}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden md:inline-flex">{session?.user?.name || "User"}</span>
+                  <ChevronDown className="h-4 w-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Briefcase className="mr-2 h-4 w-4" />
+                  <span>Applications</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </div>
+      </header>
+
+      <main className="flex-1 container py-8 px-10">
+        <div className="flex flex-col gap-8">
+          {/* Welcome and Profile Section */}
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>Welcome back, {session?.user?.name || "Candidate"}</CardTitle>
+                <CardDescription>Here's what's happening with your job search today.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-medium">Profile Completion</h3>
+                      <p className="text-sm text-muted-foreground">Complete your profile to attract more recruiters</p>
+                    </div>
+                    <span className="text-lg font-bold">{profileCompletion}%</span>
+                  </div>
+                  <Progress value={profileCompletion} className="h-2" />
+
+                  {profileCompletion < 100 && (
+                    <div className="bg-secondary/5 p-3 rounded-lg mt-4 border border-secondary/20">
+                      <p className="text-sm font-medium">
+                        <span className="text-secondary">Tip:</span> Add your work experience to improve your profile.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" className="w-full">
+                  <User className="mr-2 h-4 w-4" />
+                  Complete Your Profile
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Your latest actions on Shortlist</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentActivity.map((activity, i) => (
+                    <div key={i} className="flex items-start gap-2 pb-3 border-b last:border-0 last:pb-0">
+                      <div className="h-2 w-2 mt-2 rounded-full bg-secondary" />
+                      <div>
+                        <p className="text-sm">
+                          <span className="font-medium">{activity.action}</span> {activity.target}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{activity.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Stats Section */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {stats.map((stat, i) => (
+              <Card key={i}>
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <stat.icon className={`h-8 w-8 ${stat.color} mb-2`} />
+                  <h3 className="text-2xl font-bold">{stat.value}</h3>
+                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Feature Cards */}
+          <div>
+            <h2 className="text-2xl font-bold mb-6">Features & Tools</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featureCards.map((card, i) => (
+                <Link href={card.href} key={i} className="group">
+                  <Card className="h-full transition-all hover:shadow-md hover:border-primary/20">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div className={`p-2 rounded-lg ${card.color}`}>
+                          <card.icon className="h-5 w-5" />
+                        </div>
+                        {card.badge && (
+                          <Badge variant="secondary" className="ml-auto">
+                            {card.badge}
+                          </Badge>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <CardTitle className="text-lg mb-1">{card.title}</CardTitle>
+                      <CardDescription>{card.description}</CardDescription>
+                    </CardContent>
+                    <CardFooter>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-auto group-hover:bg-primary/10 group-hover:text-primary"
+                      >
+                        Open
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-  );
+  )
 }
 
-export default CandidateDashboard;
+function Bell(props:any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
+  )
+}

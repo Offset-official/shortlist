@@ -1,35 +1,44 @@
-import Link from "next/link";
+import type React from "react"
+import Link from "next/link"
+import { Card, CardContent } from "@/components/ui/card"
 
-const TextCard = ({
-  href,
-  text,
-  glowColor = "primary",
-  ...props
-}: { 
-  href: string; 
-  text: string; 
-  glowColor?: string 
-}) => {
+interface TextCardProps {
+  href: string
+  text: string
+  glowColor?: string
+  icon?: React.ReactNode
+}
+
+export default function TextCard({ href, text, glowColor = "primary", icon }: TextCardProps) {
+  const getGlowClass = () => {
+    switch (glowColor) {
+      case "primary":
+        return "hover:shadow-[0_0_15px_rgba(var(--color-primary),0.5)]"
+      case "secondary":
+        return "hover:shadow-[0_0_15px_rgba(var(--color-secondary),0.5)]"
+      case "tertiary":
+        return "hover:shadow-[0_0_15px_rgba(var(--color-tertiary),0.5)]"
+      case "tertiary-1":
+        return "hover:shadow-[0_0_15px_rgba(var(--color-tertiary-1),0.5)]"
+      case "tertiary-2":
+        return "hover:shadow-[0_0_15px_rgba(var(--color-tertiary-2),0.5)]"
+      case "foreground":
+        return "hover:shadow-[0_0_15px_rgba(var(--color-foreground),0.3)]"
+      default:
+        return "hover:shadow-[0_0_15px_rgba(var(--color-primary),0.5)]"
+    }
+  }
+
   return (
     <Link href={href}>
-      <div
-        className={`p-6 rounded-xl border border-border shadow-lg bg-card 
-          transition-all duration-300 transform hover:scale-105
-          hover:border-${glowColor} hover:border-2
-          relative overflow-hidden group text-center h-40 flex justify-center items-center`}
-        {...props}
-      >
-        {/* Glow effect element that appears on hover */}
-        <div 
-          className={`absolute inset-0 -z-10 opacity-0 blur-xl group-hover:opacity-15
-          transition-opacity duration-300 bg-${glowColor}`} 
-          aria-hidden="true"
-        />
-        
-        <div className="font-thin text-xl">{text}</div>
-      </div>
+      <Card className={`h-full transition-all duration-300 hover:border-${glowColor} ${getGlowClass()}`}>
+        <CardContent className="p-6 flex items-center justify-center h-full">
+          <div className="flex items-center gap-3">
+            {icon && <div className="text-2xl">{icon}</div>}
+            <span className="text-lg font-medium">{text}</span>
+          </div>
+        </CardContent>
+      </Card>
     </Link>
-  );
-};
-
-export default TextCard;
+  )
+}
