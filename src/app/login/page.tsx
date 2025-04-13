@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { signIn, useSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card } from "@/components/ui/card"
@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label"
 import { UserRound, Building2, ArrowRight, LockKeyhole } from "lucide-react"
 import Loading from "@/components/ui/loading"
 
-const LoginPage = ()=>{
+// Client component that uses useSearchParams
+const LoginClient = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session, status } = useSession()
@@ -242,5 +243,13 @@ const LoginPage = ()=>{
   )
 }
 
+// Main component with Suspense boundary
+const LoginPage = () => {
+  return (
+    <Suspense fallback={<Loading />}>
+      <LoginClient />
+    </Suspense>
+  )
+}
 
 export default LoginPage
