@@ -1,10 +1,20 @@
 import NextAuth from "next-auth";
 import { authOptions } from "@/lib/authOptions";
-import { UserSession } from "@/interfaces/misc_interfaces";
-
+import { DefaultSession } from "next-auth";
 // Extend the NextAuth session type
 declare module "next-auth" {
-  interface Session extends UserSession {}
+  interface Session {
+    user: {
+      id: string;
+      type: string;
+      image?: string;
+    } & DefaultSession["user"];
+  }
+  interface User {
+    id: string;
+    type: string;
+    image?: string;
+  }
 }
 
 const handler = NextAuth(authOptions);

@@ -119,6 +119,7 @@ const CandidateOnboarding = () => {
         email: data.email,
         password: data.password,
         redirect: false,
+        type: "candidate",
       });
 
       if (signInResult?.error) {

@@ -119,6 +119,7 @@ const RecruiterOnboarding = ()=>{
         email: data.email,
         password: data.password,
         redirect: false,
+        type: "recruiter",
       });
 
       if (signInResult?.error) {
