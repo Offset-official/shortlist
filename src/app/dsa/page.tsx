@@ -4,7 +4,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import prisma from "@/lib/prisma"; // Your Prisma client instance
 import { authOptions } from "@/lib/authOptions";
-
+import { CodingProblem } from "@/interfaces/model_interfaces"; // Your CodingProblem interface
 // Import shadcn Card components
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
@@ -69,13 +69,6 @@ export default async function DsaPage({
   );
 }
 
-interface CodingProblem {
-  id: number;
-  title: string;
-  difficulty: string; // Expected values: "Easy", "Medium", "Hard"
-  description: string;
-  category: string[]; // E.g., ["Arrays", "Dynamic Programming"]
-}
 
 interface ProblemCardProps {
   problem: CodingProblem;

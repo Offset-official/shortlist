@@ -59,15 +59,16 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             {!session ? (
               <>
-                <Button
-                  variant="outline"
-                  className="border-secondary text-secondary hover:bg-secondary/10 hover:text-secondary"
-                >
-                  Join as Recruiter
-                </Button>
-                <Button className="bg-tertiary text-foreground hover:bg-tertiary/90">
-                  Join as Candidate
-                </Button>
+                <LinkButton
+                  href="/onboarding?type=recruiter"
+                  text="Join as Recruiter"
+                  className="border-secondary bg-secondary text-secondary hover:bg-secondary/10 hover:text-secondary"
+                />
+                <LinkButton
+                  href="/onboarding?type=candidate"
+                  text="Join as Candidate"
+                  className="border-tertiary bg-tertiary text-tertiary hover:bg-tertiary/10 hover:text-tertiary"
+                />
                 <LinkButton href="/login" text="login" />
               </>
             ) : (
@@ -114,14 +115,14 @@ export default function LandingPage() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <LinkButton
                     text="For Recruiters"
-                    href="/onboarding"
+                    href="/onboarding?type=recruiter"
                     className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
                   >
                     <Building className="mr-2 h-5 w-5" /> 
                     </LinkButton>
                   <LinkButton
                     text="For Candidates"
-                    href="/onboarding"
+                    href="/onboarding?type=candidate"
                     className="bg-tertiary text-foreground hover:bg-tertiary/90"
                   >
                     <Building className="mr-2 h-5 w-5" /> 
@@ -323,12 +324,12 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <LinkButton
                 text="Join as Recruiter"
-                href="/onboarding"
+                href="/onboarding?type=recruiter"
                 className="bg-secondary text-/assets/interview1.png hover:bg-secondary/90"
               />
               <LinkButton
                 text="Join as Candidate"
-                href="/onboarding"
+                href="/onboarding?type=candidate"
                 className="bg-tertiary text-foreground hover:bg-tertiary/90"
               />
             </div>
