@@ -32,7 +32,7 @@ export default function LandingPage() {
   ]
 
   const pieData = [
-    { name: "Tech", value: 35 },
+    { name: "Chut", value: 35 },
     { name: "Finance", value: 25 },
     { name: "Healthcare", value: 20 },
     { name: "Other", value: 20 },
@@ -337,7 +337,7 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-                          <LandingFooter />
+    <LandingFooter />
     </div>
   )
 }

@@ -1,11 +1,9 @@
-// app/dsa/page.tsx
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import prisma from "@/lib/prisma"; // Your Prisma client instance
 import { authOptions } from "@/lib/authOptions";
 import { CodingProblem } from "@/interfaces/model_interfaces"; // Your CodingProblem interface
-// Import shadcn Card components
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 export default async function DsaPage({
@@ -13,7 +11,6 @@ export default async function DsaPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // Retrieve the session on the server using your auth options.
   const searchParam = await searchParams;
   let session;
   try {
