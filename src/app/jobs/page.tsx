@@ -1,10 +1,9 @@
 "use client";
 import { useState,useEffect } from 'react';
-import { prisma } from '@/lib/prisma';
 import JobCard from '@/components/JobCard';
 
 
-const JobListings = async ()=>{
+const JobListings = ()=>{
 
   const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -13,25 +12,14 @@ const JobListings = async ()=>{
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        setIsLoading(true);
-        const data = await prisma.jobListing.findMany({
-          where: {
-            status: 'active',
-            expiryDate: {
-              gt: new Date(),
-            },
-          },
-          include: {
-            Recruiter: true,
-          },
-          orderBy: {
-            postedDate: 'desc',
-          },
-        });
-        setJobs(data);
-      } catch (e) {
-        console.error("Failed to fetch jobs:", e);
-        setError("Failed to load job listings. Please try again later.");
+        const response = await fetch('/api/getJobs');
+        if (!response.ok) {
+          throw new Error('Failed to fetch jobs');
+        }
+        const data = await response.json();
+        setJobs(data.jobs);
+      } catch (error: unknown) {
+        setError(error instanceof Error ? error.message : 'An unknown error occurred');
       } finally {
         setIsLoading(false);
       }
