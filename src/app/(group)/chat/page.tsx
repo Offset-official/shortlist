@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import Markdown from "react-markdown";
-import CodeEditor from "../components/CodeEditor";
-import CameraRecorder from "../components/CameraRecorder";
+import CodeEditor from "@/components/CodeEditor";
+import CameraRecorder from "@/components/CameraRecorder";
 import TalkingHeadComponent from "@/components/TalkingAvatar";
 
 export default function ChatPage() {
@@ -244,23 +244,6 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Custom scrollbar styles */}
-      <style jsx>{`
-        .chat-scroll::-webkit-scrollbar {
-          width: 8px;
-        }
-        .chat-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .chat-scroll::-webkit-scrollbar-thumb {
-          background-color: var(--border);
-          border-radius: 4px;
-        }
-        .chat-scroll {
-          scrollbar-width: thin;
-          scrollbar-color: var(--border) transparent;
-        }
-      `}</style>
     </div>
   );
 }

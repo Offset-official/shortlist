@@ -1,21 +1,12 @@
-// File: app/page.tsx
-import { redirect } from "next/navigation";
 import TextCard from "@/components/text-card";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 
-export default async function Home() {
-  // Retrieve the session on the server
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    redirect("/login");
-  }
+const RecruiterDashboard = ()=>{
 
   return (
     <div className="min-h-screen p-8 bg-background text-foreground">
-      <h1 className="text-3xl font-bold mb-6">ShortList</h1>
-      <p className="mb-8">
-        Welcome to ShortList! Please select an option below to get started.
+      <h1 className="text-5xl font-bold mb-6">ShortList</h1>
+      <p className="mb-8 text-xl text-secondary font-bold">
+        Recruiter Dashboard!
       </p>
       <div className="mt-8">
         <div className="grid grid-cols-2 gap-6">
@@ -31,3 +22,5 @@ export default async function Home() {
     </div>
   );
 }
+
+export default RecruiterDashboard;
