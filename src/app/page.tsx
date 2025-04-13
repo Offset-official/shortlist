@@ -18,7 +18,8 @@ import {
 import { Users, Briefcase, CheckCircle, Clock, TrendingUp, Search, Building, UserCheck } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import LinkButton from "@/components/link-button"
-
+import { Github, Twitter, Instagram, Mail, Phone } from "lucide-react";
+import LandingFooter from "@/components/LandingFooter"
 export default function LandingPage() {
   // Sample data for charts
   const barData = [
@@ -336,40 +337,7 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-
-      <footer className="border-t py-6 md:py-8">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/assets/interview1.png?height=32&width=32"
-                alt="Shortlist Logo"
-                width={32}
-                height={32}
-                className="rounded"
-              />
-              <span className="font-semibold">shortlist</span>
-            </div>
-            <div className="flex gap-8">
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                About
-              </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                Features
-              </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                Pricing
-              </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                Contact
-              </Link>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} Shortlist. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+                          <LandingFooter />
     </div>
   )
 }

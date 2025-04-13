@@ -1,13 +1,3 @@
-export interface UserSession {
-    user: {
-      id: string;
-      name: string;
-      email?: string | null;
-      image?: string | null;
-      type: string;
-    };
-  }
-
 export interface Country {
     alpha2: string;
     alpha3: string;
