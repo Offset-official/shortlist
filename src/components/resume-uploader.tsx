@@ -96,7 +96,7 @@ export function ResumeUploader(userId: any) {
     }
   };
 
-  const handleExtractJson = async () => {
+  const handleExtractAnalyseJson = async () => {
     try {
       setIsAnalyzing(true);
       setError(null);
@@ -122,6 +122,7 @@ export function ResumeUploader(userId: any) {
       }
       
       setResumeData(data);
+      handleResumeAnalysis(); // Call the analysis function after successful parsing
     } catch (err: any) {
       console.error("Error parsing resume:", err);
       setError(err.message || "Failed to parse the resume. Please try again.");
@@ -129,6 +130,22 @@ export function ResumeUploader(userId: any) {
       setIsAnalyzing(false);
     }
   };
+
+  const handleResumeAnalysis = async () => {
+   
+const response = await fetch(
+  "/api/resume_analysis",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      candidateId: userId.userId,
+      resume: resumeData,
+    }),
+  }
+);
+  }
+
 
   return (
     <div className="space-y-6">
@@ -171,7 +188,7 @@ export function ResumeUploader(userId: any) {
                 <Button 
                   variant="default" 
                   size="sm" 
-                  onClick={handleExtractJson}
+                  onClick={handleExtractAnalyseJson}
                   disabled={isAnalyzing}
                 >
                   {isAnalyzing ? "Processing..." : "Parse to JSON"}

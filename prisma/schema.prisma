@@ -19,6 +19,7 @@ model Candidate {
   dreamCompanies String[] // Array of company names
   skills         String[] // Array of skills
   createdAt      DateTime @default(now())
+  resumeAnalysis Json?
 
   JobListingApplied     JobListing? @relation("AppliedCandidates", fields: [jobListingId], references: [id])
   JobListingShortlisted JobListing? @relation("ShortlistedCandidates", fields: [shortlistedJobListingId], references: [id])
