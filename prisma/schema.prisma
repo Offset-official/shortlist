@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 model Candidate {
   id             Int      @id @default(autoincrement())
@@ -18,6 +19,7 @@ model Candidate {
   dreamCompanies String[] // Array of company names
   skills         String[] // Array of skills
   createdAt      DateTime @default(now())
+  resumeAnalysis Json?
 
   JobListingApplied     JobListing? @relation("AppliedCandidates", fields: [jobListingId], references: [id])
   JobListingShortlisted JobListing? @relation("ShortlistedCandidates", fields: [shortlistedJobListingId], references: [id])
@@ -89,7 +91,7 @@ model CodingProblem {
 
   companiesAskedIn String[]
 
-  approaches Json? // JSON field to store different approaches and their explanations
+  approaches Json? // Array of approaches or methods to solve the problem
 
   @@index([title])
   @@index([difficulty])
