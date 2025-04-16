@@ -220,15 +220,15 @@ export default function ChatPage() {
         </div>
 
         {/* Main Content: either CodeEditor or Camera in center */}
-        <div className="flex-1">
-          {activeTab === "code" ? (
+        <div className="flex-1 relative">
+        {/* Keep both components mounted, toggle visibility */}
+          <div className={`${activeTab === "code" ? "block" : "hidden"} w-full h-full`}>
             <CodeEditor />
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <CameraRecorder />
-            </div>
-          )}
-        </div>
+          </div>
+          <div className={`${activeTab === "camera" ? "flex" : "hidden"} items-center justify-center absolute inset-0`}>
+            <CameraRecorder />
+          </div>
+      </div>
       </div>
 
       {/* Avatar in bottom-right */}
