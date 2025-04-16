@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+model Candidate {
+  id             Int      @id @default(autoincrement())
+  name           String
+  email          String   @unique
+  password       String
+  year           Int? // Graduation year or class year
+  collegeName    String?
+  location       String?
+  resume         Json?
+  dreamCompanies String[] // Array of company names
+  skills         String[] // Array of skills
+  createdAt      DateTime @default(now())
+  resumeAnalysis Json?
+
+  JobListingApplied     JobListing? @relation("AppliedCandidates", fields: [jobListingId], references: [id])
+  JobListingShortlisted JobListing? @relation("ShortlistedCandidates", fields: [shortlistedJobListingId], references: [id])
+
+  jobListingId            Int?
+  shortlistedJobListingId Int?
+}
+
+model Recruiter {
+  id          Int          @id @default(autoincrement())
+  companyName String
+  email       String       @unique
+  password    String
+  website     String?
+  location    String?
+  industry    String?
+  values      String[] // Array of company values
+  description String?      @db.Text
+  companySize String? // e.g., "1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"
+  linkedInUrl String?
+  createdAt   DateTime     @default(now())
+  jobListings JobListing[]
+}
+
+model JobListing {
+  id          Int     @id @default(autoincrement())
+  title       String
+  companyId   Int // Foreign key to Recruiter
+  location    String?
+  remote      Boolean @default(false)
+  salary      String?
+  description String  @db.Text
+
+  // Job details
+  employmentType  String // Full-time, Part-time, Contract, Internship
+  experienceLevel String? // Entry, Mid, Senior
+  jobRole         String?
+
+  // Skills and qualifications required
+  skills    String[]
+  education String?
+
+  // Dates
+  postedDate DateTime  @default(now())
+  expiryDate DateTime?
+
+  status String @default("active") // active, filled, expired, draft
+
+  applicationCount Int @default(0)
+
+  candidates  Candidate[] @relation("AppliedCandidates")
+  shortlisted Candidate[] @relation("ShortlistedCandidates")
+
+  Recruiter Recruiter? @relation(fields: [companyId], references: [id])
+
+  @@index([title])
+  @@index([skills])
+  @@index([companyId])
+}
+
+
+model CodingProblem {
+  id          Int    @id @default(autoincrement())
+  title       String
+  difficulty  String // Easy, Medium, Hard
+  description String @db.Text
+
+  category String[] // e.g., "Arrays", "String", "Dynamic Programming"
+
+  companiesAskedIn String[]
+
+  approaches Json? // Array of approaches or methods to solve the problem
+
+  @@index([title])
+  @@index([difficulty])
+  @@index([category])
+  @@index([companiesAskedIn])
+}
