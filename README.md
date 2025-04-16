@@ -12,15 +12,23 @@ pnpm dev
 
 ## Info
 
+`/dashboard` - d
+
 `/color_check`- color scheme of the website
 
 `/resume` - resume parsing
 
-`/candidate/[id]` - candidate's page
+`/profile` - user's page
 
 `/jobs` - joblisting page
 
 `/chat` - chat
+
+`/omboarding` - signup
+
+`/login` - login
+
+`/` - landing page
 
 ## Debugging
 
@@ -29,5 +37,12 @@ pnpm dev
 ## TODOs
 
 - Toasts
-- 3D avatar
-- Resume chat
+- UI
+- Job listings needs to made server sided
+- Secure Routes
+- Add animation
+- Responsive 
+- Navigation and footer separation from main content
+
+
+Testing subham

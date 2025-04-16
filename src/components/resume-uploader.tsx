@@ -46,7 +46,7 @@ type ResumeData = {
   }>;
 };
 
-export function ResumeUploader() {
+export function ResumeUploader(userId: any) {
   const [extractedText, setExtractedText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -65,7 +65,7 @@ export function ResumeUploader() {
       const formData = new FormData();
       formData.append("file", file);
       
-      // Send the file to the API endpoint
+      // Send the file to the API 
       const response = await fetch("/api/parsedoc", {
         method: "POST",
         body: formData,
@@ -96,17 +96,18 @@ export function ResumeUploader() {
     }
   };
 
-  const handleExtractJson = async () => {
+  const handleExtractAnalyseJson = async () => {
     try {
       setIsAnalyzing(true);
       setError(null);
-      
+      // console.log(userId);
+
       const response = await fetch("/api/extract_save_resume", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: extractedText, candidateId: "1" }), // hard coded for now. Waiting for Auth. 
+        body: JSON.stringify({ text: extractedText, candidateId: userId.userId }), // hard coded for now. Waiting for Auth. 
       });
       
       if (!response.ok) {
@@ -121,6 +122,7 @@ export function ResumeUploader() {
       }
       
       setResumeData(data);
+      handleResumeAnalysis(); // Call the analysis function after successful parsing
     } catch (err: any) {
       console.error("Error parsing resume:", err);
       setError(err.message || "Failed to parse the resume. Please try again.");
@@ -128,6 +130,22 @@ export function ResumeUploader() {
       setIsAnalyzing(false);
     }
   };
+
+  const handleResumeAnalysis = async () => {
+   
+const response = await fetch(
+  "/api/resume_analysis",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      candidateId: userId.userId,
+      resume: resumeData,
+    }),
+  }
+);
+  }
+
 
   return (
     <div className="space-y-6">
@@ -170,7 +188,7 @@ export function ResumeUploader() {
                 <Button 
                   variant="default" 
                   size="sm" 
-                  onClick={handleExtractJson}
+                  onClick={handleExtractAnalyseJson}
                   disabled={isAnalyzing}
                 >
                   {isAnalyzing ? "Processing..." : "Parse to JSON"}
