@@ -89,11 +89,7 @@ model CodingProblem {
 
   companiesAskedIn String[]
 
-  timeComplexity  String? // Expected time complexity like "O(n)"
-  spaceComplexity String? // Expected space complexity like "O(1)"
-
-  solutionApproach String? @db.Text
-  solutionCode     String? @db.Text
+  approaches Json? // JSON field to store different approaches and their explanations
 
   @@index([title])
   @@index([difficulty])
