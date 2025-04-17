@@ -9,6 +9,7 @@ import Loading from '@/components/ui/loading';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ResumeUploader } from '@/components/resume-uploader';
 
 type Candidate = {
   id: number;
@@ -82,14 +83,14 @@ const CandidateProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="bg-card shadow rounded-lg overflow-hidden">
-          <div className="px-6 py-8 border-b border-border">
-            <div className="flex items-center justify-between">
+    <main className="min-h-screen bg-background flex items-center justify-center px-2 py-8 md:py-16">
+      <div className="w-full max-w-6xl mx-auto relative">
+        <div className="relative z-10">
+          <div className="bg-card/95 border border-border shadow-xl rounded-2xl p-6 md:p-12 flex flex-col gap-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
-                <h1 className="text-3xl font-bold text-foreground">{candidate.name}</h1>
-                <p className="mt-1 text-lg text-foreground">
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-1">{candidate.name}</h1>
+                <p className="text-lg text-muted-foreground mb-1">
                   {candidate.year && `Class of ${candidate.year}`}
                   {candidate.collegeName && candidate.year && ' • '}
                   {candidate.collegeName}
@@ -109,162 +110,171 @@ const CandidateProfile = () => {
                 </Button>
               )}
             </div>
-          </div>
 
-          <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold text-foreground mb-4">Skills</h2>
-                <div className="flex flex-wrap gap-2">
-                  {candidate.skills.map((skill, index) => (
-                    <span key={index} className="bg-primary text-foreground px-3 py-1 rounded-full text-sm">
-                      {skill}
-                    </span>
-                  ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold text-foreground mb-4">Skills</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {candidate.skills.map((skill, index) => (
+                      <span key={index} className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-4">Dream Companies</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {candidate.dreamCompanies.map((company, index) => (
+                      <span key={index} className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                        {company}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-foreground mb-4">Dream Companies</h2>
-                <div className="flex flex-wrap gap-2">
-                  {candidate.dreamCompanies.map((company, index) => (
-                    <span key={index} className="bg-secondary text-foreground px-3 py-1 rounded-full text-sm">
-                      {company}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              {/* Application Tracker Section */}
-              {(candidate.jobListingId || candidate.shortlistedJobListingId) && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-foreground mb-4">Application Tracker</h2>
-                  {candidate.jobListingId && (
-                    <div className="mb-4 p-4 border rounded bg-muted/10">
-                      <h3 className="font-medium mb-1">Applied Job</h3>
-                      {getJobById(candidate.jobListingId) ? (
-                        <>
-                          <div className="text-lg font-semibold">{getJobById(candidate.jobListingId)?.title}</div>
-                          <div className="text-sm text-muted-foreground mb-1">{getJobById(candidate.jobListingId)?.Recruiter?.companyName}</div>
-                          <div className="flex flex-wrap gap-2 mb-1">
-                            {getJobById(candidate.jobListingId)?.skills?.slice(0, 4).map((skill: string, idx: number) => (
-                              <Badge key={idx} variant="secondary">{skill}</Badge>
-                            ))}
-                          </div>
-                          <div className="text-xs text-muted-foreground">{getJobById(candidate.jobListingId)?.location} • {getJobById(candidate.jobListingId)?.employmentType}</div>
-                        </>
-                      ) : (
-                        <span>Applied to Job ID: {candidate.jobListingId}</span>
-                      )}
-                    </div>
-                  )}
-                  {candidate.shortlistedJobListingId && (
-                    <div className="p-4 border rounded bg-muted/10">
-                      <h3 className="font-medium mb-1">Shortlisted Job</h3>
-                      {getJobById(candidate.shortlistedJobListingId) ? (
-                        <>
-                          <div className="text-lg font-semibold">{getJobById(candidate.shortlistedJobListingId)?.title}</div>
-                          <div className="text-sm text-muted-foreground mb-1">{getJobById(candidate.shortlistedJobListingId)?.Recruiter?.companyName}</div>
-                          <div className="flex flex-wrap gap-2 mb-1">
-                            {getJobById(candidate.shortlistedJobListingId)?.skills?.slice(0, 4).map((skill: string, idx: number) => (
-                              <Badge key={idx} variant="secondary">{skill}</Badge>
-                            ))}
-                          </div>
-                          <div className="text-xs text-muted-foreground">{getJobById(candidate.shortlistedJobListingId)?.location} • {getJobById(candidate.shortlistedJobListingId)?.employmentType}</div>
-                        </>
-                      ) : (
-                        <span>Shortlisted for Job ID: {candidate.shortlistedJobListingId}</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Resume Dialog */}
-          <Dialog open={resumeDialogOpen} onOpenChange={setResumeDialogOpen}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Resume</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-                {candidate.resume ? (
-                  <div className="text-sm">
-                    {/* Render resume in a pretty way, fallback to JSON if needed */}
-                    {candidate.resume.personalInfo && (
-                      <div className="mb-2">
-                        <div className="font-semibold">{candidate.resume.personalInfo.name}</div>
-                        <div className="text-xs text-muted-foreground">{candidate.resume.personalInfo.email}</div>
-                        <div className="text-xs text-muted-foreground">{candidate.resume.personalInfo.location}</div>
+                {/* Application Tracker Section */}
+                {(candidate.jobListingId || candidate.shortlistedJobListingId) && (
+                  <div className="mb-8">
+                    <h2 className="text-xl font-semibold text-foreground mb-4">Application Tracker</h2>
+                    {candidate.jobListingId && (
+                      <div className="mb-4 p-4 border rounded bg-muted/10">
+                        <h3 className="font-medium mb-1">Applied Job</h3>
+                        {getJobById(candidate.jobListingId) ? (
+                          <>
+                            <div className="text-lg font-semibold">{getJobById(candidate.jobListingId)?.title}</div>
+                            <div className="text-sm text-muted-foreground mb-1">{getJobById(candidate.jobListingId)?.Recruiter?.companyName}</div>
+                            <div className="flex flex-wrap gap-2 mb-1">
+                              {getJobById(candidate.jobListingId)?.skills?.slice(0, 4).map((skill: string, idx: number) => (
+                                <Badge key={idx} variant="secondary">{skill}</Badge>
+                              ))}
+                            </div>
+                            <div className="text-xs text-muted-foreground">{getJobById(candidate.jobListingId)?.location} • {getJobById(candidate.jobListingId)?.employmentType}</div>
+                          </>
+                        ) : (
+                          <span>Applied for Job ID: {candidate.jobListingId}</span>
+                        )}
                       </div>
                     )}
-                    {candidate.resume.summary && (
-                      <div className="mb-2">
-                        <div className="font-semibold">Summary</div>
-                        <div className="text-xs">{candidate.resume.summary}</div>
+                    {candidate.shortlistedJobListingId && (
+                      <div className="mb-4 p-4 border rounded bg-tertiary/10">
+                        <h3 className="font-medium mb-1">Shortlisted</h3>
+                        {getJobById(candidate.shortlistedJobListingId) ? (
+                          <>
+                            <div className="text-lg font-semibold">{getJobById(candidate.shortlistedJobListingId)?.title}</div>
+                            <div className="text-sm text-muted-foreground mb-1">{getJobById(candidate.shortlistedJobListingId)?.Recruiter?.companyName}</div>
+                            <div className="flex flex-wrap gap-2 mb-1">
+                              {getJobById(candidate.shortlistedJobListingId)?.skills?.slice(0, 4).map((skill: string, idx: number) => (
+                                <Badge key={idx} variant="secondary">{skill}</Badge>
+                              ))}
+                            </div>
+                            <div className="text-xs text-muted-foreground">{getJobById(candidate.shortlistedJobListingId)?.location} • {getJobById(candidate.shortlistedJobListingId)?.employmentType}</div>
+                          </>
+                        ) : (
+                          <span>Shortlisted for Job ID: {candidate.shortlistedJobListingId}</span>
+                        )}
                       </div>
-                    )}
-                    {candidate.resume.education && candidate.resume.education.length > 0 && (
-                      <div className="mb-2">
-                        <div className="font-semibold">Education</div>
-                        <ul className="list-disc ml-5 text-xs">
-                          {candidate.resume.education.map((edu: any, idx: number) => (
-                            <li key={idx}>
-                              {edu.degree} at {edu.institution} ({edu.dates})
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {candidate.resume.experience && candidate.resume.experience.length > 0 && (
-                      <div className="mb-2">
-                        <div className="font-semibold">Experience</div>
-                        <ul className="list-disc ml-5 text-xs">
-                          {candidate.resume.experience.map((exp: any, idx: number) => (
-                            <li key={idx}>
-                              {exp.title} at {exp.company} ({exp.dates})
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {candidate.resume.skills && (
-                      <div className="mb-2">
-                        <div className="font-semibold">Skills</div>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {(candidate.resume.skills.technical || []).map((skill: string, idx: number) => (
-                            <Badge key={idx} variant="secondary">{skill}</Badge>
-                          ))}
-                          {(candidate.resume.skills.soft || []).map((skill: string, idx: number) => (
-                            <Badge key={idx} variant="outline">{skill}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {/* Fallback: show JSON if nothing else */}
-                    {!(candidate.resume.personalInfo || candidate.resume.summary || candidate.resume.education || candidate.resume.experience || candidate.resume.skills) && (
-                      <pre className="whitespace-pre-wrap text-xs bg-muted/20 p-2 rounded">
-                        {JSON.stringify(candidate.resume, null, 2)}
-                      </pre>
                     )}
                   </div>
-                ) : (
-                  <div>No resume data available.</div>
                 )}
               </div>
-            </DialogContent>
-          </Dialog>
+            </div>
 
-          <div className="px-6 py-4 bg-card border-t border-border">
-            <p className="text-sm text-foreground">
-              Candidate registered on {new Date(candidate.createdAt).toLocaleDateString()}
-            </p>
+            {/* Resume Dialog */}
+            <Dialog open={resumeDialogOpen} onOpenChange={setResumeDialogOpen}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Resume</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                  {candidate.resume ? (
+                    <div className="text-sm">
+                      {/* Render resume in a pretty way, fallback to JSON if needed */}
+                      {candidate.resume.personalInfo && (
+                        <div className="mb-2">
+                          <div className="font-semibold">{candidate.resume.personalInfo.name}</div>
+                          <div className="text-xs text-muted-foreground">{candidate.resume.personalInfo.email}</div>
+                          <div className="text-xs text-muted-foreground">{candidate.resume.personalInfo.location}</div>
+                        </div>
+                      )}
+                      {candidate.resume.summary && (
+                        <div className="mb-2">
+                          <div className="font-semibold">Summary</div>
+                          <div className="text-xs">{candidate.resume.summary}</div>
+                        </div>
+                      )}
+                      {candidate.resume.education && candidate.resume.education.length > 0 && (
+                        <div className="mb-2">
+                          <div className="font-semibold">Education</div>
+                          <ul className="list-disc ml-5 text-xs">
+                            {candidate.resume.education.map((edu: any, idx: number) => (
+                              <li key={idx}>
+                                {edu.degree} at {edu.institution} ({edu.dates})
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {candidate.resume.experience && candidate.resume.experience.length > 0 && (
+                        <div className="mb-2">
+                          <div className="font-semibold">Experience</div>
+                          <ul className="list-disc ml-5 text-xs">
+                            {candidate.resume.experience.map((exp: any, idx: number) => (
+                              <li key={idx}>
+                                {exp.title} at {exp.company} ({exp.dates})
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {candidate.resume.skills && (
+                        <div className="mb-2">
+                          <div className="font-semibold">Skills</div>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {(candidate.resume.skills.technical || []).map((skill: string, idx: number) => (
+                              <Badge key={idx} variant="secondary">{skill}</Badge>
+                            ))}
+                            {(candidate.resume.skills.soft || []).map((skill: string, idx: number) => (
+                              <Badge key={idx} variant="outline">{skill}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {/* Fallback: show JSON if nothing else */}
+                      {!(candidate.resume.personalInfo || candidate.resume.summary || candidate.resume.education || candidate.resume.experience || candidate.resume.skills) && (
+                        <pre className="whitespace-pre-wrap text-xs bg-muted/20 p-2 rounded">
+                          {JSON.stringify(candidate.resume, null, 2)}
+                        </pre>
+                      )}
+                    </div>
+                  ) : (
+                    <div>No resume data available.</div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Overwrite Resume Section */}
+            <div className="px-6 pb-8">
+              <ResumeUploader userId={candidate.id.toString()} onSuccess={() => window.location.reload()} />
+            </div>
+
+            <div className="px-6 py-4 bg-card border-t border-border rounded-b-2xl">
+              <p className="text-sm text-foreground">
+                Candidate registered on {new Date(candidate.createdAt).toLocaleDateString()}
+              </p>
+            </div>
           </div>
         </div>
+        {/* Decorative blurred backgrounds for modern look */}
+        <div className="absolute inset-0 pointer-events-none -z-10">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/10 blur-3xl" />
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
 
