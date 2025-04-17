@@ -4,21 +4,20 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import ResumeButton from '@/components/ResumeButton';
 
 type Recruiter = {
   id: number;
   name: string;
   email: string;
-  year?: number | null;
-  collegeName?: string | null;
+  companyName?: string | null;
+  industry?: string | null;
+  companySize?: string | null;
   location?: string | null;
-  resume?: any;
-  dreamCompanies: string[];
-  skills: string[];
+  website?: string | null;
+  linkedInUrl?: string | null;
+  values?: string[] | null;
+  description?: string | null;
   createdAt: string; // coming as ISO string from JSON
-  jobListingId?: number | null;
-  shortlistedJobListingId?: number | null;
 };
 
 const RecruiterProfile = () => {
@@ -67,11 +66,11 @@ const RecruiterProfile = () => {
           <div className="px-6 py-8 border-b border-border">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-foreground">{recruiter.name}</h1>
+                <h1 className="text-3xl font-bold text-foreground">{recruiter.companyName || recruiter.name}</h1>
                 <p className="mt-1 text-lg text-foreground">
-                  {recruiter.year && `Class of ${recruiter.year}`}
-                  {recruiter.collegeName && recruiter.year && ' • '}
-                  {recruiter.collegeName}
+                  {recruiter.industry && <span>{recruiter.industry}</span>}
+                  {recruiter.companySize && recruiter.industry && ' • '}
+                  {recruiter.companySize}
                 </p>
                 {recruiter.location && (
                   <p className="mt-2 text-foreground flex items-center">
@@ -81,64 +80,56 @@ const RecruiterProfile = () => {
                     {recruiter.location}
                   </p>
                 )}
+                {recruiter.website && (
+                  <p className="mt-2 text-foreground">
+                    <a href={recruiter.website} target="_blank" rel="noopener noreferrer" className="underline text-primary">{recruiter.website}</a>
+                  </p>
+                )}
+                {recruiter.linkedInUrl && (
+                  <p className="mt-2 text-foreground">
+                    <a href={recruiter.linkedInUrl} target="_blank" rel="noopener noreferrer" className="underline text-primary">LinkedIn</a>
+                  </p>
+                )}
               </div>
-              {recruiter.resume && <ResumeButton resume={recruiter.resume} />}
             </div>
           </div>
 
           <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-foreground mb-4">Skills</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-4">Company Values</h2>
                 <div className="flex flex-wrap gap-2">
-                  {recruiter.skills.map((skill, index) => (
+                  {(recruiter.values || []).map((value, index) => (
                     <span key={index} className="bg-primary text-foreground px-3 py-1 rounded-full text-sm">
-                      {skill}
+                      {value}
                     </span>
                   ))}
                 </div>
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-foreground mb-4">Dream Companies</h2>
-                <div className="flex flex-wrap gap-2">
-                  {recruiter.dreamCompanies.map((company, index) => (
-                    <span key={index} className="bg-secondary text-foreground px-3 py-1 rounded-full text-sm">
-                      {company}
-                    </span>
-                  ))}
+                <h2 className="text-xl font-semibold text-foreground mb-4">Description</h2>
+                <div className="bg-background p-4 border border-border rounded text-foreground text-sm">
+                  {recruiter.description || <span className="italic text-muted-foreground">No description provided.</span>}
                 </div>
               </div>
             </div>
 
             <div>
-              {(recruiter.jobListingId || recruiter.shortlistedJobListingId) && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-foreground mb-4">Application Status</h2>
-                  {recruiter.jobListingId && (
-                    <div className="flex items-center mb-2">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                      <span>Applied to Job ID: {recruiter.jobListingId}</span>
-                    </div>
-                  )}
-                  {recruiter.shortlistedJobListingId && (
-                    <div className="flex items-center">
-                      <span className="w-2 h-2 bg-background rounded-full mr-2"></span>
-                      <span className="font-medium text-foreground">Shortlisted for Job ID: {recruiter.shortlistedJobListingId}</span>
-                    </div>
-                  )}
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-foreground mb-4">Contact</h2>
+                <div className="flex flex-col gap-2">
+                  <span className="text-foreground">Email: {recruiter.email}</span>
+                  {recruiter.website && <span className="text-foreground">Website: <a href={recruiter.website} className="underline text-primary" target="_blank" rel="noopener noreferrer">{recruiter.website}</a></span>}
+                  {recruiter.linkedInUrl && <span className="text-foreground">LinkedIn: <a href={recruiter.linkedInUrl} className="underline text-primary" target="_blank" rel="noopener noreferrer">{recruiter.linkedInUrl}</a></span>}
                 </div>
-              )}
-
-              {recruiter.resume && (
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-4">Resume</h2>
-                  <div className="bg-background p-4 border border-border rounded">
-                    <pre className="whitespace-pre-wrap text-sm">
-                      {JSON.stringify(recruiter.resume, null, 2)}
-                    </pre>
-                  </div>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-foreground mb-4">Stats</h2>
+                <div className="flex flex-col gap-2">
+                  <span className="text-foreground">Jobs Posted: <span className="font-bold">-</span></span>
+                  <span className="text-foreground">Applicants: <span className="font-bold">-</span></span>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 

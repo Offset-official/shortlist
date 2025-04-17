@@ -1,13 +1,14 @@
 "use client";
 import { useState,useEffect } from 'react';
 import JobCard from '@/components/JobCard';
-
+import { useSession } from 'next-auth/react';
 
 const JobListings = ()=>{
 
   const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -35,7 +36,7 @@ const JobListings = ()=>{
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {jobs.length > 0 ? (
           jobs.map((job) => (
-            <JobCard key={job.id} job={job} />
+            <JobCard key={job.id} job={job} appliedByMe={!!(session && session.user.type === 'candidate' && job.candidates && job.candidates.some((c:any) => c.id === session.user.id))} />
           ))
         ) : (
           <div className="col-span-full text-center py-16">

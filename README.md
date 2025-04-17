@@ -43,6 +43,6 @@ pnpm dev
 - Add animation
 - Responsive 
 - Navigation and footer separation from main content
-
+- Fix the insecure access to pages like jobs
 
 Testing subham

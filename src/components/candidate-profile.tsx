@@ -5,6 +5,10 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import ResumeButton from '@/components/ResumeButton';
+import Loading from '@/components/ui/loading';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 type Candidate = {
   id: number;
@@ -26,6 +30,8 @@ const CandidateProfile = () => {
   const router = useRouter();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [resumeDialogOpen, setResumeDialogOpen] = useState(false);
 
   useEffect(() => {
     if (status !== 'loading' && !session) {
@@ -50,10 +56,25 @@ const CandidateProfile = () => {
 
       fetchCandidate();
     }
+
+    // Fetch all jobs for application tracker
+    const fetchJobs = async () => {
+      try {
+        const response = await fetch('/api/getJobs');
+        const data = await response.json();
+        setJobs(data.jobs || []);
+      } catch (e) {
+        // ignore for now
+      }
+    };
+    fetchJobs();
   }, [status]);
 
+  // Helper to get job details by ID
+  const getJobById = (id: number | undefined | null) => jobs.find(j => j.id === id);
+
   if (status === 'loading' || loading || !session) {
-    return <p>Loading...</p>;
+    return <Loading />;
   }
 
   if (!candidate) {
@@ -82,7 +103,11 @@ const CandidateProfile = () => {
                   </p>
                 )}
               </div>
-              {candidate.resume && <ResumeButton resume={candidate.resume} />}
+              {candidate.resume && (
+                <Button variant="outline" onClick={() => setResumeDialogOpen(true)}>
+                  View Resume
+                </Button>
+              )}
             </div>
           </div>
 
@@ -111,36 +136,126 @@ const CandidateProfile = () => {
             </div>
 
             <div>
+              {/* Application Tracker Section */}
               {(candidate.jobListingId || candidate.shortlistedJobListingId) && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-foreground mb-4">Application Status</h2>
+                  <h2 className="text-xl font-semibold text-foreground mb-4">Application Tracker</h2>
                   {candidate.jobListingId && (
-                    <div className="flex items-center mb-2">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                      <span>Applied to Job ID: {candidate.jobListingId}</span>
+                    <div className="mb-4 p-4 border rounded bg-muted/10">
+                      <h3 className="font-medium mb-1">Applied Job</h3>
+                      {getJobById(candidate.jobListingId) ? (
+                        <>
+                          <div className="text-lg font-semibold">{getJobById(candidate.jobListingId)?.title}</div>
+                          <div className="text-sm text-muted-foreground mb-1">{getJobById(candidate.jobListingId)?.Recruiter?.companyName}</div>
+                          <div className="flex flex-wrap gap-2 mb-1">
+                            {getJobById(candidate.jobListingId)?.skills?.slice(0, 4).map((skill: string, idx: number) => (
+                              <Badge key={idx} variant="secondary">{skill}</Badge>
+                            ))}
+                          </div>
+                          <div className="text-xs text-muted-foreground">{getJobById(candidate.jobListingId)?.location} • {getJobById(candidate.jobListingId)?.employmentType}</div>
+                        </>
+                      ) : (
+                        <span>Applied to Job ID: {candidate.jobListingId}</span>
+                      )}
                     </div>
                   )}
                   {candidate.shortlistedJobListingId && (
-                    <div className="flex items-center">
-                      <span className="w-2 h-2 bg-background rounded-full mr-2"></span>
-                      <span className="font-medium text-foreground">Shortlisted for Job ID: {candidate.shortlistedJobListingId}</span>
+                    <div className="p-4 border rounded bg-muted/10">
+                      <h3 className="font-medium mb-1">Shortlisted Job</h3>
+                      {getJobById(candidate.shortlistedJobListingId) ? (
+                        <>
+                          <div className="text-lg font-semibold">{getJobById(candidate.shortlistedJobListingId)?.title}</div>
+                          <div className="text-sm text-muted-foreground mb-1">{getJobById(candidate.shortlistedJobListingId)?.Recruiter?.companyName}</div>
+                          <div className="flex flex-wrap gap-2 mb-1">
+                            {getJobById(candidate.shortlistedJobListingId)?.skills?.slice(0, 4).map((skill: string, idx: number) => (
+                              <Badge key={idx} variant="secondary">{skill}</Badge>
+                            ))}
+                          </div>
+                          <div className="text-xs text-muted-foreground">{getJobById(candidate.shortlistedJobListingId)?.location} • {getJobById(candidate.shortlistedJobListingId)?.employmentType}</div>
+                        </>
+                      ) : (
+                        <span>Shortlisted for Job ID: {candidate.shortlistedJobListingId}</span>
+                      )}
                     </div>
                   )}
-                </div>
-              )}
-
-              {candidate.resume && (
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-4">Resume</h2>
-                  <div className="bg-background p-4 border border-border rounded">
-                    <pre className="whitespace-pre-wrap text-sm">
-                      {JSON.stringify(candidate.resume, null, 2)}
-                    </pre>
-                  </div>
                 </div>
               )}
             </div>
           </div>
+
+          {/* Resume Dialog */}
+          <Dialog open={resumeDialogOpen} onOpenChange={setResumeDialogOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Resume</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                {candidate.resume ? (
+                  <div className="text-sm">
+                    {/* Render resume in a pretty way, fallback to JSON if needed */}
+                    {candidate.resume.personalInfo && (
+                      <div className="mb-2">
+                        <div className="font-semibold">{candidate.resume.personalInfo.name}</div>
+                        <div className="text-xs text-muted-foreground">{candidate.resume.personalInfo.email}</div>
+                        <div className="text-xs text-muted-foreground">{candidate.resume.personalInfo.location}</div>
+                      </div>
+                    )}
+                    {candidate.resume.summary && (
+                      <div className="mb-2">
+                        <div className="font-semibold">Summary</div>
+                        <div className="text-xs">{candidate.resume.summary}</div>
+                      </div>
+                    )}
+                    {candidate.resume.education && candidate.resume.education.length > 0 && (
+                      <div className="mb-2">
+                        <div className="font-semibold">Education</div>
+                        <ul className="list-disc ml-5 text-xs">
+                          {candidate.resume.education.map((edu: any, idx: number) => (
+                            <li key={idx}>
+                              {edu.degree} at {edu.institution} ({edu.dates})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {candidate.resume.experience && candidate.resume.experience.length > 0 && (
+                      <div className="mb-2">
+                        <div className="font-semibold">Experience</div>
+                        <ul className="list-disc ml-5 text-xs">
+                          {candidate.resume.experience.map((exp: any, idx: number) => (
+                            <li key={idx}>
+                              {exp.title} at {exp.company} ({exp.dates})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {candidate.resume.skills && (
+                      <div className="mb-2">
+                        <div className="font-semibold">Skills</div>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {(candidate.resume.skills.technical || []).map((skill: string, idx: number) => (
+                            <Badge key={idx} variant="secondary">{skill}</Badge>
+                          ))}
+                          {(candidate.resume.skills.soft || []).map((skill: string, idx: number) => (
+                            <Badge key={idx} variant="outline">{skill}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Fallback: show JSON if nothing else */}
+                    {!(candidate.resume.personalInfo || candidate.resume.summary || candidate.resume.education || candidate.resume.experience || candidate.resume.skills) && (
+                      <pre className="whitespace-pre-wrap text-xs bg-muted/20 p-2 rounded">
+                        {JSON.stringify(candidate.resume, null, 2)}
+                      </pre>
+                    )}
+                  </div>
+                ) : (
+                  <div>No resume data available.</div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <div className="px-6 py-4 bg-card border-t border-border">
             <p className="text-sm text-foreground">

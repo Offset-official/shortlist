@@ -1,21 +1,18 @@
-"use client"
 import CandidateProfile from '@/components/candidate-profile';
 import RecruiterProfile from '@/components/recruiter-profile';
-import { useSession } from 'next-auth/react';
-import Loading from '@/components/ui/loading';
-import { Suspense } from 'react';
-const ProfileClient = () => {
-  const { data: session, status } = useSession();
-  return <>
-  {false? <RecruiterProfile />:<CandidateProfile />}
-  </>
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
 
-}
-const ProfilePage = () => {
+const ProfilePage = async () => {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      redirect("/login");
+    }
   return (
-    <Suspense fallback={<Loading />}>
-      <ProfileClient />
-    </Suspense>
+    <>
+      {session.user.type === "recruiter" ? <RecruiterProfile /> : <CandidateProfile />}
+    </>
   )
 }
 
