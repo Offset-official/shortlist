@@ -10,12 +10,13 @@ export default function TestPage() {
   // The function that queries Screenpipe
   async function queryScreenpipe() {
     try {
-      const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
+      const oneMinuteAgo = new Date(Date.now() - 10 * 1000).toISOString();
 
       const results = await pipe.queryScreenpipe({
         startTime: oneMinuteAgo,
         limit: 100,
-        contentType: "ocr", // could be "ocr", "audio", "ui", or "all"
+        contentType: "ocr", // could be "ocr", "audio", "ui", or "all",
+        browserUrl: "chat*"
       });
 
       if (!results || !results.data) {
