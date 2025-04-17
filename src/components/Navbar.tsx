@@ -1,3 +1,4 @@
+"use client"
 import Image from "next/image";
 import Link from "next/link";
 import { ModeToggle } from "@/components/mode-toggle"
@@ -21,16 +22,15 @@ import {
   User,
 } from "lucide-react"
 import {Button} from "@/components/ui/button"
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
-const Navbar = async () => {
-    const session = await getServerSession(authOptions);
+import { useSession } from "next-auth/react";
+const Navbar = () => {
+    const { data: session } = useSession()
     return (
 
         <header className="border-b sticky top-0 z-50 bg-card px-5">
             <div className="container flex h-16 items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <Link href="/" className="flex items-center gap-2">
+                    <Link href="/dashboard" className="flex items-center gap-2">
                         <Image
                             src="/assets/interview1.png?height=40&width=40"
                             alt="Shortlist Logo"
@@ -80,20 +80,20 @@ const Navbar = async () => {
                         <DropdownMenuContent align="end" className="w-56">
                             <DropdownMenuLabel>My Account</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                                <User className="mr-2 h-4 w-4" />
-                                <span>Profile</span>
+                            <DropdownMenuItem asChild>
+                                <Link href="/profile" className="flex items-center w-full">
+                                    <User className="mr-2 h-4 w-4" />
+                                    <span>Profile</span>
+                                </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <Briefcase className="mr-2 h-4 w-4" />
-                                <span>Applications</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <Settings className="mr-2 h-4 w-4" />
-                                <span>Settings</span>
+                            <DropdownMenuItem asChild>
+                                <Link href="/settings" className="flex items-center w-full">
+                                    <Settings className="mr-2 h-4 w-4" />
+                                    <span>Settings</span>
+                                </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => import('next-auth/react').then(mod => mod.signOut())} className="text-destructive focus:text-destructive">
                                 <LogOut className="mr-2 h-4 w-4" />
                                 <span>Log out</span>
                             </DropdownMenuItem>

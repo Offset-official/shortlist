@@ -94,7 +94,7 @@ const CandidateOnboarding = () => {
         skills: data.skills,
       };
 
-      const res = await fetch("/api/register", {
+      const res = await fetch("/api/register_candidate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(registerPayload),
