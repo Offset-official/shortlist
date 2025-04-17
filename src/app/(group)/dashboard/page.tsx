@@ -9,7 +9,6 @@ export default async function Home() {
   if (!session) {
     redirect("/login");
   }
-  console.log("Session:", session);
   return (
     <>
       {session.user.type === "recruiter" ? <RecruiterDashboard /> : <CandidateDashboard />}

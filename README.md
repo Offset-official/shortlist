@@ -16,8 +16,6 @@ pnpm dev
 
 `/color_check`- color scheme of the website
 
-`/resume` - resume parsing
-
 `/profile` - user's page
 
 `/jobs` - joblisting page
@@ -43,6 +41,4 @@ pnpm dev
 - Add animation
 - Responsive 
 - Navigation and footer separation from main content
-
-
-Testing subham
+- Fix the insecure access to pages like jobs
