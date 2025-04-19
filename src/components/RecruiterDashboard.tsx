@@ -181,7 +181,7 @@ const RecruiterDashboard = () => {
                 </div>
                 <div>
                   <label className="block mb-1 font-medium">Expiry Date</label>
-                  <input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="w-full border rounded p-2" min="2025-04-17" />
+                  <input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} className="w-full border rounded p-2" min="2025-04-17" required/>
                 </div>
                 <div className="flex flex-row gap-2 mt-auto">
                   <Button type="submit" className="bg-primary w-1/2" disabled={loading}>{loading ? "Creating..." : "Create"}</Button>
