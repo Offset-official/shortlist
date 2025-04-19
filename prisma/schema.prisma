@@ -7,79 +7,88 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
 model Candidate {
-  id             Int      @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   name           String
-  email          String   @unique
+  email          String    @unique
   password       String
-  year           Int? // Graduation year or class year
+  year           Int?      
   collegeName    String?
   location       String?
   resume         Json?
-  dreamCompanies String[] // Array of company names
-  skills         String[] // Array of skills
-  createdAt      DateTime @default(now())
+  dreamCompanies String[]  
+  skills         String[]  
+  createdAt      DateTime  @default(now())
   resumeAnalysis Json?
 
-  JobListingApplied     JobListing? @relation("AppliedCandidates", fields: [jobListingId], references: [id])
-  JobListingShortlisted JobListing? @relation("ShortlistedCandidates", fields: [shortlistedJobListingId], references: [id])
+  // many-to-many applications
+  appliedJobs    JobListing[] @relation("AppliedCandidates")
+  shortlistedJobs JobListing[] @relation("ShortlistedCandidates")
 
-  jobListingId            Int?
-  shortlistedJobListingId Int?
+  // interviews back‑relation
+  interviews     Interview[]
 }
 
 model Recruiter {
-  id          Int          @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   companyName String
-  email       String       @unique
+  email       String        @unique
   password    String
   website     String?
   location    String?
   industry    String?
-  values      String[] // Array of company values
-  description String?      @db.Text
-  companySize String? // e.g., "1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"
+  values      String[]      
+  description String?       @db.Text
+  companySize String?      
   linkedInUrl String?
-  createdAt   DateTime     @default(now())
+  createdAt   DateTime      @default(now())
   jobListings JobListing[]
 }
 
 model JobListing {
-  id          Int     @id @default(autoincrement())
-  title       String
-  companyId   Int // Foreign key to Recruiter
-  location    String?
-  remote      Boolean @default(false)
-  salary      String?
-  description String  @db.Text
+  id               Int           @id @default(autoincrement())
+  title            String
+  companyId        Int
+  location         String?
+  remote           Boolean       @default(false)
+  salary           String?
+  description      String        @db.Text
+  employmentType   String
+  experienceLevel  String?
+  jobRole          String?
+  skills           String[]
+  education        String?
+  postedDate       DateTime      @default(now())
+  expiryDate       DateTime?
+  status           String        @default("active")
+  applicationCount Int           @default(0)
 
-  // Job details
-  employmentType  String // Full-time, Part-time, Contract, Internship
-  experienceLevel String? // Entry, Mid, Senior
-  jobRole         String?
+  // many-to-many candidates
+  candidates       Candidate[]   @relation("AppliedCandidates")
+  shortlisted      Candidate[]   @relation("ShortlistedCandidates")
 
-  // Skills and qualifications required
-  skills    String[]
-  education String?
+  // interviews back‑relation
+  interviews       Interview[]
 
-  // Dates
-  postedDate DateTime  @default(now())
-  expiryDate DateTime?
-
-  status String @default("active") // active, filled, expired, draft
-
-  applicationCount Int @default(0)
-
-  candidates  Candidate[] @relation("AppliedCandidates")
-  shortlisted Candidate[] @relation("ShortlistedCandidates")
-
-  Recruiter Recruiter? @relation(fields: [companyId], references: [id])
+  Recruiter        Recruiter?    @relation(fields: [companyId], references: [id])
 
   @@index([title])
   @@index([skills])
   @@index([companyId])
 }
 
+model Interview {
+  id            Int         @id @default(autoincrement())
+  candidate     Candidate   @relation(fields: [candidateId], references: [id])
+  candidateId   Int
+  jobListing    JobListing  @relation(fields: [jobListingId], references: [id])
+  jobListingId  Int
+  // add any interview-specific fields below, e.g.:
+  // scheduledAt DateTime?
+  // status      String?
+  createdAt     DateTime    @default(now())
+}
 
 model CodingProblem {
   id          Int    @id @default(autoincrement())
