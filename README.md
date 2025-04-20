@@ -22,7 +22,7 @@ pnpm dev
 
 `/chat` - chat
 
-`/omboarding` - signup
+`/onboarding` - signup
 
 `/login` - login
 
