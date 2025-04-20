@@ -30,7 +30,7 @@ const PAGE_SIZE = 10;
 export default function JobListingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { jobId } = useParams();  // Correct method to fetch the jobId
+  const { jobId } = useParams<{ jobId: string }>();  // Correct method to fetch the jobId
 
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,6 +132,7 @@ export default function JobListingPage() {
         <CandidateDetailsPopup
           candidate={selectedCandidate}
           onClose={() => setSelectedCandidate(null)}
+          jobListingId={ Number(jobId) }  // Ensure jobId is a string
         />
       )}
     </div>
