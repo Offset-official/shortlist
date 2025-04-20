@@ -22,6 +22,7 @@
     "@met4citizen/talkinghead": "^1.4.0",
     "@prisma/client": "6.5.0",
     "@radix-ui/react-avatar": "^1.1.4",
+    "@radix-ui/react-checkbox": "^1.2.2",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-dropdown-menu": "^2.1.6",
     "@radix-ui/react-label": "^2.1.2",
