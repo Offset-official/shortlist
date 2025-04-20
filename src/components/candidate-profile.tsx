@@ -258,7 +258,7 @@ const CandidateProfile = () => {
 
             {/* Overwrite Resume Section */}
             <div className="px-6 pb-8">
-              <ResumeUploader userId={candidate.id.toString()} onSuccess={() => window.location.reload()} />
+              <ResumeUploader userId={candidate.id.toString()} />
             </div>
 
             <div className="px-6 py-4 bg-card border-t border-border rounded-b-2xl">
