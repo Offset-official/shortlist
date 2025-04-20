@@ -78,16 +78,25 @@ model JobListing {
   @@index([companyId])
 }
 
+enum InterviewType {
+  TECHNICAL
+  HR
+}
+
 model Interview {
-  id            Int         @id @default(autoincrement())
-  candidate     Candidate   @relation(fields: [candidateId], references: [id])
-  candidateId   Int
-  jobListing    JobListing  @relation(fields: [jobListingId], references: [id])
-  jobListingId  Int
-  // add any interview-specific fields below, e.g.:
-  // scheduledAt DateTime?
-  // status      String?
-  createdAt     DateTime    @default(now())
+  id                  Int            @id @default(autoincrement())
+  candidate           Candidate      @relation(fields: [candidateId], references: [id])
+  candidateId         Int
+  jobListing          JobListing     @relation(fields: [jobListingId], references: [id])
+  jobListingId        Int
+
+  type                InterviewType
+  topics              String[]       // only used when type = TECHNICAL
+  scheduledDateTime   DateTime
+  attemptedDateTime   DateTime?      // null until they actually take it
+  stats               Json?          // store any performance data here
+
+  createdAt           DateTime       @default(now())
 }
 
 model CodingProblem {
