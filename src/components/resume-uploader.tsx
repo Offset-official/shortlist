@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FileUploader } from "@/components/file-uploader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// Define the type for parsed resume data
 type ResumeData = {
   personalInfo?: {
     name?: string;
@@ -46,7 +47,7 @@ type ResumeData = {
   }>;
 };
 
-export function ResumeUploader(userId: any) {
+export function ResumeUploader({ userId }: { userId: string }) {
   const [extractedText, setExtractedText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -54,33 +55,32 @@ export function ResumeUploader(userId: any) {
   const [error, setError] = useState<string | null>(null);
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
 
+  // Handle uploading the file and extracting text
   const handleFileUpload = async (file: File) => {
     try {
       setIsLoading(true);
       setError(null);
       setFileName(file.name);
-      setResumeData(null); // Reset any previous analysis
-      
-      // Create FormData and append the file
+      setResumeData(null);
+
       const formData = new FormData();
       formData.append("file", file);
-      
-      // Send the file to the API 
+
       const response = await fetch("/api/parsedoc", {
         method: "POST",
         body: formData,
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to process file");
       }
-      
+
       const data = await response.json();
       setExtractedText(data.text);
     } catch (err: any) {
       console.error("Error extracting text:", err);
-      setError(err.message || "Failed to extract text from the file. Please try a different file format.");
+      setError(err.message || "Failed to extract text from the file.");
     } finally {
       setIsLoading(false);
     }
@@ -96,67 +96,65 @@ export function ResumeUploader(userId: any) {
     }
   };
 
+  // Trigger parsing and saving of resume, then analysis
   const handleExtractAnalyseJson = async () => {
     try {
       setIsAnalyzing(true);
       setError(null);
-      // console.log(userId);
 
       const response = await fetch("/api/extract_save_resume", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: extractedText, candidateId: userId.userId }), // hard coded for now. Waiting for Auth. 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: extractedText, candidateId: userId }),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to parse resume");
       }
-      
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      setResumeData(data);
-      handleResumeAnalysis(); // Call the analysis function after successful parsing
+
+      const parsed: ResumeData = await response.json();
+      setResumeData(parsed);
+
+      // Immediately analyze using the parsed object, not state
+      await handleResumeAnalysis(parsed);
     } catch (err: any) {
       console.error("Error parsing resume:", err);
-      setError(err.message || "Failed to parse the resume. Please try again.");
+      setError(err.message || "Failed to parse the resume.");
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const handleResumeAnalysis = async () => {
-   
-const response = await fetch(
-  "/api/resume_analysis",
-  {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      candidateId: userId.userId,
-      resume: resumeData,
-    }),
-  }
-);
-  }
-
+  // Accepts the parsed resume object directly
+  const handleResumeAnalysis = async (parsedResume: ResumeData) => {
+    try {
+      const res = await fetch("/api/resume_analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ candidateId: userId, resume: parsedResume }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Resume analysis failed");
+      }
+      // Optionally handle result of analysis
+      const analysisResult = await res.json();
+      console.log("Analysis result:", analysisResult);
+    } catch (err: any) {
+      console.error("Error analyzing resume:", err);
+      setError(err.message || "Resume analysis error.");
+    }
+  };
 
   return (
     <div className="space-y-6">
       <Card className="p-6">
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Upload Resume</h2>
-          <p className="text-sm text-muted-foreground">
-            Supported formats: PDF
-          </p>
-          
-          <FileUploader 
+          <p className="text-sm text-muted-foreground">Supported formats: PDF</p>
+
+          <FileUploader
             onFileUpload={handleFileUpload}
             isLoading={isLoading}
             acceptedFileTypes={{
@@ -167,7 +165,7 @@ const response = await fetch(
               'text/plain': ['.txt'],
             }}
           />
-          
+
           {error && (
             <div className="text-sm p-3 bg-destructive/10 text-destructive rounded-md">
               {error}
@@ -185,9 +183,9 @@ const response = await fetch(
                 <Button variant="outline" size="sm" onClick={handleCopyText}>
                   Copy Text
                 </Button>
-                <Button 
-                  variant="default" 
-                  size="sm" 
+                <Button
+                  variant="default"
+                  size="sm"
                   onClick={handleExtractAnalyseJson}
                   disabled={isAnalyzing}
                 >
@@ -195,16 +193,14 @@ const response = await fetch(
                 </Button>
               </div>
             </div>
-            
+
             <Tabs defaultValue="preview">
               <TabsList>
                 <TabsTrigger value="preview">Preview</TabsTrigger>
                 <TabsTrigger value="raw">Raw Text</TabsTrigger>
-                {resumeData && (
-                  <TabsTrigger value="json">JSON Data</TabsTrigger>
-                )}
+                {resumeData && <TabsTrigger value="json">JSON Data</TabsTrigger>}
               </TabsList>
-              
+
               <TabsContent value="preview" className="mt-4">
                 <div className="bg-muted/50 p-4 rounded-md max-h-[500px] overflow-y-auto">
                   {extractedText.split('\n').map((line, i) => (
@@ -214,7 +210,7 @@ const response = await fetch(
                   ))}
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="raw" className="mt-4">
                 <textarea
                   className="w-full h-[500px] p-4 font-mono text-sm bg-muted/50 rounded-md resize-none"
@@ -222,7 +218,7 @@ const response = await fetch(
                   readOnly
                 />
               </TabsContent>
-              
+
               {resumeData && (
                 <TabsContent value="json" className="mt-4">
                   <div className="flex justify-end mb-2">
@@ -238,7 +234,7 @@ const response = await fetch(
                 </TabsContent>
               )}
             </Tabs>
-            
+
             <div className="text-xs text-muted-foreground">
               Extracted from: {fileName}
             </div>
