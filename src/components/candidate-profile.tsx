@@ -10,6 +10,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ResumeUploader } from '@/components/resume-uploader';
+import { toast } from "react-hot-toast";
 
 type Candidate = {
   id: number;
@@ -62,10 +63,14 @@ const CandidateProfile = () => {
     const fetchJobs = async () => {
       try {
         const response = await fetch('/api/getJobs');
+        if (!response.ok) {
+          toast.error('Failed to fetch jobs');
+          return;
+        }
         const data = await response.json();
         setJobs(data.jobs || []);
-      } catch (e) {
-        // ignore for now
+      } catch (error) {
+        toast.error('An error occurred while fetching jobs');
       }
     };
     fetchJobs();

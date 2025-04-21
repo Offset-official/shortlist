@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma"; // Your Prisma client instance
 import { authOptions } from "@/lib/authOptions";
 import { CodingProblem } from "@/interfaces/model_interfaces"; // Your CodingProblem interface
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { toast } from "react-hot-toast";
 
 export default async function DsaPage({
   searchParams,
@@ -35,6 +36,15 @@ export default async function DsaPage({
     take: pageSize,
     orderBy: { id: "asc" },
   });
+
+  const handleDSAAction = async () => {
+    try {
+      // Example: Add toast to DSA action
+      toast.success("DSA action successful!");
+    } catch (err) {
+      toast.error("DSA action failed.");
+    }
+  };
 
   return (
     <div className="container mx-auto p-4">

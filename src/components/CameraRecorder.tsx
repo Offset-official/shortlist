@@ -6,6 +6,7 @@ import { getFacingDirection } from "../utils/faceUtils";
 import { getPoseStatus } from "../utils/poseUtils";
 import { Landmark } from "../utils/types";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "react-hot-toast";
 
 export default function CameraRecorder() {
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -130,20 +131,33 @@ export default function CameraRecorder() {
   // 5) POST diagnostics (labels only) at 2 Hz, reading from refs
   useEffect(() => {
     const iv = setInterval(() => {
-      fetch("/api/diagnostics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          poseData: poseStatusRef.current,
-          faceData: faceStatusRef.current,
-          cameraImage: null,
-          screenpipeData: null,
-        }),
-      }).catch(console.error);
+      sendDiagnostics({
+        poseData: poseStatusRef.current,
+        faceData: faceStatusRef.current,
+        cameraImage: null,
+        screenpipeData: null,
+      });
     }, 500);
 
     return () => clearInterval(iv);
   }, []);
+
+  const sendDiagnostics = async (data: any) => {
+    try {
+      const response = await fetch("/api/diagnostics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        toast.error("Failed to send diagnostics");
+        return;
+      }
+      toast.success("Diagnostics sent successfully");
+    } catch (error) {
+      toast.error("An error occurred while sending diagnostics");
+    }
+  };
 
   return (
     <div className="w-full flex justify-center">

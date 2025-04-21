@@ -2,6 +2,7 @@
 import { Suspense } from "react";
 import CandidateOnboarding from "@/components/CandidateOnboarding";
 import RecruiterOnboarding from "@/components/RecruiterOnboarding";
+import { toast } from "react-hot-toast";
 
 // Create a client component that uses useSearchParams
 import { useSearchParams } from "next/navigation";
@@ -9,6 +10,16 @@ import { useSearchParams } from "next/navigation";
 const OnboardingClient = () => {
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
+
+  const handleOnboarding = async (formData: any) => {
+    try {
+      // ...existing code...
+      toast.success("Onboarding complete!");
+      // ...existing code...
+    } catch (err) {
+      toast.error("An error occurred during onboarding.");
+    }
+  };
   
   return (
     <>

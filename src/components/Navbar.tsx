@@ -23,6 +23,8 @@ import {
 } from "lucide-react"
 import {Button} from "@/components/ui/button"
 import { useSession } from "next-auth/react";
+import { toast } from "react-hot-toast";
+
 const Navbar = () => {
     const { data: session } = useSession()
     return (
@@ -93,7 +95,11 @@ const Navbar = () => {
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => import('next-auth/react').then(mod => mod.signOut())} className="text-destructive focus:text-destructive">
+                            <DropdownMenuItem onClick={async () => {
+                                const mod = await import('next-auth/react');
+                                await mod.signOut({ redirect: false });
+                                toast.success("Signed out successfully!");
+                            }} className="text-destructive focus:text-destructive">
                                 <LogOut className="mr-2 h-4 w-4" />
                                 <span>Log out</span>
                             </DropdownMenuItem>

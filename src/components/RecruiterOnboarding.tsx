@@ -23,6 +23,7 @@ import { AllCountriesDropdown } from "@/components/AllCountriesDropdown";
 import { DreamCompaniesComboBox } from "@/components/DreamCompaniesComboBox";
 import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { toast } from "react-hot-toast";
 
 // Import your SkillsPicker component and its Skill type.
 import SkillsPicker, { type Skill } from "@/components/SkillsPicker";
@@ -88,7 +89,7 @@ const RecruiterOnboarding = () => {
       });
       if (!res.ok) {
         const { error } = await res.json();
-        alert(error || "Something went wrong with registration");
+        toast.error(error || "Something went wrong with registration");
         return;
       }
       setIsRedirecting(true);
@@ -102,13 +103,14 @@ const RecruiterOnboarding = () => {
         type: "recruiter",
       });
       if (signInResult?.error) {
-        alert(signInResult.error);
+        toast.error(signInResult.error);
         return;
       }
+      toast.success("Registration successful! Redirecting...");
       router.push("/");
     } catch (err) {
       console.error("Onboarding sign up error:", err);
-      alert("Something went wrong during onboarding.");
+      toast.error("Something went wrong during onboarding.");
     }
   };
 
@@ -135,6 +137,7 @@ const RecruiterOnboarding = () => {
         }
       } catch (error) {
         console.error("Error checking email uniqueness:", error);
+        toast.error("Error checking email uniqueness");
         return false;
       }
       return true;

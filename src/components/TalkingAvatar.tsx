@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from "react-hot-toast";
 
 type TalkingHeadProps = {
   text: string;
@@ -124,9 +125,21 @@ export default function TalkingHeadComponent({ text, gender, onLoad }: TalkingHe
     (instance: any) => {
       const url = `/models/${gender}.glb`;
 
-      fetch(url, { method: 'HEAD' })
-        .then((res) => {
-          if (!res.ok) throw new Error(`Model not found (${res.status})`);
+      const fetchAvatar = async (url: string) => {
+        try {
+          const response = await fetch(url, { method: 'HEAD' });
+          if (!response.ok) {
+            toast.error('Failed to fetch avatar resource');
+            return;
+          }
+          toast.success('Avatar resource loaded');
+        } catch (error) {
+          toast.error('An error occurred while fetching avatar resource');
+        }
+      };
+
+      fetchAvatar(url)
+        .then(() => {
           return instance.showAvatar(
             {
               url,

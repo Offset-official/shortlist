@@ -7,6 +7,7 @@ import CodeEditor from "@/components/CodeEditor";
 import CameraRecorder from "@/components/CameraRecorder";
 import TalkingHeadComponent from "@/components/TalkingAvatar";
 import ScreenpipePanel from "@/components/ScreenpipePanel";
+import { toast } from "react-hot-toast";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
@@ -43,8 +44,10 @@ export default function ChatPage() {
       });
       const { reply } = await res.json();
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      toast.success("Message sent!");
     } catch (err) {
       console.error("Error sending hidden message:", err);
+      toast.error("Failed to send message.");
     } finally {
       setLoading(false);
     }
@@ -72,8 +75,10 @@ export default function ChatPage() {
       });
       const { reply } = await res.json();
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      toast.success("Message sent!");
     } catch (err) {
       console.error("Error:", err);
+      toast.error("Failed to send message.");
     } finally {
       setLoading(false);
     }
