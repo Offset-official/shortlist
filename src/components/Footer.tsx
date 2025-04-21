@@ -5,7 +5,7 @@ import { Github, Twitter, Instagram, Mail, Phone } from "lucide-react";
 
 const Footer = () =>{
   return (
-    <footer className="border-t py-6 md:py-10">
+    <footer className="bg-card border-t py-6 md:py-10">
       <div className=" px-6 md:px-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Column 1: Logo and Description */}
