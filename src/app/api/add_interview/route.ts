@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
           subject: 'You’ve been shortlisted for an interview! 🎉',
           html,
         })
-        .catch((err) => console.error('📧 Gmail send failed:', err));
+        .catch((err: any) => console.error('📧 Gmail send failed:', err));
     } else {
       console.warn('Candidate has no email; notification not sent.');
     }
