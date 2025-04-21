@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FileUploader } from "@/components/file-uploader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "react-hot-toast";
 
 // Define the type for parsed resume data
 type ResumeData = {
@@ -73,14 +74,17 @@ export function ResumeUploader({ userId }: { userId: string }) {
 
       if (!response.ok) {
         const errorData = await response.json();
+        toast.error("Failed to extract text from resume");
         throw new Error(errorData.error || "Failed to process file");
       }
 
       const data = await response.json();
       setExtractedText(data.text);
+      toast.success("Resume text extracted successfully");
     } catch (err: any) {
       console.error("Error extracting text:", err);
       setError(err.message || "Failed to extract text from the file.");
+      toast.error("An error occurred while extracting resume text");
     } finally {
       setIsLoading(false);
     }
@@ -110,17 +114,20 @@ export function ResumeUploader({ userId }: { userId: string }) {
 
       if (!response.ok) {
         const errorData = await response.json();
+        toast.error("Failed to parse and save resume");
         throw new Error(errorData.error || "Failed to parse resume");
       }
 
       const parsed: ResumeData = await response.json();
       setResumeData(parsed);
+      toast.success("Resume parsed and saved successfully");
 
       // Immediately analyze using the parsed object, not state
       await handleResumeAnalysis(parsed);
     } catch (err: any) {
       console.error("Error parsing resume:", err);
       setError(err.message || "Failed to parse the resume.");
+      toast.error("An error occurred while parsing resume");
     } finally {
       setIsAnalyzing(false);
     }
@@ -136,14 +143,17 @@ export function ResumeUploader({ userId }: { userId: string }) {
       });
       if (!res.ok) {
         const errorData = await res.json();
+        toast.error("Failed to analyze resume");
         throw new Error(errorData.error || "Resume analysis failed");
       }
       // Optionally handle result of analysis
       const analysisResult = await res.json();
       console.log("Analysis result:", analysisResult);
+      toast.success("Resume analyzed successfully");
     } catch (err: any) {
       console.error("Error analyzing resume:", err);
       setError(err.message || "Resume analysis error.");
+      toast.error("An error occurred while analyzing resume");
     }
   };
 

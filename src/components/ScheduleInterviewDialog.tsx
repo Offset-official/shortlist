@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { toast } from "react-hot-toast";
 
 const TOPIC_OPTIONS = [
   'DSA - Easy',
@@ -81,6 +82,7 @@ export function ScheduleInterviewDialog({
     setLoading(false);
 
     if (res.ok) {
+      toast.success('Interview scheduled successfully!');
       onScheduled();
       onOpenChange(false);
       setScheduledDateTime('');
@@ -96,6 +98,7 @@ export function ScheduleInterviewDialog({
         msg = await res.text();
       }
       setErrorMsg(msg || 'Server error.');
+      toast.error(msg || 'Server error.');
     }
   };
 

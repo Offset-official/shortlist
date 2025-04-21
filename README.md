@@ -42,3 +42,18 @@ pnpm dev
 - Responsive 
 - Navigation and footer separation from main content
 - Fix the insecure access to pages like jobs
+
+
+## Test login details
+
+Candidate -
+```
+mail- test@gmail.com
+password - password
+```
+
+Recruiter -
+```
+mail- test1@gmail.com
+password - password
+```

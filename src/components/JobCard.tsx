@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
+import { toast } from "react-hot-toast";
 
 type JobCardProps = {
   job: {
@@ -53,11 +54,16 @@ export default function JobCard({ job, appliedByMe }: JobCardProps & { appliedBy
       if (!res.ok) {
         const { error } = await res.json();
         setError(error || 'Failed to apply');
+        toast.error(error || 'Failed to apply');
+        setApplying(false);
+        return;
       } else {
         setApplied(true);
+        toast.success('Applied successfully!');
       }
     } catch (err) {
       setError('Failed to apply');
+      toast.error('Failed to apply');
     }
     setApplying(false);
   };

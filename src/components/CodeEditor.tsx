@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Editor from "react-simple-code-editor";
 import { highlight, languages } from "prismjs";
+import { toast } from "react-hot-toast";
 
 import "prismjs/components/prism-clike";
 import "prismjs/components/prism-javascript";
@@ -24,10 +25,9 @@ export default function CodeEditor() {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      toast.success('Copied to clipboard!');
     } catch (err) {
-      console.error("Failed to copy!", err);
+      toast.error('Failed to copy!');
     }
   };
 

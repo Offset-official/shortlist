@@ -2,6 +2,7 @@
 import { useState,useEffect } from 'react';
 import JobCard from '@/components/JobCard';
 import { useSession } from 'next-auth/react';
+import { toast } from "react-hot-toast";
 
 const JobListings = ()=>{
 
@@ -19,8 +20,10 @@ const JobListings = ()=>{
         }
         const data = await response.json();
         setJobs(data.jobs);
+        toast.success("Jobs action successful!");
       } catch (error: unknown) {
         setError(error instanceof Error ? error.message : 'An unknown error occurred');
+        toast.error("Jobs action failed.");
       } finally {
         setIsLoading(false);
       }
