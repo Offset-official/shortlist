@@ -47,16 +47,15 @@ export default function LandingPage() {
   return (
   <div className="flex flex-col min-h-screen">
       {/* Navbar */}
-      <header className="border-b sticky top-0 z-50 bg-background">
-        <div className=" flex h-16 items-center justify-between">
+      <header className="border-b sticky top-0 z-50 bg-card">
+        <div className=" flex h-16 items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/assets/interview1.png"
+              src="/assets/logo.svg"
               alt="Shortlist Logo"
-              width={40}
+              width={100}
               height={40}
               className="rounded" />
-            <span className="text-xl font-bold">shortlist</span>
           </Link>
           <div className="flex items-center gap-4">
             {!session ? (
@@ -101,7 +100,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center w-full">
+      <main className="flex-1 flex flex-col items-center justify-center w-full bg-card">
         {/* Hero Section */}
         <section className="py-20 md:py-28 w-full flex justify-center">
           <div className=" max-w-7xl mx-auto px-4 md:px-6">
@@ -143,11 +142,11 @@ export default function LandingPage() {
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 bg-foreground/5 w-full flex justify-center">
+        <section className=" py-16 bg-foreground/5 w-full flex justify-center">
           <div className=" max-w-7xl mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold text-center mb-12">Our Impact in Numbers</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <Card className="border-none shadow-sm">
+              <Card className="container border-none shadow-sm">
                 <CardContent className="p-6 flex flex-col items-center text-center">
                   <Users className="h-10 w-10 text-secondary mb-4" />
                   <h3 className="text-3xl font-bold">10k+</h3>
@@ -181,7 +180,7 @@ export default function LandingPage() {
 
         {/* Graphs Section */}
         <section className="py-16 w-full flex justify-center">
-          <div className=" max-w-7xl mx-auto px-4 md:px-6">
+          <div className="container max-w-7xl mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold text-center mb-12">Insights & Trends</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <Card>

@@ -34,13 +34,12 @@ const Navbar = () => {
                 <div className="flex items-center gap-2">
                     <Link href="/dashboard" className="flex items-center gap-2">
                         <Image
-                            src="/assets/interview1.png?height=40&width=40"
+                            src="/assets/logo.svg?height=40&width=40"
                             alt="Shortlist Logo"
-                            width={40}
+                            width={100}
                             height={40}
                             className="rounded"
                         />
-                        <span className="text-xl font-bold">shortlist</span>
                     </Link>
                 </div>
 
