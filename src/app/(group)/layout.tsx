@@ -7,9 +7,11 @@ const GroupLayout=({
   children: React.ReactNode
 }) =>{
   return(
-    <div className="min-h-screen flex flex-col bg-background ">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
+      <div className='flex-1 w-full px-4 py-8 justify-center items-center'>
       {children}
+      </div>
       <Footer />
     </div>
   )

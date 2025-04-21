@@ -30,7 +30,7 @@ const Navbar = () => {
     return (
 
         <header className="border-b sticky top-0 z-50 bg-card px-5">
-            <div className="container flex h-16 items-center justify-between">
+            <div className=" flex h-16 items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Link href="/dashboard" className="flex items-center gap-2">
                         <Image

@@ -126,7 +126,7 @@ export default function ChatPage() {
                 <div className="w-10 h-10 flex items-center justify-center">
                   {msg.role === "assistant" && <span className="text-xl">🤖</span>}
                 </div>
-                <div className="p-3 rounded-lg border shadow-md bg-background outline outline-1 outline-ring text-white">
+                <div className="p-3 rounded-lg border shadow-md bg-background outline-1 outline-ring text-white">
                   <Markdown>{msg.content}</Markdown>
                 </div>
                 <div className="w-10 h-10 flex items-center justify-center">

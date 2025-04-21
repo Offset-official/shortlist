@@ -70,7 +70,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-all duration-75`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-all duration-75 `}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
