@@ -1,11 +1,10 @@
-// components/CandidateInterviews.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
+import Loading from './ui/loading';
 /** Shape returned by the API */
 export interface Interview {
   id: number;
@@ -60,7 +59,7 @@ export default function CandidateInterviews() {
     <div className="p-4 space-y-6">
       <h1 className="text-2xl font-semibold">Scheduled Interviews</h1>
 
-      {loading && <p>Loading…</p>}
+      {loading && <Loading />}
       {error && <p className="text-destructive">{error}</p>}
 
       {!loading && data && data.interviews.length === 0 && (

@@ -48,7 +48,7 @@ export default function LandingPage() {
   <div className="flex flex-col min-h-screen">
       {/* Navbar */}
       <header className="border-b sticky top-0 z-50 bg-background">
-        <div className="container flex h-16 items-center justify-between">
+        <div className=" flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/assets/interview1.png"
@@ -101,12 +101,12 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 flex flex-col items-center justify-center w-full">
         {/* Hero Section */}
-        <section className="py-20 md:py-28">
-          <div className="container px-4 md:px-6">
+        <section className="py-20 md:py-28 w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-              <div className="space-y-4">
+              <div className="space-y-4 text-center lg:text-left">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter">
                   Connecting the right talent with the right opportunities
                 </h1>
@@ -114,7 +114,7 @@ export default function LandingPage() {
                   Shortlist streamlines recruitment, making it easier for candidates to find their dream jobs and for
                   recruiters to find perfect matches.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
                   <LinkButton
                     text="For Recruiters"
                     href="/onboarding?type=recruiter"
@@ -129,10 +129,9 @@ export default function LandingPage() {
                   >
                     <Building className="mr-2 h-5 w-5" />
                   </LinkButton>
-
                 </div>
               </div>
-              <div className="relative h-[400px] lg:h-[500px]">
+              <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] w-full max-w-md mx-auto">
                 <Image
                   src="/assets/interview1.png"
                   alt="Hero Image"
@@ -144,8 +143,8 @@ export default function LandingPage() {
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 bg-foreground/5">
-          <div className="container px-4 md:px-6">
+        <section className="py-16 bg-foreground/5 w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold text-center mb-12">Our Impact in Numbers</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <Card className="border-none shadow-sm">
@@ -166,174 +165,174 @@ export default function LandingPage() {
                 <CardContent className="p-6 flex flex-col items-center text-center">
                   <CheckCircle className="h-10 w-10 text-tertiary mb-4" />
                   <h3 className="text-3xl font-bold">25k+</h3>
-                <p className="text-muted-foreground">Successful Placements</p>
-              </CardContent>
-            </Card>
-            <Card className="border-none shadow-sm">
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <Clock className="h-10 w-10 text-secondary mb-4" />
-                <h3 className="text-3xl font-bold">75%</h3>
-                <p className="text-muted-foreground">Faster Hiring</p>
-              </CardContent>
-            </Card>
+                  <p className="text-muted-foreground">Successful Placements</p>
+                </CardContent>
+              </Card>
+              <Card className="border-none shadow-sm">
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <Clock className="h-10 w-10 text-secondary mb-4" />
+                  <h3 className="text-3xl font-bold">75%</h3>
+                  <p className="text-muted-foreground">Faster Hiring</p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-          </div>
-      </section>
+        </section>
 
-      {/* Graphs Section */}
-      <section className="py-16">
-        <div className="container px-4 md:px-6">
-          <h2 className="text-3xl font-bold text-center mb-12">Insights & Trends</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Placement Growth</h3>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={barData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Bar dataKey="value" fill="var(--color-secondary)" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+        {/* Graphs Section */}
+        <section className="py-16 w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6">
+            <h2 className="text-3xl font-bold text-center mb-12">Insights & Trends</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-4">Placement Growth</h3>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={barData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Bar dataKey="value" fill="var(--color-secondary)" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-4">Industry Distribution</h3>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={pieData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* For Recruiters Section */}
+        <section className="py-16 bg-secondary/5 w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+              <div className="space-y-4">
+                <div className="inline-block rounded-lg bg-secondary/10 px-3 py-1 text-sm text-secondary mb-2">
+                  For Recruiters
                 </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Industry Distribution</h3>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
+                <h2 className="text-3xl font-bold tracking-tighter">Find the perfect candidates faster</h2>
+                <p className="text-lg text-muted-foreground">
+                  Our AI-powered matching algorithm helps you identify the most qualified candidates for your open
+                  positions, saving you time and resources.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <Search className="h-5 w-5 text-secondary mt-0.5" />
+                    <span>Advanced search filters to find candidates with specific skills</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <TrendingUp className="h-5 w-5 text-secondary mt-0.5" />
+                    <span>Analytics dashboard to track your recruitment performance</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Clock className="h-5 w-5 text-secondary mt-0.5" />
+                    <span>Automated screening to reduce time-to-hire</span>
+                  </li>
+                </ul>
+                <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 mt-2">
+                  Start Recruiting
+                </Button>
+              </div>
+              <div className="relative h-[400px]">
+                <Image
+                  src="/assets/interview1.png"
+                  alt="Recruiter Dashboard"
+                  fill
+                  className="object-cover rounded-lg" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* For Candidates Section */}
+        <section className="py-16 bg-tertiary/5 w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+              <div className="order-2 lg:order-1 relative h-[400px]">
+                <Image
+                  src="/assets/interview1.png?height=400&width=500"
+                  alt="Candidate Profile"
+                  fill
+                  className="object-cover rounded-lg" />
+              </div>
+              <div className="order-1 lg:order-2 space-y-4">
+                <div className="inline-block rounded-lg bg-tertiary/10 px-3 py-1 text-sm text-tertiary mb-2">
+                  For Candidates
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* For Recruiters Section */}
-      <section className="py-16 bg-secondary/5">
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-            <div className="space-y-4">
-              <div className="inline-block rounded-lg bg-secondary/10 px-3 py-1 text-sm text-secondary mb-2">
-                For Recruiters
+                <h2 className="text-3xl font-bold tracking-tighter">Land your dream job with ease</h2>
+                <p className="text-lg text-muted-foreground">
+                  Create a standout profile that showcases your skills and experience, and get matched with
+                  opportunities that align with your career goals.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-tertiary mt-0.5" />
+                    <span>Personalized job recommendations based on your profile</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-tertiary mt-0.5" />
+                    <span>Skills assessment to highlight your strengths</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-tertiary mt-0.5" />
+                    <span>Direct communication with recruiters</span>
+                  </li>
+                </ul>
+                <Button className="bg-tertiary text-foreground hover:bg-tertiary/90 mt-2">
+                  Create Your Profile
+                </Button>
               </div>
-              <h2 className="text-3xl font-bold tracking-tighter">Find the perfect candidates faster</h2>
-              <p className="text-lg text-muted-foreground">
-                Our AI-powered matching algorithm helps you identify the most qualified candidates for your open
-                positions, saving you time and resources.
-              </p>
-              <ul className="space-y-2">
-                <li className="flex items-start gap-2">
-                  <Search className="h-5 w-5 text-secondary mt-0.5" />
-                  <span>Advanced search filters to find candidates with specific skills</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <TrendingUp className="h-5 w-5 text-secondary mt-0.5" />
-                  <span>Analytics dashboard to track your recruitment performance</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Clock className="h-5 w-5 text-secondary mt-0.5" />
-                  <span>Automated screening to reduce time-to-hire</span>
-                </li>
-              </ul>
-              <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 mt-2">
-                Start Recruiting
-              </Button>
-            </div>
-            <div className="relative h-[400px]">
-              <Image
-                src="/assets/interview1.png"
-                alt="Recruiter Dashboard"
-                fill
-                className="object-cover rounded-lg" />
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* For Candidates Section */}
-      <section className="py-16 bg-tertiary/5">
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-            <div className="order-2 lg:order-1 relative h-[400px]">
-              <Image
-                src="/assets/interview1.png?height=400&width=500"
-                alt="Candidate Profile"
-                fill
-                className="object-cover rounded-lg" />
-            </div>
-            <div className="order-1 lg:order-2 space-y-4">
-              <div className="inline-block rounded-lg bg-tertiary/10 px-3 py-1 text-sm text-tertiary mb-2">
-                For Candidates
-              </div>
-              <h2 className="text-3xl font-bold tracking-tighter">Land your dream job with ease</h2>
-              <p className="text-lg text-muted-foreground">
-                Create a standout profile that showcases your skills and experience, and get matched with
-                opportunities that align with your career goals.
-              </p>
-              <ul className="space-y-2">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-tertiary mt-0.5" />
-                  <span>Personalized job recommendations based on your profile</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-tertiary mt-0.5" />
-                  <span>Skills assessment to highlight your strengths</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-tertiary mt-0.5" />
-                  <span>Direct communication with recruiters</span>
-                </li>
-              </ul>
-              <Button className="bg-tertiary text-foreground hover:bg-tertiary/90 mt-2">
-                Create Your Profile
-              </Button>
+        {/* CTA Section */}
+        <section className="py-20 bg-card text-card-foreground w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6 text-center">
+            <h2 className="text-3xl font-bold mb-4">Ready to transform your hiring process?</h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Join thousands of recruiters and candidates who are already using Shortlist to connect and grow.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <LinkButton
+                text="Join as Recruiter"
+                href="/onboarding?type=recruiter"
+                className="bg-secondary text-/assets/interview1.png hover:bg-secondary/90" />
+              <LinkButton
+                text="Join as Candidate"
+                href="/onboarding?type=candidate"
+                className="bg-tertiary text-foreground hover:bg-tertiary/90" />
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-card text-card-foreground">
-        <div className="container px-4 md:px-6 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to transform your hiring process?</h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of recruiters and candidates who are already using Shortlist to connect and grow.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <LinkButton
-              text="Join as Recruiter"
-              href="/onboarding?type=recruiter"
-              className="bg-secondary text-/assets/interview1.png hover:bg-secondary/90" />
-            <LinkButton
-              text="Join as Candidate"
-              href="/onboarding?type=candidate"
-              className="bg-tertiary text-foreground hover:bg-tertiary/90" />
-          </div>
-        </div>
-      </section>
-    </main>
-    <LandingFooter />
+        </section>
+      </main>
+      <LandingFooter />
     </div>
   )
 }

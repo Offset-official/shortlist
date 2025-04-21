@@ -105,7 +105,7 @@ export default function CandidateDashboard() {
   return (
 
 
-      <main className="flex-1 container py-8 px-10">
+      <main className="flex-1 py-4 px-4 lg:py-8 lg:px-10">
         <div className="flex flex-col gap-8">
           {/* Welcome and Profile Section */}
           <div className="grid gap-6 md:grid-cols-3">
