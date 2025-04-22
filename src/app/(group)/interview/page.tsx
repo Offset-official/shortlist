@@ -179,10 +179,10 @@ export default function InterviewPage() {
             <CodeEditor />
           </div>
           <div className={`${activeTab === "camera" ? "flex" : "hidden"} absolute inset-0 items-center justify-center`}>
-          <CameraRecorder active={started && !over} />
+          <CameraRecorder active={started && !over} interviewId={interviewId || ""}/>
           </div>
           <div className={`${activeTab === "screenpipe" ? "flex" : "hidden"} absolute inset-0 items-center justify-center`}>
-            <ScreenpipePanel active = {started && !over}/>
+            <ScreenpipePanel active = {started && !over} interviewId={interviewId || ""}/>
           </div>
         </div>
       </div>
