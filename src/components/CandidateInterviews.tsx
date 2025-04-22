@@ -1,6 +1,7 @@
 // components/CandidateInterviews.tsx
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -48,9 +49,7 @@ export default function CandidateInterviews() {
     }
 
     fetchInterviews();
-    return () => {
-      ignore = true;
-    };
+    return () => { ignore = true; };
   }, [page]);
 
   const nextPage = () => setPage((p) => Math.min(p + 1, data?.totalPages ?? p));
@@ -87,15 +86,16 @@ export default function CandidateInterviews() {
                     timeStyle: 'short',
                   })}
                 </p>
-                {iv.type === 'TECHNICAL' && iv.topics.length > 0 && (
+                {/* {iv.type === 'TECHNICAL' && iv.topics.length > 0 && (
                   <p className="text-sm">
-                    <span className="font-medium">Topics:</span> {iv.topics.join(', ')}
+                    <span className="font-medium">Topics:</span>{' '}
+                    {iv.topics.join(', ')}
                   </p>
-                )}
+                )} */}
               </CardContent>
               <div className="p-4 pt-0">
-                <Button className="w-full" disabled>
-                  Start Interview
+                <Button asChild className="w-full">
+                  <Link href={`/interview?id=${iv.id}&mock=false`}>Start Interview</Link>
                 </Button>
               </div>
             </Card>

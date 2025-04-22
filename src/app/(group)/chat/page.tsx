@@ -196,10 +196,10 @@ export default function ChatPage() {
             <CodeEditor />
           </div>
           <div className={`${activeTab === "camera" ? "flex" : "hidden"} absolute inset-0 items-center justify-center`}>
-            <CameraRecorder />
+            {/* <CameraRecorder /> */}
           </div>
           <div className={`${activeTab === "screenpipe" ? "flex" : "hidden"} absolute inset-0 items-center justify-center`}>
-            <ScreenpipePanel />
+            {/* <ScreenpipePanel /> */}
           </div>
         </div>
       </div>

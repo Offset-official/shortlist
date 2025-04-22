@@ -44,24 +44,31 @@ export function ScheduleInterviewDialog({
   const [scheduledDateTime, setScheduledDateTime] = useState('');
   const [topics, setTopics] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null); // ← NEW
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  /* Toggle checkboxes – max 3 topics */
+  /* Toggle checkboxes – max 3 topics */
   const toggleTopic = (topic: string, checked: boolean) => {
     setTopics((prev) =>
       checked
         ? prev.length < 3
           ? [...prev, topic]
           : prev
-        : prev.filter((t) => t !== topic),
+        : prev.filter((t) => t !== topic)
     );
   };
 
   /* POST /api/add_interview */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!scheduledDateTime) return;
     setErrorMsg(null);
+
+    // Validate technical topics
+    if (type === 'TECHNICAL' && topics.length < 2) {
+      setErrorMsg('Please select at least two topics for a technical interview.');
+      return;
+    }
+
+    if (!scheduledDateTime) return;
     setLoading(true);
 
     const payload = {
@@ -72,30 +79,34 @@ export function ScheduleInterviewDialog({
       scheduledDateTime: new Date(scheduledDateTime).toISOString(),
     };
 
-    const res = await fetch('/api/add_interview', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch('/api/add_interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    setLoading(false);
+      setLoading(false);
 
-    if (res.ok) {
-      onScheduled();
-      onOpenChange(false);
-      setScheduledDateTime('');
-      setTopics([]);
-      setType('TECHNICAL');
-    } else {
-      // Try JSON first, then fallback to text
-      let msg = 'Something went wrong.';
-      try {
-        const { error } = await res.json();
-        msg = error ?? msg;
-      } catch {
-        msg = await res.text();
+      if (res.ok) {
+        onScheduled();
+        onOpenChange(false);
+        setScheduledDateTime('');
+        setTopics([]);
+        setType('TECHNICAL');
+      } else {
+        let msg = 'Something went wrong.';
+        try {
+          const { error } = await res.json();
+          msg = error ?? msg;
+        } catch {
+          msg = await res.text();
+        }
+        setErrorMsg(msg || 'Server error.');
       }
-      setErrorMsg(msg || 'Server error.');
+    } catch (err) {
+      setLoading(false);
+      setErrorMsg('Network error. Please try again.');
     }
   };
 
@@ -116,7 +127,7 @@ export function ScheduleInterviewDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Date & time */}
           <div>
-            <Label htmlFor="scheduled">Date & Time</Label>
+            <Label htmlFor="scheduled">Date & Time</Label>
             <Input
               id="scheduled"
               type="datetime-local"
@@ -146,23 +157,24 @@ export function ScheduleInterviewDialog({
           {/* Topics */}
           {type === 'TECHNICAL' && (
             <div>
-              <Label>Topics (choose up to 3)</Label>
+              <Label>Topics (choose 2–3)</Label>
               <div className="grid grid-cols-2 gap-2 mt-1">
                 {TOPIC_OPTIONS.map((topic) => (
                   <label key={topic} className="flex items-center space-x-2">
                     <Checkbox
                       checked={topics.includes(topic)}
-                      onCheckedChange={(chk) =>
-                        toggleTopic(topic, chk as boolean)
-                      }
-                      disabled={
-                        !topics.includes(topic) && topics.length >= 3
-                      }
+                      onCheckedChange={(chk) => toggleTopic(topic, chk as boolean)}
+                      disabled={!topics.includes(topic) && topics.length >= 3}
                     />
                     <span className="text-sm">{topic}</span>
                   </label>
                 ))}
               </div>
+              {topics.length < 2 && (
+                <p className="text-sm text-red-600 mt-1">
+                  Please select at least two topics.
+                </p>
+              )}
             </div>
           )}
 
@@ -175,7 +187,10 @@ export function ScheduleInterviewDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button
+              type="submit"
+              disabled={loading || (type === 'TECHNICAL' && topics.length < 2)}
+            >
               {loading ? 'Scheduling…' : 'Schedule'}
             </Button>
           </DialogFooter>
