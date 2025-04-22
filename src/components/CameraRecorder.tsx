@@ -6,8 +6,11 @@ import { getFacingDirection } from "../utils/faceUtils";
 import { getPoseStatus } from "../utils/poseUtils";
 import { Landmark } from "../utils/types";
 import { Badge } from "@/components/ui/badge";
-
-export default function CameraRecorder() {
+interface Props {
+  /** when true, begin posting diagnostics to /api/diagnostics */
+  active: boolean;
+}
+export default function CameraRecorder({ active }: Props) {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<"waiting" | "granted" | "denied">("waiting");
   const [faceStatus, setFaceStatus] = useState("No Face Detected");
@@ -127,8 +130,10 @@ export default function CameraRecorder() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // 5) POST diagnostics (labels only) at 2 Hz, reading from refs
+  // 5) POST diagnostics (labels only) at 1 Hz, reading from refs
   useEffect(() => {
+    if (!active) return;
+
     const iv = setInterval(() => {
       fetch("/api/diagnostics", {
         method: "POST",
@@ -140,10 +145,10 @@ export default function CameraRecorder() {
           screenpipeData: null,
         }),
       }).catch(console.error);
-    }, 500);
+    }, 1000);
 
     return () => clearInterval(iv);
-  }, []);
+  }, [active]);
 
   return (
     <div className="w-full flex justify-center">

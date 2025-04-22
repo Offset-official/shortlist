@@ -3,7 +3,12 @@
 
 import ScreenpipeLogger from "@/components/ScreenpipeLogger";
 
-export default function ScreenpipePanel() {
+
+interface Props {
+  active: boolean;
+}
+
+export default function ScreenpipePanel({active} : Props) {
   // you can add any layout or controls around ScreenpipeLogger here later
-  return <ScreenpipeLogger />;
+  return <ScreenpipeLogger active={active} />;
 }
