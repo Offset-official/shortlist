@@ -9,9 +9,10 @@ type Status = "retry" | "init" | "ready" | "error";
 
 interface Props {
   active: boolean;
+  interviewId: string;
 }
 
-export default function ScreenpipeLogger({ active }: Props) {
+export default function ScreenpipeLogger({ active, interviewId }: Props) {
   const [status, setStatus] = useState<Status>("retry");
   const [initCountdown, setInitCountdown] = useState(5);
   const [bad, setBad] = useState(false);
@@ -122,6 +123,7 @@ export default function ScreenpipeLogger({ active }: Props) {
         faceData: null,
         cameraImage: null,
         screenpipeData: results,
+        interviewId: interviewId,
       }),
     }).catch(console.error);
   }
