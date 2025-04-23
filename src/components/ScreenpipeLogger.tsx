@@ -1,4 +1,5 @@
-"use client";
+// components/ScreenpipeLogger.tsx
+'use client';
 
 import { JSX, useEffect, useRef, useState } from "react";
 import { pipe } from "@screenpipe/browser";
@@ -7,7 +8,12 @@ import { toast } from "react-hot-toast";
 
 type Status = "retry" | "init" | "ready" | "error";
 
-export default function ScreenpipeLogger() {
+interface Props {
+  active: boolean;
+  interviewId: string;
+}
+
+export default function ScreenpipeLogger({ active, interviewId }: Props) {
   const [status, setStatus] = useState<Status>("retry");
   const [initCountdown, setInitCountdown] = useState(5);
   const [bad, setBad] = useState(false);
@@ -19,9 +25,19 @@ export default function ScreenpipeLogger() {
   const initCountdownInterval = useRef<NodeJS.Timeout | null>(null);
   const readyInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // 1) RETRY phase: try for 5 s at 1 Hz
+  // Clear all timers when deactivated
   useEffect(() => {
-    if (status !== "retry") return;
+    if (!active) {
+      clearInterval(retryInterval.current!);
+      clearTimeout(retryTimer.current!);
+      clearInterval(initCountdownInterval.current!);
+      clearInterval(readyInterval.current!);
+    }
+  }, [active]);
+
+  // 1) RETRY phase: try for 5s at 1Hz
+  useEffect(() => {
+    if (!active || status !== "retry") return;
     const fetchOnce = async () => {
       try {
         const res = await pipe.queryScreenpipe({
@@ -29,8 +45,6 @@ export default function ScreenpipeLogger() {
           limit: 10,
           contentType: "ocr",
         });
-        console.log("📥", res);
-        // immediately go to INIT
         setStatus("init");
         postDiagnostics(res);
       } catch {
@@ -45,11 +59,11 @@ export default function ScreenpipeLogger() {
       clearInterval(retryInterval.current!);
       clearTimeout(retryTimer.current!);
     };
-  }, [status]);
+  }, [active, status]);
 
   // 2) INIT phase: countdown 5→0 then READY
   useEffect(() => {
-    if (status !== "init") return;
+    if (!active || status !== "init") return;
     setInitCountdown(5);
     initCountdownInterval.current = setInterval(() => {
       setInitCountdown((c) => {
@@ -62,14 +76,12 @@ export default function ScreenpipeLogger() {
       });
     }, 1_000);
 
-    return () => {
-      clearInterval(initCountdownInterval.current!);
-    };
-  }, [status]);
+    return () => clearInterval(initCountdownInterval.current!);
+  }, [active, status]);
 
-  // 3) READY phase: poll every 10 s
+  // 3) READY phase: poll every 10s
   useEffect(() => {
-    if (status !== "ready") return;
+    if (!active || status !== "ready") return;
     const doFetch = async () => {
       try {
         const res = await pipe.queryScreenpipe({
@@ -87,7 +99,7 @@ export default function ScreenpipeLogger() {
     readyInterval.current = setInterval(doFetch, 10_000);
 
     return () => clearInterval(readyInterval.current!);
-  }, [status]);
+  }, [active, status]);
 
   function analyze(results: any) {
     let isBad = false, g = false, c = false;
@@ -121,12 +133,17 @@ export default function ScreenpipeLogger() {
   };
 
   function postDiagnostics(results: any) {
-    sendDiagnostics({
-      poseData: null,
-      faceData: null,
-      cameraImage: null,
-      screenpipeData: results,
-    });
+    fetch("/api/diagnostics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        poseData: null,
+        faceData: null,
+        cameraImage: null,
+        screenpipeData: results,
+        interviewId: interviewId,
+      }),
+    }).catch(console.error);
   }
 
   // Render UI
@@ -169,5 +186,9 @@ export default function ScreenpipeLogger() {
       );
   }
 
-  return <div className="flex flex-col items-center justify-center h-full w-full space-y-2">{badge}</div>;
+  return (
+    <div className="flex flex-col items-center justify-center h-full w-full space-y-2">
+      {badge}
+    </div>
+  );
 }
