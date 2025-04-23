@@ -11,9 +11,12 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 export interface Interview {
   id: number;
   jobTitle: string;
+  companyName: string;
   type: 'TECHNICAL' | 'HR';
   topics: string[];
   scheduledDateTime: string; // ISO 8601
+  expiryDateTime: string; // ISO 8601
+  expired?: boolean;
 }
 
 interface ApiResponse {
@@ -74,27 +77,27 @@ export default function CandidateInterviews() {
                 <CardTitle className="text-base font-medium">
                   {iv.jobTitle}
                 </CardTitle>
+                <div className="text-xs text-muted-foreground">
+                  {iv.companyName}
+                </div>
               </CardHeader>
               <CardContent className="space-y-2 flex-1">
                 <p className="text-sm">
                   <span className="font-medium">Type:</span> {iv.type}
                 </p>
                 <p className="text-sm">
-                  <span className="font-medium">Date:</span>{' '}
-                  {new Date(iv.scheduledDateTime).toLocaleString('en-IN', {
+                  <span className="font-medium">Expiry:</span>{' '}
+                  {new Date(iv.expiryDateTime).toLocaleString('en-IN', {
                     dateStyle: 'medium',
                     timeStyle: 'short',
                   })}
                 </p>
-                {/* {iv.type === 'TECHNICAL' && iv.topics.length > 0 && (
-                  <p className="text-sm">
-                    <span className="font-medium">Topics:</span>{' '}
-                    {iv.topics.join(', ')}
-                  </p>
-                )} */}
+                {iv.expired && (
+                  <p className="text-sm text-red-600 font-semibold">Expired</p>
+                )}
               </CardContent>
               <div className="p-4 pt-0">
-                <Button asChild className="w-full">
+                <Button asChild className="w-full" disabled={iv.expired}>
                   <Link href={`/interview?id=${iv.id}&mock=false`}>Start Interview</Link>
                 </Button>
               </div>

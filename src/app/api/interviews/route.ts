@@ -33,23 +33,34 @@ export async function GET(req: NextRequest) {
     // 4️⃣ Fetch paginated interviews
     const interviews = await prisma.interview.findMany({
       where: { candidateId },
-      orderBy: { scheduledDateTime: 'desc' },
+      orderBy: { expiryDateTime: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
-        jobListing: { select: { title: true } },
+        jobListing: { select: { title: true, Recruiter: { select: { companyName: true } } } },
       },
     });
 
     // 5️⃣ Map to response shape
     const response = {
-      interviews: interviews.map(iv => ({
-        id: iv.id,
-        jobTitle: iv.jobListing.title,
-        type: iv.type,
-        topics: iv.topics,
-        scheduledDateTime: iv.scheduledDateTime.toISOString(),
-      })),
+      interviews: interviews.map(iv => {
+        // Expiry logic
+        let expired = false;
+        if (iv.expiryDateTime) {
+          const expiry = new Date(iv.expiryDateTime);
+          const now = new Date();
+          expired = expiry < now;
+        }
+        return {
+          id: iv.id,
+          jobTitle: iv.jobListing.title,
+          companyName: iv.jobListing.Recruiter?.companyName ?? '',
+          type: iv.type,
+          topics: iv.topics,
+          expiryDateTime: iv.expiryDateTime.toISOString(),
+          expired,
+        };
+      }),
       page,
       totalPages,
     };
