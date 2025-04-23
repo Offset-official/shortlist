@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';  // Use useParams from n
 import Loading from '@/components/ui/loading';
 import CandidateDetailsPopup from '@/components/CandidateDetailsPopup';
 import { Button } from '@/components/ui/button';
+import { toast } from "react-hot-toast";
 
 /**
  * Candidate interface matching API response
@@ -65,6 +66,7 @@ export default function JobListingPage() {
       .then(data => {
         if (data.candidates) {
           setCandidates(data.candidates);
+          toast.success("Job listing action successful!");
         } else {
           setError('No candidates found for this job.');
         }
@@ -72,6 +74,7 @@ export default function JobListingPage() {
       .catch(error => {
         console.error('Error fetching job candidates:', error);
         setError('An error occurred while fetching candidates.');
+        toast.error("Job listing action failed.");
       })
       .finally(() => {
         setLoading(false);

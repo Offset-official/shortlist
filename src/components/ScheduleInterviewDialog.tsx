@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { toast } from "react-hot-toast";
 
 const DSA_TOPICS = [
   { topic: 'Arrays', difficulties: ['Easy', 'Medium', 'Hard'] },

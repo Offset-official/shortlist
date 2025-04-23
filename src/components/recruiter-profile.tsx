@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { toast } from "react-hot-toast";
 
 type Recruiter = {
   id: number;
@@ -39,8 +40,13 @@ const RecruiterProfile = () => {
               user_id: session.user.id
             }
           });
+          if (response.status !== 200) {
+            toast.error('Failed to fetch recruiter data');
+            return;
+          }
           setRecruiter(response.data);
         } catch (error) {
+          toast.error('An error occurred while fetching recruiter data');
           console.error('Failed to fetch Recruiter', error);
         } finally {
           setLoading(false);
