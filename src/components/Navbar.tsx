@@ -23,22 +23,23 @@ import {
 } from "lucide-react"
 import {Button} from "@/components/ui/button"
 import { useSession } from "next-auth/react";
+import { toast } from "react-hot-toast";
+
 const Navbar = () => {
     const { data: session } = useSession()
     return (
 
         <header className="border-b sticky top-0 z-50 bg-card px-5">
-            <div className="container flex h-16 items-center justify-between">
+            <div className=" flex h-16 items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Link href="/dashboard" className="flex items-center gap-2">
                         <Image
-                            src="/assets/interview1.png?height=40&width=40"
+                            src="/assets/logo.svg?height=40&width=40"
                             alt="Shortlist Logo"
-                            width={40}
+                            width={100}
                             height={40}
                             className="rounded"
                         />
-                        <span className="text-xl font-bold">shortlist</span>
                     </Link>
                 </div>
 
@@ -93,7 +94,11 @@ const Navbar = () => {
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => import('next-auth/react').then(mod => mod.signOut())} className="text-destructive focus:text-destructive">
+                            <DropdownMenuItem onClick={async () => {
+                                const mod = await import('next-auth/react');
+                                await mod.signOut({ redirect: false });
+                                toast.success("Signed out successfully!");
+                            }} className="text-destructive focus:text-destructive">
                                 <LogOut className="mr-2 h-4 w-4" />
                                 <span>Log out</span>
                             </DropdownMenuItem>

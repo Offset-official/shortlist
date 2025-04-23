@@ -4,6 +4,7 @@
 import { JSX, useEffect, useRef, useState } from "react";
 import { pipe } from "@screenpipe/browser";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "react-hot-toast";
 
 type Status = "retry" | "init" | "ready" | "error";
 
@@ -113,6 +114,23 @@ export default function ScreenpipeLogger({ active, interviewId }: Props) {
     setGoogleDetected(g);
     setChatgptDetected(c);
   }
+
+  const sendDiagnostics = async (data: any) => {
+    try {
+      const response = await fetch("/api/diagnostics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        toast.error("Failed to send diagnostics");
+        return;
+      }
+      toast.success("Diagnostics sent successfully");
+    } catch (error) {
+      toast.error("An error occurred while sending diagnostics");
+    }
+  };
 
   function postDiagnostics(results: any) {
     fetch("/api/diagnostics", {

@@ -7,6 +7,7 @@ import JobListingRecruiter from '@/components/JobListingRecruiter';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import Loading from '@/components/ui/loading';
+import { toast } from "react-hot-toast";
 
 /**
  * Type definitions for Job and Candidate
@@ -98,31 +99,43 @@ export default function RecruiterDashboard(): ReactNode {
   const handleAddJob = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    await fetch('/api/add_job', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: jobTitle,
-        location,
-        remote,
-        salary,
-        description: jobDesc,
-        employmentType,
-        experienceLevel,
-        jobRole,
-        skills,
-        education,
-        expiryDate: expiryDate ? new Date(expiryDate).toISOString() : undefined,
-      }),
-    });
-    const res = await fetch('/api/getRecruiterJobs');
-    const data = await res.json();
-    setJobs(data.jobs || []);
-    setSubmitting(false);
-    setOpen(false);
-    setJobTitle(''); setJobDesc(''); setLocation(''); setRemote(false);
-    setSalary(''); setEmploymentType(''); setExperienceLevel(''); setJobRole('');
-    setSkills([]); setEducation(''); setExpiryDate('');
+    try {
+      const res = await fetch('/api/add_job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: jobTitle,
+          location,
+          remote,
+          salary,
+          description: jobDesc,
+          employmentType,
+          experienceLevel,
+          jobRole,
+          skills,
+          education,
+          expiryDate: expiryDate ? new Date(expiryDate).toISOString() : undefined,
+        }),
+      });
+      if (!res.ok) {
+        const { error } = await res.json();
+        toast.error(error || 'Failed to add job');
+        setSubmitting(false);
+        return;
+      }
+      toast.success('Job added successfully!');
+      const resJobs = await fetch('/api/getRecruiterJobs');
+      const data = await resJobs.json();
+      setJobs(data.jobs || []);
+      setSubmitting(false);
+      setOpen(false);
+      setJobTitle(''); setJobDesc(''); setLocation(''); setRemote(false);
+      setSalary(''); setEmploymentType(''); setExperienceLevel(''); setJobRole('');
+      setSkills([]); setEducation(''); setExpiryDate('');
+    } catch (err) {
+      toast.error('An error occurred while adding the job.');
+      setSubmitting(false);
+    }
   };
 
   if (status === 'loading') return <Loading />;

@@ -6,6 +6,7 @@ import { getFacingDirection } from "../utils/faceUtils";
 import { getPoseStatus } from "../utils/poseUtils";
 import { Landmark } from "../utils/types";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "react-hot-toast";
 
 interface Props {
   /** when true, begin posting diagnostics to /api/diagnostics */
@@ -94,7 +95,7 @@ export default function CameraRecorder({ active, interviewId }: Props) {
       if (now - lastDetectTime.current >= THROTTLE_MS) {
         lastDetectTime.current = now;
         const vid = videoRef.current;
-        if (vid?.readyState >= 2) {
+        if (vid && vid.readyState >= 2) {
           // Face
           const f = faceLandmarkerRef.current;
           if (f) {
@@ -140,6 +141,23 @@ export default function CameraRecorder({ active, interviewId }: Props) {
     }, 1000);
     return () => clearInterval(iv);
   }, [active, faceStatus, poseStatus, interviewId]);
+
+  const sendDiagnostics = async (data: any) => {
+    try {
+      const response = await fetch("/api/diagnostics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        toast.error("Failed to send diagnostics");
+        return;
+      }
+      toast.success("Diagnostics sent successfully");
+    } catch (error) {
+      toast.error("An error occurred while sending diagnostics");
+    }
+  };
 
   return (
     <div className="w-full flex justify-center">

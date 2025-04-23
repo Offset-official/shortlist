@@ -32,3 +32,18 @@ export async function POST() {
     return NextResponse.error();
   }
 }
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get("limit") || "2", 10);
+    const problems = await prisma.codingProblem.findMany({
+      take: limit,
+      orderBy: { id: "asc" },
+    });
+    return NextResponse.json({ problems });
+  } catch (error) {
+    console.error("Error fetching coding problems:", error);
+    return NextResponse.json({ error: "Failed to fetch coding problems" }, { status: 500 });
+  }
+}

@@ -20,6 +20,8 @@ import { useSession, signOut } from "next-auth/react"
 import LinkButton from "@/components/link-button"
 import { Github, Twitter, Instagram, Mail, Phone } from "lucide-react";
 import LandingFooter from "@/components/LandingFooter"
+import { toast } from "react-hot-toast"
+
 export default function LandingPage() {
   // Sample data for charts
   const barData = [
@@ -43,19 +45,17 @@ export default function LandingPage() {
   const { data: session } = useSession()
 
   return (
-    <div className="flex flex-col min-h-screen">
+  <div className="flex flex-col min-h-screen">
       {/* Navbar */}
-      <header className="border-b sticky top-0 z-50 bg-background">
-        <div className="container flex h-16 items-center justify-between">
+      <header className="border-b sticky top-0 z-50 bg-card">
+        <div className=" flex h-16 items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/assets/interview1.png"
+              src="/assets/logo.svg"
               alt="Shortlist Logo"
-              width={40}
+              width={100}
               height={40}
-              className="rounded"
-            />
-            <span className="text-xl font-bold">shortlist</span>
+              className="rounded" />
           </Link>
           <div className="flex items-center gap-4">
             {!session ? (
@@ -63,13 +63,11 @@ export default function LandingPage() {
                 <LinkButton
                   href="/onboarding?type=recruiter"
                   text="Join as Recruiter"
-                  className="border-secondary bg-secondary text-secondary hover:bg-secondary/10 hover:text-secondary"
-                />
+                  className="border-secondary bg-secondary text-secondary hover:bg-secondary/10 hover:text-secondary" />
                 <LinkButton
                   href="/onboarding?type=candidate"
                   text="Join as Candidate"
-                  className="border-tertiary bg-tertiary text-tertiary hover:bg-tertiary/10 hover:text-tertiary"
-                />
+                  className="border-tertiary bg-tertiary text-tertiary hover:bg-tertiary/10 hover:text-tertiary" />
                 <LinkButton href="/login" text="login" />
               </>
             ) : (
@@ -82,14 +80,16 @@ export default function LandingPage() {
                       alt="Profile"
                       width={32}
                       height={32}
-                      className="rounded-full"
-                    />
+                      className="rounded-full" />
                   )}
                 </div>
-                <LinkButton href="/dashboard" text="Go to Dashboard" className=""/>
+                <LinkButton href="/dashboard" text="Go to Dashboard" className="" />
                 <Button
                   variant="ghost"
-                  onClick={() => signOut({ redirect: false })}
+                  onClick={async () => {
+                    await signOut({ redirect: false })
+                    toast.success("Signed out successfully!")
+                  } }
                   className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                 >
                   Sign Out
@@ -100,12 +100,12 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 flex flex-col items-center justify-center w-full bg-card">
         {/* Hero Section */}
-        <section className="py-20 md:py-28">
-          <div className="container px-4 md:px-6">
+        <section className="py-20 md:py-28 w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-              <div className="space-y-4">
+              <div className="space-y-4 text-center lg:text-left">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter">
                   Connecting the right talent with the right opportunities
                 </h1>
@@ -113,42 +113,40 @@ export default function LandingPage() {
                   Shortlist streamlines recruitment, making it easier for candidates to find their dream jobs and for
                   recruiters to find perfect matches.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
                   <LinkButton
                     text="For Recruiters"
                     href="/onboarding?type=recruiter"
                     className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
                   >
-                    <Building className="mr-2 h-5 w-5" /> 
-                    </LinkButton>
+                    <Building className="mr-2 h-5 w-5" />
+                  </LinkButton>
                   <LinkButton
                     text="For Candidates"
                     href="/onboarding?type=candidate"
                     className="bg-tertiary text-foreground hover:bg-tertiary/90"
                   >
-                    <Building className="mr-2 h-5 w-5" /> 
-                    </LinkButton>
-  
+                    <Building className="mr-2 h-5 w-5" />
+                  </LinkButton>
                 </div>
               </div>
-              <div className="relative h-[400px] lg:h-[500px]">
+              <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] w-full max-w-md mx-auto">
                 <Image
                   src="/assets/interview1.png"
                   alt="Hero Image"
                   fill
-                  className="object-cover rounded-lg"
-                />
+                  className="object-cover rounded-lg" />
               </div>
             </div>
           </div>
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 bg-foreground/5">
-          <div className="container px-4 md:px-6">
+        <section className=" py-16 bg-foreground/5 w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold text-center mb-12">Our Impact in Numbers</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <Card className="border-none shadow-sm">
+              <Card className="container border-none shadow-sm">
                 <CardContent className="p-6 flex flex-col items-center text-center">
                   <Users className="h-10 w-10 text-secondary mb-4" />
                   <h3 className="text-3xl font-bold">10k+</h3>
@@ -181,8 +179,8 @@ export default function LandingPage() {
         </section>
 
         {/* Graphs Section */}
-        <section className="py-16">
-          <div className="container px-4 md:px-6">
+        <section className="py-16 w-full flex justify-center">
+          <div className="container max-w-7xl mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold text-center mb-12">Insights & Trends</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <Card>
@@ -230,8 +228,8 @@ export default function LandingPage() {
         </section>
 
         {/* For Recruiters Section */}
-        <section className="py-16 bg-secondary/5">
-          <div className="container px-4 md:px-6">
+        <section className="py-16 bg-secondary/5 w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="space-y-4">
                 <div className="inline-block rounded-lg bg-secondary/10 px-3 py-1 text-sm text-secondary mb-2">
@@ -265,24 +263,22 @@ export default function LandingPage() {
                   src="/assets/interview1.png"
                   alt="Recruiter Dashboard"
                   fill
-                  className="object-cover rounded-lg"
-                />
+                  className="object-cover rounded-lg" />
               </div>
             </div>
           </div>
         </section>
 
         {/* For Candidates Section */}
-        <section className="py-16 bg-tertiary/5">
-          <div className="container px-4 md:px-6">
+        <section className="py-16 bg-tertiary/5 w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="order-2 lg:order-1 relative h-[400px]">
                 <Image
                   src="/assets/interview1.png?height=400&width=500"
                   alt="Candidate Profile"
                   fill
-                  className="object-cover rounded-lg"
-                />
+                  className="object-cover rounded-lg" />
               </div>
               <div className="order-1 lg:order-2 space-y-4">
                 <div className="inline-block rounded-lg bg-tertiary/10 px-3 py-1 text-sm text-tertiary mb-2">
@@ -316,8 +312,8 @@ export default function LandingPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-card text-card-foreground">
-          <div className="container px-4 md:px-6 text-center">
+        <section className="py-20 bg-card text-card-foreground w-full flex justify-center">
+          <div className=" max-w-7xl mx-auto px-4 md:px-6 text-center">
             <h2 className="text-3xl font-bold mb-4">Ready to transform your hiring process?</h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join thousands of recruiters and candidates who are already using Shortlist to connect and grow.
@@ -326,18 +322,16 @@ export default function LandingPage() {
               <LinkButton
                 text="Join as Recruiter"
                 href="/onboarding?type=recruiter"
-                className="bg-secondary text-/assets/interview1.png hover:bg-secondary/90"
-              />
+                className="bg-secondary text-/assets/interview1.png hover:bg-secondary/90" />
               <LinkButton
                 text="Join as Candidate"
                 href="/onboarding?type=candidate"
-                className="bg-tertiary text-foreground hover:bg-tertiary/90"
-              />
+                className="bg-tertiary text-foreground hover:bg-tertiary/90" />
             </div>
           </div>
         </section>
       </main>
-    <LandingFooter />
+      <LandingFooter />
     </div>
   )
 }

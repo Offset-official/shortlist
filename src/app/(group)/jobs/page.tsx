@@ -2,6 +2,7 @@
 import { useState,useEffect } from 'react';
 import JobCard from '@/components/JobCard';
 import { useSession } from 'next-auth/react';
+import { toast } from "react-hot-toast";
 
 const JobListings = ()=>{
 
@@ -19,8 +20,10 @@ const JobListings = ()=>{
         }
         const data = await response.json();
         setJobs(data.jobs);
+        toast.success("Jobs action successful!");
       } catch (error: unknown) {
         setError(error instanceof Error ? error.message : 'An unknown error occurred');
+        toast.error("Jobs action failed.");
       } finally {
         setIsLoading(false);
       }
@@ -30,7 +33,7 @@ const JobListings = ()=>{
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className=" mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Job Listings</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

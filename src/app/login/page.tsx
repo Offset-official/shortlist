@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { UserRound, Building2, ArrowRight, LockKeyhole } from "lucide-react"
 import Loading from "@/components/ui/loading"
+import { toast } from "react-hot-toast"
 
 // Client component that uses useSearchParams
 const LoginClient = () => {
@@ -52,13 +53,15 @@ const LoginClient = () => {
       })
 
       if (result?.error) {
-        alert(result.error)
+        toast.error("Login failed. Please check your credentials.")
         return
       }
 
+      toast.success("Login successful!")
       // If success, redirect to dashboard
       router.push("/dashboard")
     } catch (error) {
+      toast.error("An error occurred during login.")
       console.error(error)
     } finally {
       setIsLoading(false)
