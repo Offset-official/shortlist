@@ -65,13 +65,25 @@ export async function POST(req: NextRequest) {
       config: {
         systemInstruction: systemInstruction || "You are a helpful assistant.",
         // Limit output to 100 tokens
-        maxOutputTokens: 100,
+        maxOutputTokens: 500,
       },
     });
 
     const response = await chat.sendMessage({ message: promptText });
-
-    return NextResponse.json({ reply: response.text });
+    
+    // Process the response text
+    const replyText = response.text;
+    
+    // Check for interview over before sending response
+    const isInterviewOver = (replyText ?? "").includes("<INTERVIEW OVER>");
+    
+    // Remove the <INTERVIEW OVER> tag from the displayed text
+    const cleanedReply = (replyText ?? "").replace(/<INTERVIEW OVER>/g, "").trim();
+    
+    return NextResponse.json({ 
+      reply: cleanedReply,
+      isInterviewOver 
+    });
   } catch (error) {
     return NextResponse.json(
       { reply: `Error: ${String(error)}` },

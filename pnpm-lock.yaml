@@ -74,6 +74,9 @@ importers:
       '@screenpipe/js':
         specifier: ^1.0.21
         version: 1.0.21(typescript@5.8.2)
+      '@types/nodemailer':
+        specifier: ^6.4.17
+        version: 6.4.17
       axios:
         specifier: ^1.8.4
         version: 1.8.4(debug@4.4.0)
@@ -189,9 +192,6 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.17.28
-      '@types/nodemailer':
-        specifier: ^6.4.17
-        version: 6.4.17
       '@types/prismjs':
         specifier: ^1.26.5
         version: 1.26.5
