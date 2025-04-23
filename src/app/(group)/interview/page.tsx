@@ -8,6 +8,19 @@ import CameraRecorder from "@/components/CameraRecorder";
 import TalkingHeadComponent from "@/components/TalkingAvatar";
 import ScreenpipePanel from "@/components/ScreenpipePanel";
 
+// Extract text between <SPEAKABLE> tags and clean content
+function extractSpeakableContent(content: string) {
+  // Extract text between <SPEAKABLE> tags
+  const speakableRegex = /<SPEAKABLE>([\s\S]*?)<\/SPEAKABLE>/g;
+  const speakableMatches = [...content.matchAll(speakableRegex)];
+  const speakableText = speakableMatches.map(match => match[1]).join(" ");
+  
+  // Remove the tags from the display content
+  const cleanedContent = content.replace(/<\/?SPEAKABLE>/g, "");
+  
+  return { speakableText, cleanedContent };
+}
+
 export default function InterviewPage() {
   const params = useSearchParams();
   const interviewId = params.get("id");
@@ -19,6 +32,7 @@ export default function InterviewPage() {
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
   const [over, setOver] = useState(false);
+  const [speakableText, setSpeakableText] = useState("");
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -45,7 +59,12 @@ export default function InterviewPage() {
         body: JSON.stringify({ messages: [userMsg], systemInstruction }),
       });
       const { reply } = await res.json();
-      setMessages([{ role: "assistant", content: reply }]);
+      
+      // Process the reply to extract speakable content and clean displayed content
+      const { speakableText, cleanedContent } = extractSpeakableContent(reply);
+      setSpeakableText(speakableText || cleanedContent);
+      
+      setMessages([{ role: "assistant", content: cleanedContent }]);
     } finally {
       setLoading(false);
     }
@@ -66,9 +85,16 @@ export default function InterviewPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [...messages, userMessage], systemInstruction }),
       });
-      const { reply } = await res.json();
-      setMessages((m) => [...m, { role: "assistant", content: reply }]);
-      if (reply.includes("<INTERVIEW OVER>")) {
+      const data = await res.json();
+      
+      // Process the reply to extract speakable content and clean displayed content
+      const { speakableText, cleanedContent } = extractSpeakableContent(data.reply);
+      setSpeakableText(speakableText || data.reply);
+      
+      setMessages((m) => [...m, { role: "assistant", content: cleanedContent }]);
+      
+      // Use isInterviewOver from API response rather than checking for tag
+      if (data.isInterviewOver) {
         setOver(true);
       }
     } finally {
@@ -86,6 +112,26 @@ export default function InterviewPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, over]);
+
+  useEffect(() => {
+    if (!over) return;
+    // Save chat history and system prompt when interview ends
+    const saveHistory = async () => {
+      if (!interviewId) return;
+      const systemPrompt = sessionStorage.getItem("InterviewSystemPrompt") || "";
+      await fetch("/api/interview/save_history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          interviewId: Number(interviewId),
+          chatHistory: messages,
+          systemPrompt,
+        }),
+      });
+    };
+    saveHistory();
+    // eslint-disable-next-line
+  }, [over]);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground relative">
@@ -117,7 +163,7 @@ export default function InterviewPage() {
                   {msg.role === "assistant" && <span className="text-xl">🤖</span>}
                 </div>
                 <div className="p-3 rounded-lg border shadow-md bg-background outline outline-1 outline-ring text-white">
-                  <Markdown>{msg.content}</Markdown>
+                  {msg.role === "assistant" ? <Markdown>{msg.content}</Markdown> : msg.content}
                 </div>
                 <div className="w-10 h-10 flex items-center justify-center">
                   {msg.role === "user" && <span className="text-xl">🧑</span>}
@@ -190,7 +236,7 @@ export default function InterviewPage() {
       {/* Avatar */}
       <div className="fixed bottom-6 right-6 w-[300px] h-[300px] z-50">
         <TalkingHeadComponent
-          text={messages.slice().reverse().find((m) => m.role === "assistant")?.content || "..."}
+          text={speakableText}
           gender="woman"
         />
       </div>

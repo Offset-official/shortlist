@@ -14,15 +14,43 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 
-const TOPIC_OPTIONS = [
-  'DSA - Easy',
-  'DSA - Medium',
-  'DSA - Hard',
+const DSA_TOPICS = [
+  { topic: 'Arrays', difficulties: ['Easy', 'Medium', 'Hard'] },
+  { topic: 'Strings', difficulties: ['Easy', 'Medium', 'Hard'] },
+  { topic: 'Linked List', difficulties: ['Easy', 'Medium', 'Hard'] },
+  { topic: 'Trees', difficulties: ['Easy', 'Medium', 'Hard'] },
+  { topic: 'Graphs', difficulties: ['Easy', 'Medium', 'Hard'] },
+  { topic: 'Dynamic Programming', difficulties: ['Easy', 'Medium', 'Hard'] },
+  { topic: 'Recursion', difficulties: ['Easy', 'Medium', 'Hard'] },
+  { topic: 'Searching & Sorting', difficulties: ['Easy', 'Medium', 'Hard'] },
+];
+
+const NON_DSA_TOPICS = [
   'Web Development',
   'Game Development',
   'Mobile Development',
   'AI/ML',
   'Blockchain',
+];
+
+const HR_TOPICS = [
+  'Behaviour',
+  'Communication',
+  'Teamwork',
+  'Leadership',
+  'Problem Solving',
+  'Conflict Resolution',
+  'Adaptability',
+];
+
+const LANGUAGES = [
+  'Python',
+  'JavaScript',
+  'Java',
+  'C++',
+  'Go',
+  'TypeScript',
+  'C#',
 ];
 
 interface Props {
@@ -42,18 +70,37 @@ export function ScheduleInterviewDialog({
 }: Props) {
   const [type, setType] = useState<'TECHNICAL' | 'HR'>('TECHNICAL');
   const [scheduledDateTime, setScheduledDateTime] = useState('');
-  const [topics, setTopics] = useState<string[]>([]);
+  const [expiryDateTime, setExpiryDateTime] = useState('');
+  const [programmingLanguage, setProgrammingLanguage] = useState('Python');
+  const [dsaTopics, setDsaTopics] = useState<{ topic: string; difficulty: string }[]>([]);
+  const [nonDsaTopics, setNonDsaTopics] = useState<string[]>([]);
+  const [hrTopics, setHrTopics] = useState<string[]>([]);
+  const [numQuestions, setNumQuestions] = useState(2);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  /* Toggle checkboxes – max 3 topics */
-  const toggleTopic = (topic: string, checked: boolean) => {
-    setTopics((prev) =>
-      checked
-        ? prev.length < 3
-          ? [...prev, topic]
-          : prev
-        : prev.filter((t) => t !== topic)
+  // DSA topic selection
+  const toggleDsaTopic = (topic: string, difficulty: string, checked: boolean) => {
+    setDsaTopics((prev) => {
+      if (checked) {
+        return [...prev, { topic, difficulty }];
+      } else {
+        return prev.filter((t) => !(t.topic === topic && t.difficulty === difficulty));
+      }
+    });
+  };
+
+  // Non-DSA topic selection
+  const toggleNonDsaTopic = (topic: string, checked: boolean) => {
+    setNonDsaTopics((prev) =>
+      checked ? [...prev, topic] : prev.filter((t) => t !== topic)
+    );
+  };
+
+  // HR topic selection
+  const toggleHrTopic = (topic: string, checked: boolean) => {
+    setHrTopics((prev) =>
+      checked ? [...prev, topic] : prev.filter((t) => t !== topic)
     );
   };
 
@@ -61,23 +108,55 @@ export function ScheduleInterviewDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
-
-    // Validate technical topics
-    if (type === 'TECHNICAL' && topics.length < 2) {
-      setErrorMsg('Please select at least two topics for a technical interview.');
+    if (!expiryDateTime) return;
+    // Validate expiryDateTime string
+    const selected = new Date(expiryDateTime);
+    if (isNaN(selected.getTime())) {
+      setErrorMsg('Invalid expiry date & time. Please select a valid date and time.');
+      return;
+    }
+    const now = new Date();
+    if (selected < now) {
+      setErrorMsg(`Expiry date & time cannot be before the current time. Current time: ${now.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`);
       return;
     }
 
-    if (!scheduledDateTime) return;
+    if (type === 'TECHNICAL') {
+      if (dsaTopics.length < 1) {
+        setErrorMsg('Select at least 1 DSA topic (with difficulty) for technical interview.');
+        return;
+      }
+      if (numQuestions < 1) {
+        setErrorMsg('Number of questions must be at least 1.');
+        return;
+      }
+    }
+    if (type === 'HR') {
+      if (hrTopics.length < 2) {
+        setErrorMsg('Select at least 2 HR topics.');
+        return;
+      }
+      if (numQuestions < 1) {
+        setErrorMsg('Number of questions must be at least 1.');
+        return;
+      }
+    }
     setLoading(true);
 
-    const payload = {
+    const payload: any = {
       candidateId,
       jobListingId,
       type,
-      topics: type === 'TECHNICAL' ? topics : [],
-      scheduledDateTime: new Date(scheduledDateTime).toISOString(),
+      expiryDateTime: selected.toISOString(), // always send valid ISO string
+      numQuestions,
     };
+    if (type === 'TECHNICAL') {
+      payload.programmingLanguage = programmingLanguage;
+      payload.dsaTopics = dsaTopics;
+      payload.topics = nonDsaTopics;
+    } else {
+      payload.hrTopics = hrTopics;
+    }
 
     try {
       const res = await fetch('/api/add_interview', {
@@ -92,7 +171,10 @@ export function ScheduleInterviewDialog({
         onScheduled();
         onOpenChange(false);
         setScheduledDateTime('');
-        setTopics([]);
+        setDsaTopics([]);
+        setNonDsaTopics([]);
+        setHrTopics([]);
+        setNumQuestions(2);
         setType('TECHNICAL');
       } else {
         let msg = 'Something went wrong.';
@@ -125,8 +207,21 @@ export function ScheduleInterviewDialog({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Date & time */}
+          {/* Expiry date & time */}
           <div>
+            <Label htmlFor="expiry">Interview Expiry Date & Time</Label>
+            <Input
+              id="expiry"
+              type="datetime-local"
+              required
+              min={new Date().toISOString().slice(0, 16)}
+              value={expiryDateTime}
+              onChange={e => setExpiryDateTime(e.target.value)}
+            />
+          </div>
+
+          {/* Date & time */}
+          {/* <div>
             <Label htmlFor="scheduled">Date & Time</Label>
             <Input
               id="scheduled"
@@ -135,7 +230,7 @@ export function ScheduleInterviewDialog({
               value={scheduledDateTime}
               onChange={(e) => setScheduledDateTime(e.target.value)}
             />
-          </div>
+          </div> */}
 
           {/* Interview type */}
           <div>
@@ -146,7 +241,9 @@ export function ScheduleInterviewDialog({
               value={type}
               onChange={(e) => {
                 setType(e.target.value as 'TECHNICAL' | 'HR');
-                setTopics([]);
+                setDsaTopics([]);
+                setNonDsaTopics([]);
+                setHrTopics([]);
               }}
             >
               <option value="TECHNICAL">Technical</option>
@@ -154,28 +251,97 @@ export function ScheduleInterviewDialog({
             </select>
           </div>
 
-          {/* Topics */}
+          {/* Technical interview details */}
           {type === 'TECHNICAL' && (
-            <div>
-              <Label>Topics (choose 2–3)</Label>
-              <div className="grid grid-cols-2 gap-2 mt-1">
-                {TOPIC_OPTIONS.map((topic) => (
-                  <label key={topic} className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={topics.includes(topic)}
-                      onCheckedChange={(chk) => toggleTopic(topic, chk as boolean)}
-                      disabled={!topics.includes(topic) && topics.length >= 3}
-                    />
-                    <span className="text-sm">{topic}</span>
-                  </label>
-                ))}
+            <>
+              <div>
+                <Label>Programming Language</Label>
+                <select
+                  className="mt-1 block w-full rounded border"
+                  value={programmingLanguage}
+                  onChange={e => setProgrammingLanguage(e.target.value)}
+                >
+                  {LANGUAGES.map(lang => (
+                    <option key={lang} value={lang}>{lang}</option>
+                  ))}
+                </select>
               </div>
-              {topics.length < 2 && (
-                <p className="text-sm text-red-600 mt-1">
-                  Please select at least two topics.
-                </p>
-              )}
-            </div>
+              <div>
+                <Label>DSA Topics (at least 1, with difficulty)</Label>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  {DSA_TOPICS.map(({ topic, difficulties }) => (
+                    <div key={topic} className="flex flex-col">
+                      <span className="font-medium text-xs">{topic}</span>
+                      <div className="flex flex-row gap-2">
+                        {difficulties.map(diff => (
+                          <label key={diff} className="flex items-center space-x-1 text-xs">
+                            <Checkbox
+                              checked={!!dsaTopics.find(t => t.topic === topic && t.difficulty === diff)}
+                              onCheckedChange={chk => toggleDsaTopic(topic, diff, chk as boolean)}
+                            />
+                            <span>{diff}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>Other Technical Topics (optional)</Label>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  {NON_DSA_TOPICS.map(topic => (
+                    <label key={topic} className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={nonDsaTopics.includes(topic)}
+                        onCheckedChange={chk => toggleNonDsaTopic(topic, chk as boolean)}
+                      />
+                      <span className="text-sm">{topic}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>Number of Questions</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={numQuestions}
+                  onChange={e => setNumQuestions(Number(e.target.value))}
+                />
+              </div>
+            </>
+          )}
+
+          {/* HR interview details */}
+          {type === 'HR' && (
+            <>
+              <div>
+                <Label>HR Topics (choose at least 2)</Label>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  {HR_TOPICS.map(topic => (
+                    <label key={topic} className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={hrTopics.includes(topic)}
+                        onCheckedChange={chk => toggleHrTopic(topic, chk as boolean)}
+                      />
+                      <span className="text-sm">{topic}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>Number of Questions</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={numQuestions}
+                  onChange={e => setNumQuestions(Number(e.target.value))}
+                />
+              </div>
+            </>
           )}
 
           {/* Footer */}
@@ -189,7 +355,7 @@ export function ScheduleInterviewDialog({
             </Button>
             <Button
               type="submit"
-              disabled={loading || (type === 'TECHNICAL' && topics.length < 2)}
+              disabled={loading || (type === 'TECHNICAL' && dsaTopics.length < 1) || (type === 'HR' && hrTopics.length < 2)}
             >
               {loading ? 'Scheduling…' : 'Schedule'}
             </Button>

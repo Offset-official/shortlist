@@ -91,10 +91,16 @@ model Interview {
   jobListingId        Int
 
   type                InterviewType
-  topics              String[]       // only used when type = TECHNICAL
-  scheduledDateTime   DateTime
+  topics              String[]       // only used for non-DSA technical topics
+  dsaTopics           Json?          // [{ topic: string, difficulty: string }]
+  programmingLanguage String?        // for technical interviews
+  hrTopics            String[]      // for HR interviews
+  numQuestions        Int?           // number of questions
+  expiryDateTime      DateTime       // single expiry datetime for the interview
   attemptedDateTime   DateTime?      // null until they actually take it
   stats               Json?          // store any performance data here
+  chatHistory         Json?          // stores the chat history after interview ends
+  systemPrompt        String?        // stores the system prompt used for the interview
 
   createdAt           DateTime       @default(now())
 }
