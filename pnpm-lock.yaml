@@ -192,9 +192,6 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.17.28
-      '@types/nodemailer':
-        specifier: ^6.4.17
-        version: 6.4.17
       '@types/prismjs':
         specifier: ^1.26.5
         version: 1.26.5
