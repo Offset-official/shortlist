@@ -3,6 +3,26 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import prisma, { InterviewType } from "@/lib/prisma";
 
+// Extended interview interface to include all necessary properties
+interface ExtendedInterview {
+  id: number;
+  candidateId: number;
+  jobListingId: number;
+  type: InterviewType;
+  systemPrompt: string | null;
+  programmingLanguage: string | null;
+  dsaTopics: any[] | null;
+  topics: string[] | null;
+  hrTopics: string[] | null;
+  numQuestions: number | null;
+  chatHistory: any;
+  dsaId?: number | null;  // Optional property for DSA question ID
+  screenpipeRequired?: boolean | null;  // Optional property for screenpipe requirement
+  terminatorRequired?: boolean | null;  // Optional property for terminator requirement
+  candidate: { name: string };
+  jobListing: { title: string };
+}
+
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.type !== "candidate") {
@@ -18,7 +38,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Fetch the interview
-  const iv = await prisma.interview.findUnique({
+  const interview = await prisma.interview.findUnique({
     where: { id },
     include: {
       jobListing: { select: { title: true } },
@@ -26,9 +46,12 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  if (!iv || iv.candidateId !== Number(session.user.id)) {
+  if (!interview || interview.candidateId !== Number(session.user.id)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  
+  // Cast to extended interface with optional properties
+  const iv = interview as unknown as ExtendedInterview;
 
   // DSA mock interview: ask only the selected DSA question
   if (mock && iv.dsaId) {

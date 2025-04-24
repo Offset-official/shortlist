@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Markdown from 'react-markdown';
 import CodeEditor from '@/components/CodeEditor';
@@ -39,11 +39,10 @@ function wrapCodeInMarkdown(input: string): string {
 /* ------------------------------------------------------------ */
 type Status = 'retry' | 'init' | 'ready' | 'error';
 
-export default function InterviewPage() {
+function InterviewContent() {
   const params = useSearchParams();
-  const interviewId = params.get('id') || '';
-  const mock = params.get('mock') === 'true';
-  const router = useRouter();
+  const interviewId = params?.get('id') || '';
+  const mock = params?.get('mock') === 'true';
 
   /* Chat state */
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
@@ -87,10 +86,10 @@ export default function InterviewPage() {
   ]);
 
   /* Screenpipe refs for timers & status */
-  const retryInterval = useRef<NodeJS.Timeout>();
-  const retryTimer = useRef<NodeJS.Timeout>();
-  const initInterval = useRef<NodeJS.Timeout>();
-  const pollInterval = useRef<NodeJS.Timeout>();
+  const retryInterval = useRef<NodeJS.Timeout | null>(null);
+  const retryTimer = useRef<NodeJS.Timeout | null>(null);
+  const initInterval = useRef<NodeJS.Timeout | null>(null);
+  const pollInterval = useRef<NodeJS.Timeout | null>(null);
   const statusRef = useRef<Status>(status);
 
   /* Keep statusRef in sync */
@@ -151,7 +150,6 @@ export default function InterviewPage() {
     }
 
     if (!interviewId) {
-      router.push('/interview');
       return;
     }
 
@@ -252,16 +250,16 @@ export default function InterviewPage() {
         });
 
         setEverConnected(true);
-        clearInterval(retryInterval.current);
-        clearTimeout(retryTimer.current);
+        if (retryInterval.current) clearInterval(retryInterval.current);
+        if (retryTimer.current) clearTimeout(retryTimer.current);
         changeStatus('ready');
         postDiagnostics(res);
       } catch (err: any) {
         const http = err?.response?.status ?? err?.status;
         if (http === 404) {
           setEverConnected(true);
-          clearInterval(retryInterval.current);
-          clearTimeout(retryTimer.current);
+          if (retryInterval.current) clearInterval(retryInterval.current);
+          if (retryTimer.current) clearTimeout(retryTimer.current);
           changeStatus('ready');
         }
       }
@@ -276,8 +274,8 @@ export default function InterviewPage() {
     }, 5_000);
 
     return () => {
-      clearInterval(retryInterval.current);
-      clearTimeout(retryTimer.current);
+      if (retryInterval.current) clearInterval(retryInterval.current);
+      if (retryTimer.current) clearTimeout(retryTimer.current);
     };
   }, [status]);
 
@@ -291,7 +289,7 @@ export default function InterviewPage() {
     initInterval.current = setInterval(() => {
       setInitCountdown((c) => {
         if (c <= 1) {
-          clearInterval(initInterval.current);
+          if (initInterval.current) clearInterval(initInterval.current);
           changeStatus('ready');
           return 0;
         }
@@ -299,7 +297,9 @@ export default function InterviewPage() {
       });
     }, 1_000);
 
-    return () => clearInterval(initInterval.current);
+    return () => {
+      if (initInterval.current) clearInterval(initInterval.current);
+    };
   }, [status]);
 
   /* ===========================================================
@@ -324,7 +324,9 @@ export default function InterviewPage() {
 
     poll();
     pollInterval.current = setInterval(poll, 10_000);
-    return () => clearInterval(pollInterval.current);
+    return () => {
+      if (pollInterval.current) clearInterval(pollInterval.current);
+    };
   }, [status, started]);
 
   /* Screenpipe: analysis of OCR results */
@@ -454,7 +456,7 @@ export default function InterviewPage() {
                 <div className="w-10 h-10 flex items-center justify-center">
                   {m.role === 'assistant' && <span className="text-xl">🤖</span>}
                 </div>
-                <div className="p-3 rounded-lg border shadow-md bg-background outline outline-1 outline-ring text-white">
+                <div className="p-3 rounded-lg border shadow-md bg-background outline-ring text-white">
                   <Markdown>{m.content}</Markdown>
                 </div>
                 <div className="w-10 h-10 flex items-center justify-center">
@@ -584,5 +586,13 @@ export default function InterviewPage() {
         <TalkingHeadComponent text={speakableText} gender="woman" />
       </div>
     </div>
+  );
+}
+
+export default function InterviewPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InterviewContent />
+    </Suspense>
   );
 }
