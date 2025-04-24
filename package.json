@@ -20,6 +20,7 @@
     "@mediapipe/face_mesh": "^0.4.1633559619",
     "@mediapipe/tasks-vision": "0.10.22-rc.20250304",
     "@met4citizen/talkinghead": "^1.4.0",
+    "@next/bundle-analyzer": "^15.3.1",
     "@prisma/client": "6.5.0",
     "@radix-ui/react-avatar": "^1.1.4",
     "@radix-ui/react-checkbox": "^1.2.2",
@@ -70,6 +71,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
