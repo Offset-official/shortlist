@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -50,7 +51,13 @@ const LANGUAGES = [
   'C#',
 ];
 
-export default function MockInterviewPage() {
+function MockInterviewContent() {
+  const params = useSearchParams();
+  const dsaId = params?.get('dsaId');
+  const dsaTitle = params?.get('title');
+  const dsaDifficulty = params?.get('difficulty');
+  const isDSAMock = !!dsaId;
+
   /* ───── Auth guard ───── */
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -66,12 +73,6 @@ export default function MockInterviewPage() {
   const [numQuestions, setNumQuestions] = useState(3);
   const [screenpipe, setScreenpipe] = useState(false); // Explicitly false
   const [terminator, setTerminator] = useState(false); // Explicitly false
-
-  const params = useSearchParams();
-  const dsaId = params.get('dsaId');
-  const dsaTitle = params.get('title');
-  const dsaDifficulty = params.get('difficulty');
-  const isDSAMock = !!dsaId;
 
   /* ───── Only allow candidates ───── */
   useEffect(() => {
@@ -362,5 +363,13 @@ export default function MockInterviewPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function MockInterviewPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MockInterviewContent />
+    </Suspense>
   );
 }

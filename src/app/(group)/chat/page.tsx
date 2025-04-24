@@ -6,7 +6,7 @@ import Markdown from "react-markdown";
 import CodeEditor from "@/components/CodeEditor";
 import CameraRecorder from "@/components/CameraRecorder";
 import TalkingHeadComponent from "@/components/TalkingAvatar";
-import ScreenpipePanel from "@/components/ScreenpipePanel";
+// import ScreenpipePanel from "@/components/ScreenpipePanel";
 import { toast } from "react-hot-toast";
 
 export default function ChatPage() {
