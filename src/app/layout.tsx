@@ -1,11 +1,10 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Providers } from "./providers";
 import type { Metadata, Viewport } from "next";
 import { ModeToggle } from "@/components/mode-toggle"
 import { Toaster } from "react-hot-toast";
-
+import { League_Spartan } from 'next/font/google'
 const APP_NAME = "Shortlist";
 const APP_DEFAULT_TITLE = "Shortlist - Connecting Talent with Opportunities";
 const APP_TITLE_TEMPLATE = "%s - Shortlist App";
@@ -48,18 +47,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
+  themeColor: "#0B0C0E",
 };
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
+const league = League_Spartan({
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 export default function RootLayout({
   children,
@@ -70,7 +63,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-all duration-75 `}>
+      <body className={`${league.className} ${league.className} antialiased transition-all duration-75 bg-background text-foreground`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

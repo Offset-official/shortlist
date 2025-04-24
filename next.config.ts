@@ -1,14 +1,16 @@
 import type { NextConfig } from "next";
 
-// Using @ducanh2912/next-pwa package
+// Import plugins
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
 });
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 const nextConfig: NextConfig = {
-  // Add the allowedDevOrigins here inside the main config object
-  allowedDevOrigins: ['local-origin.dev', '*.local-origin.dev', '10.1.58.38']
+  allowedDevOrigins: ['local-origin.dev', '*.local-origin.dev', '10.1.58.38'],
 };
 
-// Export the configuration with PWA wrapper
-export default withPWA(nextConfig);
+// Compose plugins: withBundleAnalyzer wraps withPWA, which wraps nextConfig
+export default withBundleAnalyzer(withPWA(nextConfig));

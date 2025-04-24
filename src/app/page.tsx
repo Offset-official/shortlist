@@ -1,5 +1,4 @@
 "use client"
-
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -18,10 +17,9 @@ import {
 import { Users, Briefcase, CheckCircle, Clock, TrendingUp, Search, Building, UserCheck } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import LinkButton from "@/components/link-button"
-import { Github, Twitter, Instagram, Mail, Phone } from "lucide-react";
 import LandingFooter from "@/components/LandingFooter"
 import { toast } from "react-hot-toast"
-
+import Logo from "@/components/svgs/logo"
 export default function LandingPage() {
   // Sample data for charts
   const barData = [
@@ -34,7 +32,7 @@ export default function LandingPage() {
   ]
 
   const pieData = [
-    { name: "Chut", value: 35 },
+    { name: "Technology", value: 35 },
     { name: "Finance", value: 25 },
     { name: "Healthcare", value: 20 },
     { name: "Other", value: 20 },
@@ -45,17 +43,18 @@ export default function LandingPage() {
   const { data: session } = useSession()
 
   return (
-  <div className="flex flex-col min-h-screen">
+  <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Navbar */}
-      <header className="border-b sticky top-0 z-50 bg-card">
+      <header className="border-b sticky top-0 z-50">
         <div className=" flex h-16 items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/assets/logo.svg"
+           <Logo width="50" height="50" className="bg-contain" fill="white" />
+            {/* <img
+              src="/assets/logo_text.svg"
               alt="Shortlist Logo"
               width={100}
               height={40}
-              className="rounded" />
+              className="rounded fill-white" /> */}
           </Link>
           <div className="flex items-center gap-4">
             {!session ? (
@@ -100,7 +99,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center w-full bg-card">
+      <main className="flex-1 flex flex-col items-center justify-center w-full bg-background">
         {/* Hero Section */}
         <section className="py-20 md:py-28 w-full flex justify-center">
           <div className=" max-w-7xl mx-auto px-4 md:px-6">
