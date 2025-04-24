@@ -20,7 +20,7 @@ const LoginClient = () => {
   const { data: session, status } = useSession()
 
   // Get the tab from URL or default to "candidate"
-  const defaultTab = searchParams.get("tab") || "candidate"
+  const defaultTab = searchParams?.get("tab") || "candidate"
   const [activeTab, setActiveTab] = useState(defaultTab)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -35,7 +35,7 @@ const LoginClient = () => {
 
   // Update URL when tab changes
   useEffect(() => {
-    const params = new URLSearchParams(searchParams)
+    const params = new URLSearchParams(searchParams || undefined)
     params.set("tab", activeTab)
     router.push(`/login?${params.toString()}`, { scroll: false })
   }, [activeTab, router, searchParams])
