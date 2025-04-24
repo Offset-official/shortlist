@@ -14,11 +14,24 @@ import { Badge } from '@/components/ui/badge';
 /* Helper: strip <SPEAKABLE> … </SPEAKABLE>                    */
 /* ----------------------------------------------------------- */
 function extractSpeakableContent(content: string) {
-  const reg = /<SPEAKABLE>([\s\S]*?)<\/SPEAKABLE>/g;
+  const reg = /<SPEAKABLE>([\s hemeS]*?)<\/SPEAKABLE>/g;
   const matches = [...content.matchAll(reg)];
   const speakableText = matches.map((m) => m[1]).join(' ');
   const cleanedContent = content.replace(/<\/?SPEAKABLE>/g, '');
   return { speakableText, cleanedContent };
+}
+
+/* ----------------------------------------------------------- */
+/* Helper: detect and wrap code in Markdown code blocks         */
+/* ----------------------------------------------------------- */
+function wrapCodeInMarkdown(input: string): string {
+  // Simple heuristic to detect code: contains multiple lines, indentation, or common code keywords
+  const isCode = input.includes('\n') || input.match(/^\s{2,}/m) || input.match(/\b(function|class|const|let|var|import|export)\b/);
+  if (isCode) {
+    // Wrap in triple backticks with optional language (default to 'tsx' for TypeScript/React)
+    return `\`\`\`tsx\n${input}\n\`\`\``;
+  }
+  return input;
 }
 
 /* ------------------------------------------------------------ */
@@ -59,7 +72,7 @@ export default function InterviewPage() {
   const [everConnected, setEverConnected] = useState(false);
   const [initCountdown, setInitCountdown] = useState(5);
   const [bad, setBad] = useState(false);
-  
+
   /* Violations state */
   const [violations, setViolations] = useState<{
     timestamp: string;
@@ -70,7 +83,7 @@ export default function InterviewPage() {
     { name: 'chatgpt', pattern: 'chatgpt' },
     { name: 'stackoverflow', pattern: 'stackoverflow' },
     { name: 'github', pattern: 'github' },
-    { name: 'wikipedia', pattern: 'wikipedia' }
+    { name: 'wikipedia', pattern: 'wikipedia' },
   ]);
 
   /* Screenpipe refs for timers & status */
@@ -181,7 +194,8 @@ export default function InterviewPage() {
   /* --------------------------------------------------------- */
   const handleSend = async () => {
     if (!input.trim() || over) return;
-    const user = { role: 'user', content: input };
+    const formattedInput = wrapCodeInMarkdown(input); // Wrap code in Markdown
+    const user = { role: 'user', content: formattedInput };
     const next = [...messages, user];
     setMessages(next);
     setInput('');
@@ -317,7 +331,7 @@ export default function InterviewPage() {
   function analyse(res: any) {
     let flagged = false;
     const newViolations: { timestamp: string; website: string }[] = [];
-    
+
     res.data?.forEach((it: any) => {
       if (it.type !== 'OCR') return;
       const w = it.content.windowName?.toLowerCase() || '';
@@ -329,7 +343,7 @@ export default function InterviewPage() {
         if (w.includes(website.pattern)) {
           newViolations.push({
             timestamp: new Date().toISOString(),
-            website: website.name
+            website: website.name,
           });
         }
       });
@@ -372,7 +386,7 @@ export default function InterviewPage() {
       case 'ready':
         return bad ? (
           <>
-            <Badge variant="destructive">Suspicious Activity</Badge>
+            <Badge variant="destructive">Suspicious Activity in last 10s</Badge>
             {violations.map((v, i) => (
               <Badge key={i} variant="destructive" className="mt-2">
                 {v.website.charAt(0).toUpperCase() + v.website.slice(1)} detected
@@ -380,7 +394,7 @@ export default function InterviewPage() {
             ))}
           </>
         ) : (
-          <Badge className="bg-green-400 text-black">All Clear</Badge>
+          <Badge className="bg-green-400 text-black">All Clear in last 10s</Badge>
         );
       default:
         return everConnected ? (
@@ -399,7 +413,7 @@ export default function InterviewPage() {
   return (
     <div className="flex min-h-screen bg-background text-foreground relative">
       {/* ---------------- LEFT: veinteCHat ---------------- */}
-      <div className="w-1/2 flex flex-col h-screen p-4">
+      <div className="w-1/2 flex flex-col h-screen pGFX 4">
         <header className="mb-4">
           <h1 className="text-2xl font-bold">
             {over ? 'Interview Complete' : 'Interview'}
@@ -409,18 +423,21 @@ export default function InterviewPage() {
         {!started ? (
           <div className="flex-1 flex flex-col items-center justify-center space-y-4">
             {probeOver && !screenpipeReady && (
-              <div className="text-center text-red-500">
+              <div className="text-center" style={{ color: 'var(--destructive)' }}>
                 Screenpipe not found. Please start the Screenpipe back-end and refresh.
               </div>
             )}
             <button
               onClick={handleStart}
               disabled={screenpipeRequired && !screenpipeReady}
-              className={`px-6 py-3 bg-primary text-foreground rounded ${
-                screenpipeRequired && !screenpipeReady
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:bg-primary/80'
-              }`}
+              style={{
+                background: 'var(--primary)',
+                color: 'var(--primary-foreground)',
+                borderRadius: 'var(--radius-md)',
+                opacity: screenpipeRequired && !screenpipeReady ? 0.5 : 1,
+                cursor: screenpipeRequired && !screenpipeReady ? 'not-allowed' : 'pointer',
+              }}
+              className="px-6 py-3 font-semibold transition-colors"
             >
               Start Interview
             </button>
@@ -430,7 +447,7 @@ export default function InterviewPage() {
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={`grid grid-cols-[2.5rem_1fr_2.5rem] items-center gap-2 mx-4 ${
+                className={`grid grid-cols-[2.5rem_1fr_2.5rem] items-center gap-2 mx-4SfX 4 ${
                   i === 0 ? 'mt-4' : ''
                 }`}
               >
@@ -438,11 +455,7 @@ export default function InterviewPage() {
                   {m.role === 'assistant' && <span className="text-xl">🤖</span>}
                 </div>
                 <div className="p-3 rounded-lg border shadow-md bg-background outline outline-1 outline-ring text-white">
-                  {m.role === 'assistant' ? (
-                    <Markdown>{m.content}</Markdown>
-                  ) : (
-                    m.content
-                  )}
+                  <Markdown>{m.content}</Markdown>
                 </div>
                 <div className="w-10 h-10 flex items-center justify-center">
                   {m.role === 'user' && <span className="text-xl">🧑</span>}
@@ -473,6 +486,7 @@ export default function InterviewPage() {
               placeholder="Your answer…"
               disabled={!started}
               className="flex-1 p-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground resize-none overflow-hidden disabled:opacity-50"
+              style={{ whiteSpace: 'pre-wrap' }} // Preserve whitespace
             />
             <button
               onClick={handleSend}
@@ -490,15 +504,18 @@ export default function InterviewPage() {
       </div>
 
       {/* ---------------- RIGHT: TABS ---------------- */}
-      <div className="w-1/2 flex flex-col h-screen border-l border-border">
-        <div className="flex items-center p-2 border-b border-border">
+      <div className="w-1/2 flex flex-col h-screen border-l" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center p-2 border-b" style={{ borderColor: 'var(--border)' }}>
           {(['code', 'camera', 'screenpipe'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setActiveTab(t)}
-              className={`px-4 py-2 mr-2 rounded ${
-                activeTab === t ? 'bg-accent text-black' : 'bg-transparent'
-              }`}
+              style={{
+                background: activeTab === t ? 'var(--accent)' : 'transparent',
+                color: activeTab === t ? 'var(--accent-foreground)' : 'inherit',
+                borderRadius: 'var(--radius-sm)',
+              }}
+              className="px-4 py-2 mr-2 font-medium transition-colors"
             >
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
@@ -537,7 +554,7 @@ export default function InterviewPage() {
             }`}
           >
             {probeOver && !screenpipeReady ? (
-              <div className="text-center text-red-500">
+              <div className="text-center" style={{ color: 'var(--destructive)' }}>
                 Screenpipe not found. Monitoring disabled.
               </div>
             ) : (
@@ -547,7 +564,7 @@ export default function InterviewPage() {
                   Violation Count: {violations.length}
                 </div>
                 {violations.length > 0 && (
-                  <div className="text-sm text-gray-400 max-h-64 overflow-y-auto">
+                  <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
                     <h3 className="font-bold mb-2">Violation History:</h3>
                     {violations.map((v, i) => (
                       <div key={i} className="mb-1">

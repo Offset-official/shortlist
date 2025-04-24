@@ -87,8 +87,10 @@ model Interview {
   id                  Int            @id @default(autoincrement())
   candidate           Candidate      @relation(fields: [candidateId], references: [id])
   candidateId         Int
-  jobListing          JobListing     @relation(fields: [jobListingId], references: [id])
-  jobListingId        Int
+  jobListing          JobListing?     @relation(fields: [jobListingId], references: [id])
+  jobListingId        Int?
+
+  mock                Boolean        @default(false) // true if it's a mock interview
 
   type                InterviewType
   topics              String[]       // only used for non-DSA technical topics
@@ -96,15 +98,17 @@ model Interview {
   programmingLanguage String?        // for technical interviews
   hrTopics            String[]      // for HR interviews
   numQuestions        Int?           // number of questions
-  expiryDateTime      DateTime       // single expiry datetime for the interview
+  expiryDateTime      DateTime?       // single expiry datetime for the interview
   attemptedDateTime   DateTime?      // null until they actually take it
   stats               Json?          // store any performance data here
   chatHistory         Json?          // stores the chat history after interview ends
   systemPrompt        String?        // stores the system prompt used for the interview
 
-  screenpipeRequired  Boolean        @default(true)
+  screenpipeRequired  Boolean        @default(false)
   terminatorRequired  Boolean        @default(false)
   interviewStarted    Boolean        @default(false)
+
+  dsaId               Int?          // for DSA mock interviews, the id of the coding problem
 
   createdAt           DateTime       @default(now())
 }
