@@ -117,11 +117,7 @@ export async function POST(req: NextRequest) {
         <p>Hi ${candidate.name ?? 'there'},</p>
         <p>You’ve been <strong>shortlisted</strong> for the <strong>${body.type}</strong> interview for the role “${job.title}” at <strong>${companyName}</strong>.</p>
         <p><strong>Note:</strong> This interview link will expire on <strong>${expiryStr}</strong>. Please complete your interview before this time.</p>
-        ${
-          topics.length
-            ? `<p><strong>Topics:</strong> ${topics.join(', ')}</p>`
-            : ''
-        }
+    
         <p>View details and next steps at <a href="https://short-list.vercelapp.com" target="_blank">short‑list.vercelapp.com</a>.</p>
         <p>Best of luck!</p>
         <p>— The Short‑List Team</p>

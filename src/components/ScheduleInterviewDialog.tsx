@@ -79,6 +79,8 @@ export function ScheduleInterviewDialog({
   const [numQuestions, setNumQuestions] = useState(2);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [screenpipeRequired, setScreenpipeRequired] = useState(true);
+  const [terminatorRequired, setTerminatorRequired] = useState(false);
 
   // DSA topic selection
   const toggleDsaTopic = (topic: string, difficulty: string, checked: boolean) => {
@@ -150,6 +152,8 @@ export function ScheduleInterviewDialog({
       type,
       expiryDateTime: selected.toISOString(), // always send valid ISO string
       numQuestions,
+      screenpipeRequired,
+      terminatorRequired,
     };
     if (type === 'TECHNICAL') {
       payload.programmingLanguage = programmingLanguage;
@@ -344,6 +348,24 @@ export function ScheduleInterviewDialog({
               </div>
             </>
           )}
+
+          {/* Monitoring & Restriction checkboxes */}
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2">
+              <Checkbox
+                checked={screenpipeRequired}
+                onCheckedChange={chk => setScreenpipeRequired(!!chk)}
+              />
+              <span>Enable suspicion monitoring using Screenpipe</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <Checkbox
+                checked={terminatorRequired}
+                onCheckedChange={chk => setTerminatorRequired(!!chk)}
+              />
+              <span>Enable UI restriction using Terminator</span>
+            </label>
+          </div>
 
           {/* Footer */}
           <DialogFooter className="flex justify-end space-x-2">

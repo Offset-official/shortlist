@@ -102,6 +102,10 @@ model Interview {
   chatHistory         Json?          // stores the chat history after interview ends
   systemPrompt        String?        // stores the system prompt used for the interview
 
+  screenpipeRequired  Boolean        @default(true)
+  terminatorRequired  Boolean        @default(false)
+  interviewStarted    Boolean        @default(false)
+
   createdAt           DateTime       @default(now())
 }
 
