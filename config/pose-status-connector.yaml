@@ -1,0 +1,10 @@
+# pose-status-connector.yaml
+apiVersion: 0.1.0
+meta:
+  version: 0.4.3
+  name: pose-status
+  type: http-source
+  topic: pose-status
+http:
+  endpoint: https://www.short-list.live/api/diagnostics
+  interval: 1s
