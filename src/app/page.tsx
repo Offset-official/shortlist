@@ -1,5 +1,6 @@
 "use client"
-
+import Logo from "@/components/svgs/logo"
+import LogoText from "@/components/svgs/logo_text"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -21,6 +22,7 @@ import LinkButton from "@/components/link-button"
 import { Github, Twitter, Instagram, Mail, Phone } from "lucide-react";
 import LandingFooter from "@/components/LandingFooter"
 import { toast } from "react-hot-toast"
+import GrainyHero from "@/components/GrainyHero"
 
 export default function LandingPage() {
   // Sample data for charts
@@ -45,66 +47,58 @@ export default function LandingPage() {
   const { data: session } = useSession()
 
   return (
-  <div className="flex flex-col min-h-screen">
-      {/* Navbar */}
-      <header className="border-b sticky top-0 z-50 bg-card">
-        <div className=" flex h-16 items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/assets/logo.svg"
-              alt="Shortlist Logo"
-              width={100}
-              height={40}
-              className="rounded" />
-          </Link>
-          <div className="flex items-center gap-4">
-            {!session ? (
-              <>
-                <LinkButton
-                  href="/onboarding?type=recruiter"
-                  text="Join as Recruiter"
-                  className="border-secondary bg-secondary text-secondary hover:bg-secondary/10 hover:text-secondary" />
-                <LinkButton
-                  href="/onboarding?type=candidate"
-                  text="Join as Candidate"
-                  className="border-tertiary bg-tertiary text-tertiary hover:bg-tertiary/10 hover:text-tertiary" />
-                <LinkButton href="/login" text="login" />
-              </>
-            ) : (
-              <>
-                <div className="flex items-center mr-4">
-                  <span className="mr-2">Hi, {session.user?.name}</span>
-                  {session.user?.image && (
-                    <Image
-                      src={session.user.image || "//assets/interview1.png"}
-                      alt="Profile"
-                      width={32}
-                      height={32}
-                      className="rounded-full" />
-                  )}
-                </div>
-                <LinkButton href="/dashboard" text="Go to Dashboard" className="" />
-                <Button
-                  variant="ghost"
-                  onClick={async () => {
-                    await signOut({ redirect: false })
-                    toast.success("Signed out successfully!")
-                  } }
-                  className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                >
-                  Sign Out
-                </Button>
-              </>
-            )}
+    <div className="flex flex-col min-h-screen">
+        <header className="border-b fixed w-full top-0 z-50 bg-background/50">
+          <div className=" flex h-16 items-center justify-between px-6">
+            <Link href="/" className="flex items-center gap-2">
+              <Logo className="w-[50px] h-[50px] fill-foreground" />
+              <LogoText className="w-[100px] h-[50px] fill-foreground" />
+            </Link>
+            <div className="flex items-center gap-4">
+              {!session ? (
+                <>
+                  <LinkButton
+                    href="/onboarding?type=recruiter"
+                    text="Join as Recruiter"
+                    className="border-secondary  hover:bg-secondary/50 text-secondary bg-secondary/10 hover:text-foreground" />
+                  <LinkButton
+                    href="/onboarding?type=candidate"
+                    text="Join as Candidate"
+                    className="border-primary hover:bg-primary/50 text-primary bg-primary/10 hover:text-foreground" />
+                  <LinkButton href="/login" text="login" />
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center mr-4">
+                    <span className="mr-2">Hi, {session.user?.name}</span>
+                    {session.user?.image && (
+                      <Image
+                        src={session.user.image || "./assets/interview1.png"}
+                        alt="Profile"
+                        width={32}
+                        height={32}
+                        className="rounded-full" />
+                    )}
+                  </div>
+                  <LinkButton href="/dashboard" text="Go to Dashboard" className="" />
+                  <Button
+                    variant="ghost"
+                    onClick={async () => {
+                      await signOut({ redirect: false })
+                      toast.success("Signed out successfully!")
+                    }}
+                    className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </header>
-
-      <main className="flex-1 flex flex-col items-center justify-center w-full bg-card">
-        {/* Hero Section */}
-        <section className="py-20 md:py-28 w-full flex justify-center">
-          <div className=" max-w-7xl mx-auto px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+        </header>
+      <GrainyHero>
+        <section className="py-10 w-full min-h-screen flex justify-center">
+            <div className=" max-w-7xl mx-auto px-4 md:px-6 grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="space-y-4 text-center lg:text-left">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter">
                   Connecting the right talent with the right opportunities
@@ -117,32 +111,25 @@ export default function LandingPage() {
                   <LinkButton
                     text="For Recruiters"
                     href="/onboarding?type=recruiter"
-                    className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                    className="bg-secondary text-secondary-foreground hover:bg-secondary/40"
                   >
                     <Building className="mr-2 h-5 w-5" />
                   </LinkButton>
                   <LinkButton
                     text="For Candidates"
                     href="/onboarding?type=candidate"
-                    className="bg-tertiary text-foreground hover:bg-tertiary/90"
+                    className="bg-primary text-foreground hover:bg-primary/40"
                   >
                     <Building className="mr-2 h-5 w-5" />
                   </LinkButton>
                 </div>
               </div>
-              <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] w-full max-w-md mx-auto">
-                <Image
-                  src="/assets/interview1.png"
-                  alt="Hero Image"
-                  fill
-                  className="object-cover rounded-lg" />
-              </div>
             </div>
-          </div>
         </section>
-
+      </GrainyHero>
+      <main className="flex-1 flex flex-col items-center justify-center w-full bg-background">
         {/* Stats Section */}
-        <section className=" py-16 bg-foreground/5 w-full flex justify-center">
+        <section className="  bg-background w-full flex justify-center">
           <div className=" max-w-7xl mx-auto px-4 md:px-6">
             <h2 className="text-3xl font-bold text-center mb-12">Our Impact in Numbers</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -312,7 +299,7 @@ export default function LandingPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-card text-card-foreground w-full flex justify-center">
+        <section className="py-20 bg-background text-foreground w-full flex justify-center">
           <div className=" max-w-7xl mx-auto px-4 md:px-6 text-center">
             <h2 className="text-3xl font-bold mb-4">Ready to transform your hiring process?</h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
