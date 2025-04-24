@@ -9,7 +9,7 @@ import { useSearchParams } from "next/navigation";
 
 const OnboardingClient = () => {
   const searchParams = useSearchParams();
-  const type = searchParams.get("type");
+  const type = searchParams ? searchParams.get("type") : null;
 
   const handleOnboarding = async (formData: any) => {
     try {

@@ -1,4 +1,3 @@
-// app/api/add_interview/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
@@ -35,6 +34,8 @@ const BodySchema = z.object({
   hrTopics: z.array(z.string().min(1)).optional(),
   numQuestions: z.number().int().min(1).optional(),
   expiryDateTime: z.string().datetime(),
+  screenpipeRequired: z.boolean().optional(), // Added for screenpipe
+  terminatorRequired: z.boolean().optional(), // Added for terminator
 });
 
 export async function POST(req: NextRequest) {
@@ -51,6 +52,9 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     return NextResponse.json({ error: 'Invalid payload', detail: err }, { status: 400 });
   }
+
+  // Debug: Log the received payload
+  console.log('Received payload:', body);
 
   /* 3 – Verify recruiter owns the job */
   const job = await prisma.jobListing.findFirst({
@@ -77,8 +81,7 @@ export async function POST(req: NextRequest) {
   }
 
   /* 5 – Normalise topics */
-  const topics =
-    body.type === InterviewType.TECHNICAL ? body.topics ?? [] : [];
+  const topics = body.type === InterviewType.TECHNICAL ? body.topics ?? [] : [];
   const dsaTopics = body.type === InterviewType.TECHNICAL ? body.dsaTopics ?? [] : [];
   const programmingLanguage = body.type === InterviewType.TECHNICAL ? body.programmingLanguage ?? null : null;
   const hrTopics = body.type === InterviewType.HR ? body.hrTopics ?? [] : [];
@@ -98,6 +101,8 @@ export async function POST(req: NextRequest) {
         hrTopics,
         numQuestions,
         expiryDateTime: new Date(expiryDateTime),
+        screenpipeRequired: body.screenpipeRequired ?? false, // Use payload value, default to false
+        terminatorRequired: body.terminatorRequired ?? false, // Use payload value, default to false
       },
     });
 
@@ -120,7 +125,7 @@ export async function POST(req: NextRequest) {
     
         <p>View details and next steps at <a href="https://short-list.vercelapp.com" target="_blank">short‑list.vercelapp.com</a>.</p>
         <p>Best of luck!</p>
-        <p>— The Short‑List Team</p>
+        <p>— The Short‑List Team</p>
       `;
 
       mailTransport

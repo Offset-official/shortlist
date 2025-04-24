@@ -53,13 +53,14 @@ export async function GET(req: NextRequest) {
         }
         return {
           id: iv.id,
-          jobTitle: iv.jobListing.title,
-          companyName: iv.jobListing.Recruiter?.companyName ?? '',
+          jobTitle: iv.jobListing?.title ?? '',
+          companyName: iv.jobListing?.Recruiter?.companyName ?? '',
           type: iv.type,
           topics: iv.topics,
-          expiryDateTime: iv.expiryDateTime.toISOString(),
+          expiryDateTime: iv.expiryDateTime?.toISOString(),
           expired,
         };
+        
       }),
       page,
       totalPages,

@@ -76,7 +76,6 @@ export default async function DsaPage({
   );
 }
 
-
 interface ProblemCardProps {
   problem: CodingProblem;
 }
@@ -92,8 +91,11 @@ function ProblemCard({ problem }: ProblemCardProps) {
     difficultyColor = "bg-red-100 text-red-800";
   }
 
+  // Link to mockInterview with DSA mode and question info
+  const mockInterviewHref = `/mockInterview?dsaId=${problem.id}&title=${encodeURIComponent(problem.title)}&difficulty=${encodeURIComponent(problem.difficulty)}`;
+
   return (
-    <Link href={`/dsa/${problem.id}`}>
+    <Link href={mockInterviewHref}>
       <Card className="cursor-pointer hover:shadow-lg transition">
         <CardHeader className="flex justify-between items-center p-4">
           {/* Display the problem number */}

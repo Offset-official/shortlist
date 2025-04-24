@@ -31,7 +31,8 @@ const PAGE_SIZE = 10;
 export default function JobListingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { jobId } = useParams<{ jobId: string }>();  // Correct method to fetch the jobId
+  const params = useParams<{ jobId: string }>();
+  const jobId = params?.jobId; // Safely access jobId
 
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
