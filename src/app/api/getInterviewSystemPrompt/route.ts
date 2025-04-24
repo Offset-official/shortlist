@@ -30,6 +30,26 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // DSA mock interview: ask only the selected DSA question
+  if (mock && iv.dsaId) {
+    const dsa = await prisma.codingProblem.findUnique({ where: { id: iv.dsaId } });
+    if (!dsa) {
+      return NextResponse.json({ error: "DSA question not found" }, { status: 404 });
+    }
+    let base = `[MOCK MODE] You are conducting a mock DSA interview for candidate ${iv.candidate.name}.\n` +
+      `Ask the following DSA question in detail, guiding the candidate step by step, and provide hints if they get stuck.\n` +
+      `Title: ${dsa.title}\n` +
+      `Difficulty: ${dsa.difficulty}\n` +
+      `Description: ${dsa.description}\n` +
+      `Do not ask any other questions. After the candidate has attempted the solution and discussed their approach, end the interview with <INTERVIEW OVER>.\n` +
+      `For parts of your response that should be spoken by an avatar (excluding code blocks, technical syntax, etc.), wrap those parts in <SPEAKABLE> and </SPEAKABLE> tags.`;
+    return NextResponse.json({
+      systemPrompt: base,
+      screenpipeRequired: iv.screenpipeRequired ?? true,
+      terminatorRequired: iv.terminatorRequired ?? false,
+    });
+  }
+
   let base = `You are conducting an interview for the role “${iv.jobListing.title}” with candidate ${iv.candidate.name}. `;
 
   if (iv.type === InterviewType.TECHNICAL) {
