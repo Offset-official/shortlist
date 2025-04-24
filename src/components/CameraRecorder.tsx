@@ -12,9 +12,11 @@ interface Props {
   /** when true, begin posting diagnostics to /api/diagnostics */
   active: boolean;
   interviewId: string;
+  /** callback to notify parent of camera permission status */
+  onPermissionChange?: (granted: boolean) => void;
 }
 
-export default function CameraRecorder({ active, interviewId }: Props) {
+export default function CameraRecorder({ active, interviewId, onPermissionChange }: Props) {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<"waiting"|"granted"|"denied">("waiting");
   const [faceStatus, setFaceStatus] = useState("No Face Detected");
@@ -36,9 +38,13 @@ export default function CameraRecorder({ active, interviewId }: Props) {
     .then(stream => {
       setStream(stream);
       setPermissionStatus("granted");
+      if (onPermissionChange) onPermissionChange(true);
     })
-    .catch(() => setPermissionStatus("denied"));
-  }, []);
+    .catch(() => {
+      setPermissionStatus("denied");
+      if (onPermissionChange) onPermissionChange(false);
+    });
+  }, [onPermissionChange]);
 
   // 2) sync stream → video element & cleanup
   useEffect(() => {
@@ -142,22 +148,7 @@ export default function CameraRecorder({ active, interviewId }: Props) {
     return () => clearInterval(iv);
   }, [active, faceStatus, poseStatus, interviewId]);
 
-  const sendDiagnostics = async (data: any) => {
-    try {
-      const response = await fetch("/api/diagnostics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        toast.error("Failed to send diagnostics");
-        return;
-      }
-      toast.success("Diagnostics sent successfully");
-    } catch (error) {
-      toast.error("An error occurred while sending diagnostics");
-    }
-  };
+  
 
   return (
     <div className="w-full flex justify-center">
