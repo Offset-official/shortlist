@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Sans, Noto_Sans_Mono } from 'next/font/google'
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Providers } from "./providers";
@@ -48,17 +48,18 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
+  themeColor: "#0B0C0E",
 };
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+ 
+const noto = Noto_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+})
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const noto_mono = Noto_Sans_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 
 export default function RootLayout({
@@ -70,7 +71,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-all duration-75 `}>
+      <body className={`${noto.className} antialiased transition-all duration-75  bg-background text-foreground`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
