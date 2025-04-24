@@ -67,5 +67,9 @@ For parts of your response that should be spoken by an avatar, wrap those parts 
     base = "[MOCK MODE] " + base;
   }
 
-  return NextResponse.json({ systemPrompt: base });
+  return NextResponse.json({
+    systemPrompt: base,
+    screenpipeRequired: iv.screenpipeRequired ?? true,
+    terminatorRequired: iv.terminatorRequired ?? false,
+  });
 }
