@@ -19,3 +19,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
   }
 }
+
+export async function GET(req: Request) {
+  try {
+    return NextResponse.json({ message: 'Diagnostics API is working!' });
+  } catch (err) {
+    console.error('🛑 diagnostics error:', err);
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+  }
+}
+
