@@ -10,8 +10,8 @@ import { pipe } from '@screenpipe/browser';
 import { Badge } from '@/components/ui/badge';
 import { set } from 'date-fns';
 import router from 'next/router';
-
-/* ----------------------------------------------------------- */
+import { PiMicrophoneBold } from "react-icons/pi";
+import { IoArrowUpSharp } from "react-icons/io5";/* ----------------------------------------------------------- */
 /* Helper: strip <SPEAKABLE> … </SPEAKABLE>                    */
 /* ----------------------------------------------------------- */
 function extractSpeakableContent(content: string) {
@@ -746,13 +746,14 @@ function InterviewContent() {
     console.log('[InterviewPage] Avatar loaded, setting avatarReady to true');
     setAvatarReady(true);
   }, []);
-
+  console.log("screenpipe required", screenpipeRequired);
+  console.log("screenpipe ready", screenpipeReady);
   return (
     <div className="flex min-h-screen bg-background text-foreground relative">
       <div className="w-1/2 flex flex-col h-screen p-4">
         <header className="mb-4">
           <h1 className="text-2xl font-bold">
-            {over ? 'Interview Complete' : 'InterviewComprised'}
+            {over ? 'Interview Complete' : 'Interview'}
           </h1>
         </header>
 
@@ -805,48 +806,56 @@ function InterviewContent() {
           </div>
         )}
 
-        {!over && (
-          <div className="mt-4 flex items-end gap-2 bg-muted p-2 rounded-lg">
-            <button
-              onClick={handleMicClick}
-              disabled={!started}
-              className={`w-10 h-10 flex items-center justify-center rounded-full text-foreground text-2xl ${
-                started
-                  ? isRecording
-                    ? 'bg-red-500 hover:bg-red-600'
-                    : 'bg-primary hover:bg-primary/90'
-                  : 'bg-muted cursor-not-allowed opacity-50'
-              }`}
-              title={isRecording ? 'Stop recording' : 'Start recording'}
-            >
-              🎤
-            </button>
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder="Your answer…"
-              disabled={!started}
-              className="flex-1 p-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground resize-none overflow-hidden disabled:opacity-50"
-              style={{ whiteSpace: 'pre-wrap' }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!started}
-              className={`w-10 h-10 flex items-center justify-center rounded-full text-foreground text-2xl ${
-                started ? 'bg-primary hover:bg-primary/90' : 'bg-muted cursor-not-allowed opacity-50'
-              }`}
-            >
-              ↑
-            </button>
-          </div>
-        )}
+{!over && (
+  <div className="mt-4 flex gap-2 bg-muted p-2 rounded-lg">
+    {/* Text area takes up all remaining width */}
+    <textarea
+      ref={textareaRef}
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
+      }}
+      placeholder="Your answer…"
+      disabled={!started}
+      className="flex-1 p-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground resize-none overflow-hidden disabled:opacity-50"
+      style={{ whiteSpace: 'pre-wrap' }}
+    />
+
+    {/* Right-side column for mic + send */}
+    <div className="flex flex-col items-center gap-2">
+      <button
+        onClick={handleMicClick}
+        disabled={!started}
+        className={`w-10 h-10 flex items-center justify-center rounded-full text-foreground text-2xl ${
+          started
+            ? isRecording
+              ? 'bg-red-500 hover:bg-red-600'
+              : 'bg-primary hover:bg-primary/90'
+            : 'bg-muted cursor-not-allowed opacity-50'
+        }`}
+        title={isRecording ? 'Stop recording' : 'Start recording'}
+      >
+        <PiMicrophoneBold />
+      </button>
+
+      <button
+        onClick={handleSend}
+        disabled={!started}
+        className={`w-10 h-10 flex items-center justify-center rounded-full text-foreground text-2xl ${
+          started ? 'bg-primary hover:bg-primary/90' : 'bg-muted cursor-not-allowed opacity-50'
+        }`}
+        title="Send"
+      >
+        <IoArrowUpSharp />
+      </button>
+    </div>
+  </div>
+)}
+
       </div>
 
       <div className="w-1/2 flex flex-col h-screen border-l" style={{ borderColor: 'var(--border)' }}>
