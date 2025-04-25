@@ -12,9 +12,7 @@ pnpm dev
 
 ## Info
 
-`/dashboard` - d
-
-`/color_check`- color scheme of the website
+`/dashboard` - dashboard
 
 `/profile` - user's page
 
