@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Markdown from 'react-markdown';
 import CodeEditor from '@/components/CodeEditor';
@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { pipe } from '@screenpipe/browser';
 import { Badge } from '@/components/ui/badge';
 import { set } from 'date-fns';
+import router from 'next/router';
 
 /* ----------------------------------------------------------- */
 /* Helper: strip <SPEAKABLE> … </SPEAKABLE>                    */
@@ -320,10 +321,10 @@ function InterviewContent() {
   ]);
 
   /* Screenpipe refs for timers & status */
-  const retryInterval = useRef<NodeJS.Timeout>();
-  const retryTimer = useRef<NodeJS.Timeout>();
-  const initInterval = useRef<NodeJS.Timeout>();
-  const pollInterval = useRef<NodeJS.Timeout>();
+  const retryInterval = useRef<NodeJS.Timeout | undefined>(undefined);
+  const retryTimer = useRef<NodeJS.Timeout | undefined>(undefined);
+  const initInterval = useRef<NodeJS.Timeout | undefined>(undefined);
+  const pollInterval = useRef<NodeJS.Timeout | undefined>(undefined);
   const statusRef = useRef<Status>(status);
 
   useEffect(() => {
