@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
     groqForm.append('file', audio, audio.name); // third arg sets filename header
     groqForm.append('model', process.env.GROQ_STT_MODEL ?? 'whisper-large-v3-turbo');
     groqForm.append('response_format', 'json');
+    groqForm.append('language', 'en'); // Optional: specify the language if known
 
     // ---- 4. Hit Groq’s transcription endpoint
     const groqRes = await fetch(
