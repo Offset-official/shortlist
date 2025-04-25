@@ -10,8 +10,8 @@ import { pipe } from '@screenpipe/browser';
 import { Badge } from '@/components/ui/badge';
 import { set } from 'date-fns';
 import router from 'next/router';
-
-/* ----------------------------------------------------------- */
+import { PiMicrophoneBold } from "react-icons/pi";
+import { IoArrowUpSharp } from "react-icons/io5";/* ----------------------------------------------------------- */
 /* Helper: strip <SPEAKABLE> … </SPEAKABLE>                    */
 /* ----------------------------------------------------------- */
 function extractSpeakableContent(content: string) {
@@ -320,6 +320,11 @@ function InterviewContent() {
     { name: 'wikipedia', pattern: 'wikipedia' },
   ]);
 
+  // Speech-to-text state
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
   /* Screenpipe refs for timers & status */
   const retryInterval = useRef<NodeJS.Timeout | undefined>(undefined);
   const retryTimer = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -454,6 +459,77 @@ function InterviewContent() {
       if (data.isInterviewOver) setOver(true);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Speech-to-text handler
+  const handleMicClick = async () => {
+    if (!started || over) {
+      toast.error('Interview must be active to use the microphone.');
+      return;
+    }
+
+    if (isRecording) {
+      // Stop recording
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    try {
+      // Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = async () => {
+        // Create a blob from the recorded audio
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+
+        try {
+          // Send audio to the speech-to-text API
+          const response = await fetch('/api/stt', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error('Speech-to-text API request failed');
+          }
+
+          const { text } = await response.json();
+          if (text) {
+            setInput((prev) => prev + (prev ? ' ' : '') + text);
+            toast.success('Transcription added to input.');
+          } else {
+            toast.error('No speech detected.');
+          }
+        } catch (error) {
+          console.error('[InterviewPage] Speech-to-text error:', error);
+          toast.error('Failed to transcribe audio.');
+        }
+
+        // Clean up the stream
+        stream.getTracks().forEach((track) => track.stop());
+        mediaRecorderRef.current = null;
+        audioChunksRef.current = [];
+      };
+
+      // Start recording
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+      toast.success('Recording started. Click again to stop.');
+    } catch (error) {
+      console.error('[InterviewPage] Microphone access error:', error);
+      toast.error('Failed to access microphone.');
     }
   };
 
@@ -636,7 +712,7 @@ function InterviewContent() {
       }
     }
   }
-  // console.log("screenpipe req", screenpipeRequired);
+
   const renderBadge = () => {
     switch (status) {
       case 'retry':
@@ -651,7 +727,6 @@ function InterviewContent() {
         return bad ? (
           <>
             <Badge variant="destructive">Suspicious Activity in last 10s</Badge>
-            
           </>
         ) : (
           <Badge className="bg-green-400 text-black">All Clear in last 10s</Badge>
@@ -671,7 +746,8 @@ function InterviewContent() {
     console.log('[InterviewPage] Avatar loaded, setting avatarReady to true');
     setAvatarReady(true);
   }, []);
-
+  console.log("screenpipe required", screenpipeRequired);
+  console.log("screenpipe ready", screenpipeReady);
   return (
     <div className="flex min-h-screen bg-background text-foreground relative">
       <div className="w-1/2 flex flex-col h-screen p-4">
@@ -730,34 +806,56 @@ function InterviewContent() {
           </div>
         )}
 
-        {!over && (
-          <div className="mt-4 flex items-end gap-2 bg-muted p-2 rounded-lg">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder="Your answer…"
-              disabled={!started}
-              className="flex-1 p-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground resize-none overflow-hidden disabled:opacity-50"
-              style={{ whiteSpace: 'pre-wrap' }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!started}
-              className={`w-10 h-10 flex items-center justify-center rounded-full text-foreground text-2xl ${
-                started ? 'bg-primary hover:bg-primary/90' : 'bg-muted cursor-not-allowed opacity-50'
-              }`}
-            >
-              ↑
-            </button>
-          </div>
-        )}
+{!over && (
+  <div className="mt-4 flex gap-2 bg-muted p-2 rounded-lg">
+    {/* Text area takes up all remaining width */}
+    <textarea
+      ref={textareaRef}
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
+      }}
+      placeholder="Your answer…"
+      disabled={!started}
+      className="flex-1 p-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground resize-none overflow-hidden disabled:opacity-50"
+      style={{ whiteSpace: 'pre-wrap' }}
+    />
+
+    {/* Right-side column for mic + send */}
+    <div className="flex flex-col items-center gap-2">
+      <button
+        onClick={handleMicClick}
+        disabled={!started}
+        className={`w-10 h-10 flex items-center justify-center rounded-full text-foreground text-2xl ${
+          started
+            ? isRecording
+              ? 'bg-red-500 hover:bg-red-600'
+              : 'bg-primary hover:bg-primary/90'
+            : 'bg-muted cursor-not-allowed opacity-50'
+        }`}
+        title={isRecording ? 'Stop recording' : 'Start recording'}
+      >
+        <PiMicrophoneBold />
+      </button>
+
+      <button
+        onClick={handleSend}
+        disabled={!started}
+        className={`w-10 h-10 flex items-center justify-center rounded-full text-foreground text-2xl ${
+          started ? 'bg-primary hover:bg-primary/90' : 'bg-muted cursor-not-allowed opacity-50'
+        }`}
+        title="Send"
+      >
+        <IoArrowUpSharp />
+      </button>
+    </div>
+  </div>
+)}
+
       </div>
 
       <div className="w-1/2 flex flex-col h-screen border-l" style={{ borderColor: 'var(--border)' }}>
@@ -796,44 +894,44 @@ function InterviewContent() {
           </div>
 
           <div
-  className={`absolute inset-0 items-center justify-center ${
-    activeTab === 'screenpipe' ? 'flex' : 'flex opacity-0 pointer-events-none'
-  }`}
->
-  {probeOver && !screenpipeReady ? (
-    <div className="text-center" style={{ color: 'var(--destructive)' }}>
-      Screenpipe not found. Monitoring disabled.
-    </div>
-  ) : !started ? (
-    <div className="text-center text-lg font-semibold">
-      Start Interview to enable analytics
-    </div>
-  ) : (
-    <div className="flex flex-col items-center justify-center h-full w-full space-y-4">
-      {renderBadge()}
-      <div className="text-lg font-semibold">Violation Count: {violations.length}</div>
-      {violations.length > 0 && (
-        <div
-          style={{
-            maxHeight: '200px', // Fixed height for scrollable area
-            overflowY: 'auto', // Enable vertical scrollbar
-            width: '100%', // Fit container width
-            paddingRight: '8px', // Prevent content from touching scrollbar
-            color: 'var(--muted-foreground)',
-          }}
-          className='px-15'
-        >
-          <h3 className="font-bold mb-2">Violation History:</h3>
-          {violations.map((v, i) => (
-            <div key={i} className="mb-1">
-              {new Date(v.timestamp).toLocaleString()} - {v.website}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )}
-</div>
+            className={`absolute inset-0 items-center justify-center ${
+              activeTab === 'screenpipe' ? 'flex' : 'flex opacity-0 pointer-events-none'
+            }`}
+          >
+            {probeOver && !screenpipeReady ? (
+              <div className="text-center" style={{ color: 'var(--destructive)' }}>
+                Screenpipe not found. Monitoring disabled.
+              </div>
+            ) : !started ? (
+              <div className="text-center text-lg font-semibold">
+                Start Interview to enable analytics
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full w-full space-y-4">
+                {renderBadge()}
+                <div className="text-lg font-semibold">Violation Count: {violations.length}</div>
+                {violations.length > 0 && (
+                  <div
+                    style={{
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      width: '100%',
+                      paddingRight: '8px',
+                      color: 'var(--muted-foreground)',
+                    }}
+                    className="px-15"
+                  >
+                    <h3 className="font-bold mb-2">Violation History:</h3>
+                    {violations.map((v, i) => (
+                      <div key={i} className="mb-1">
+                        {new Date(v.timestamp).toLocaleString()} - {v.website}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
