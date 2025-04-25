@@ -8,6 +8,7 @@ import CameraRecorder from '@/components/CameraRecorder';
 import toast from 'react-hot-toast';
 import { pipe } from '@screenpipe/browser';
 import { Badge } from '@/components/ui/badge';
+import { set } from 'date-fns';
 
 /* ----------------------------------------------------------- */
 /* Helper: strip <SPEAKABLE> … </SPEAKABLE>                    */
@@ -297,7 +298,7 @@ export default function InterviewPage() {
 
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [screenpipeReady, setScreenpipeReady] = useState(false);
-  const [screenpipeRequired] = useState(true);
+  const [screenpipeRequired, setScreenpipeRequired] = useState(false);
   const [fetchedReqs, setFetchedReqs] = useState(false);
 
   const [probeOver, setProbeOver] = useState(false);
@@ -347,7 +348,8 @@ export default function InterviewPage() {
   const fetchSystemPromptAndReqs = async () => {
     console.log(`[InterviewPage] Fetching system prompt and requirements for interviewId: ${interviewId}, mock: ${mock}`);
     const r = await fetch(`/api/getInterviewSystemPrompt?id=${interviewId}&mock=${mock}`);
-    const { systemPrompt } = await r.json();
+    const { systemPrompt, screenpipeRequired_ } = await r.json();
+    setScreenpipeRequired(screenpipeRequired_);
     setFetchedReqs(true);
     return systemPrompt as string;
   };
@@ -627,7 +629,6 @@ export default function InterviewPage() {
   }, [started, over, screenpipeReady, interviewId]);
 
   function analyse(res: any) {
-    let flagged = false;
     const newViolations: { timestamp: string; website: string }[] = [];
   
     res.data?.forEach((it: any) => {
@@ -636,7 +637,6 @@ export default function InterviewPage() {
       const timestamp = new Date().toISOString();
   
       if (!w.includes('connecting talent with opportunities')) {
-        flagged = true;
         console.log(`[InterviewPage] Suspicious activity detected: Interview tab not active at ${timestamp}`);
         newViolations.push({
           timestamp,
@@ -646,7 +646,6 @@ export default function InterviewPage() {
   
       forbiddenWebsites.forEach((website) => {
         if (w.includes(website.pattern)) {
-          flagged = true;
           console.log(`[InterviewPage] Suspicious activity detected: ${website.name} at ${timestamp}`);
           newViolations.push({
             timestamp,
@@ -659,14 +658,18 @@ export default function InterviewPage() {
     if (newViolations.length > 0) {
       console.log('[InterviewPage] New violations detected:', newViolations);
       setViolations((prev) => [...prev, ...newViolations]);
-    }
-  
-    if (flagged !== bad) {
-      console.log(`[InterviewPage] Updating bad status to: ${flagged}`);
-      setBad(flagged);
+      if (!bad) {
+        console.log('[InterviewPage] Updating bad status to: true');
+        setBad(true);
+      }
+    } else {
+      if (bad) {
+        console.log('[InterviewPage] Updating bad status to: false');
+        setBad(false);
+      }
     }
   }
-
+  // console.log("screenpipe req", screenpipeRequired);
   const renderBadge = () => {
     switch (status) {
       case 'retry':
@@ -681,11 +684,7 @@ export default function InterviewPage() {
         return bad ? (
           <>
             <Badge variant="destructive">Suspicious Activity in last 10s</Badge>
-            {violations.map((v, i) => (
-              <Badge key={i} variant="destructive" className="mt-2">
-                {v.website.charAt(0).toUpperCase() + v.website.slice(1)} detected
-              </Badge>
-            ))}
+            
           </>
         ) : (
           <Badge className="bg-green-400 text-black">All Clear in last 10s</Badge>
