@@ -297,7 +297,7 @@ export default function InterviewPage() {
 
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [screenpipeReady, setScreenpipeReady] = useState(false);
-  const [screenpipeRequired, setScreenpipeRequired] = useState(true);
+  const [screenpipeRequired] = useState(true);
   const [fetchedReqs, setFetchedReqs] = useState(false);
 
   const [probeOver, setProbeOver] = useState(false);
@@ -313,6 +313,7 @@ export default function InterviewPage() {
   const [forbiddenWebsites] = useState([
     { name: 'google', pattern: 'google' },
     { name: 'chatgpt', pattern: 'chatgpt' },
+    { name: 'gemini', pattern: 'gemini' },
     { name: 'stackoverflow', pattern: 'stackoverflow' },
     { name: 'github', pattern: 'github' },
     { name: 'wikipedia', pattern: 'wikipedia' },
@@ -346,9 +347,7 @@ export default function InterviewPage() {
   const fetchSystemPromptAndReqs = async () => {
     console.log(`[InterviewPage] Fetching system prompt and requirements for interviewId: ${interviewId}, mock: ${mock}`);
     const r = await fetch(`/api/getInterviewSystemPrompt?id=${interviewId}&mock=${mock}`);
-    const { systemPrompt, screenpipeRequired } = await r.json();
-    console.log(`[InterviewPage] Screenpipe required: ${screenpipeRequired}`);
-    setScreenpipeRequired(!!screenpipeRequired);
+    const { systemPrompt } = await r.json();
     setFetchedReqs(true);
     return systemPrompt as string;
   };
@@ -398,6 +397,10 @@ export default function InterviewPage() {
       toast.error(d.error || 'Could not start interview');
       return;
     }
+
+    // Reset violations and bad state when interview starts
+    setViolations([]);
+    setBad(false);
 
     setStarted(true);
     setLoading(true);
@@ -484,12 +487,12 @@ export default function InterviewPage() {
         setEverConnected(true);
         if (retryInterval.current) {
           clearInterval(retryInterval.current);
+          retryInterval.current = null;
         }
-        // clearInterval(retryInterval.current);
         if (retryTimer.current) {
           clearTimeout(retryTimer.current);
+          retryTimer.current = null;
         }
-        // clearTimeout(retryTimer.current);
         changeStatus('ready');
       } catch (err: any) {
         const http = err?.response?.status ?? err?.status;
@@ -498,11 +501,12 @@ export default function InterviewPage() {
           setEverConnected(true);
           if (retryInterval.current) {
             clearInterval(retryInterval.current);
+            retryInterval.current = null;
           }
           if (retryTimer.current) {
             clearTimeout(retryTimer.current);
+            retryTimer.current = null;
           }
-          // clearTimeout(retryTimer.current);
           changeStatus('ready');
         }
       }
@@ -518,14 +522,14 @@ export default function InterviewPage() {
     }, 5_000);
 
     return () => {
-      if (initInterval.current) {
-        clearInterval(initInterval.current);
-        
-      }
       if (retryInterval.current) {
         clearInterval(retryInterval.current);
+        retryInterval.current = null;
       }
-      
+      if (retryTimer.current) {
+        clearTimeout(retryTimer.current);
+        retryTimer.current = null;
+      }
     };
   }, [status]);
 
@@ -539,6 +543,7 @@ export default function InterviewPage() {
         if (c <= 1) {
           if (initInterval.current) {
             clearInterval(initInterval.current);
+            initInterval.current = null;
           }
           console.log('[InterviewPage] Screenpipe initialization complete, setting status to ready');
           changeStatus('ready');
@@ -551,14 +556,16 @@ export default function InterviewPage() {
     return () => {
       if (initInterval.current) {
         clearInterval(initInterval.current);
+        initInterval.current = null;
       }
     };
   }, [status]);
 
   // Combined diagnostics for CameraRecorder and Screenpipe
   useEffect(() => {
-    if (!started || over) {
-      console.log(`[InterviewPage] Diagnostics not started: started=${started}, over=${over}`);
+    // Run diagnostics if Screenpipe is enabled, even before interview starts
+    if (!screenpipeReady) {
+      console.log('[InterviewPage] Diagnostics not started: screenpipeReady=false');
       return;
     }
 
@@ -569,30 +576,29 @@ export default function InterviewPage() {
         faceData: null,
         cameraImage: null,
         screenpipeData: null,
-        violations,
+        violations: started ? violations : [], // Only include violations after interview starts
       };
 
-      // Screenpipe diagnostics if required and enabled
-      if (screenpipeRequired && screenpipeReady) {
-        try {
-          console.log('[InterviewPage] Querying Screenpipe for diagnostics');
-          const res = await pipe.queryScreenpipe({
-            startTime: new Date(Date.now() - 10_000).toISOString(),
-            limit: 10,
-            contentType: 'ocr',
-          });
-          diagnosticsData.screenpipeData = res;
+      // Screenpipe diagnostics
+      try {
+        console.log('[InterviewPage] Querying Screenpipe for diagnostics');
+        const res = await pipe.queryScreenpipe({
+          startTime: new Date(Date.now() - 10_000).toISOString(),
+          limit: 10,
+          contentType: 'ocr',
+        });
+        diagnosticsData.screenpipeData = res;
+        if (started) {
+          // Only analyze and store violations after interview starts
           analyse(res);
-          console.log('[InterviewPage] Screenpipe diagnostics collected');
-        } catch (err) {
-          console.warn('[InterviewPage] Screenpipe diagnostics failed, will retry:', err);
         }
-      } else {
-        console.log(`[InterviewPage] Skipping Screenpipe diagnostics: required=${screenpipeRequired}, ready=${screenpipeReady}`);
+        console.log('[InterviewPage] Screenpipe diagnostics collected');
+      } catch (err) {
+        console.warn('[InterviewPage] Screenpipe diagnostics failed, will retry:', err);
       }
 
-      // Camera diagnostics are handled by CameraRecorder, but we can include its latest state
-      if (cameraRecorderRef.current) {
+      // Camera diagnostics (only when interview is active)
+      if (started && cameraRecorderRef.current) {
         diagnosticsData.faceData = cameraRecorderRef.current.faceStatus || 'Unknown';
         diagnosticsData.poseData = cameraRecorderRef.current.poseStatus || 'Unknown';
         console.log('[InterviewPage] Camera diagnostics included from CameraRecorder');
@@ -607,44 +613,54 @@ export default function InterviewPage() {
       }).catch((err) => console.error('[InterviewPage] Diagnostics POST failed:', err));
     };
 
-    // Run immediately and then every second
+    // Run immediately and then every 10 seconds
     poll();
-    diagnosticsInterval.current = setInterval(poll, 1000);
+    diagnosticsInterval.current = setInterval(poll, 10_000);
 
     return () => {
       console.log('[InterviewPage] Cleaning up diagnostics interval');
       if (diagnosticsInterval.current) {
         clearInterval(diagnosticsInterval.current);
+        diagnosticsInterval.current = null;
       }
     };
-  }, [started, over, screenpipeRequired, screenpipeReady, violations, interviewId]);
+  }, [started, over, screenpipeReady, interviewId]);
 
   function analyse(res: any) {
     let flagged = false;
     const newViolations: { timestamp: string; website: string }[] = [];
-
+  
     res.data?.forEach((it: any) => {
       if (it.type !== 'OCR') return;
       const w = it.content.windowName?.toLowerCase() || '';
+      const timestamp = new Date().toISOString();
+  
       if (!w.includes('connecting talent with opportunities')) {
         flagged = true;
+        console.log(`[InterviewPage] Suspicious activity detected: Interview tab not active at ${timestamp}`);
+        newViolations.push({
+          timestamp,
+          website: 'Interview tab not active',
+        });
       }
-
+  
       forbiddenWebsites.forEach((website) => {
         if (w.includes(website.pattern)) {
+          flagged = true;
+          console.log(`[InterviewPage] Suspicious activity detected: ${website.name} at ${timestamp}`);
           newViolations.push({
-            timestamp: new Date().toISOString(),
+            timestamp,
             website: website.name,
           });
         }
       });
     });
-
+  
     if (newViolations.length > 0) {
       console.log('[InterviewPage] New violations detected:', newViolations);
       setViolations((prev) => [...prev, ...newViolations]);
     }
-
+  
     if (flagged !== bad) {
       console.log(`[InterviewPage] Updating bad status to: ${flagged}`);
       setBad(flagged);
@@ -807,7 +823,6 @@ export default function InterviewPage() {
             }`}
           >
             <CameraRecorder
-              // ref={cameraRecorderRef}
               active={started && !over}
               interviewId={interviewId}
               onPermissionChange={setCameraEnabled}
@@ -815,31 +830,44 @@ export default function InterviewPage() {
           </div>
 
           <div
-            className={`absolute inset-0 items-center justify-center ${
-              activeTab === 'screenpipe' ? 'flex' : 'flex opacity-0 pointer-events-none'
-            }`}
-          >
-            {probeOver && !screenpipeReady ? (
-              <div className="text-center" style={{ color: 'var(--destructive)' }}>
-                Screenpipe not found. Monitoring disabled.
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full w-full space-y-4">
-                {renderBadge()}
-                <div className="text-lg font-semibold">Violation Count: {violations.length}</div>
-                {violations.length > 0 && (
-                  <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                    <h3 className="font-bold mb-2">Violation History:</h3>
-                    {violations.map((v, i) => (
-                      <div key={i} className="mb-1">
-                        {new Date(v.timestamp).toLocaleString()} - {v.website}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+  className={`absolute inset-0 items-center justify-center ${
+    activeTab === 'screenpipe' ? 'flex' : 'flex opacity-0 pointer-events-none'
+  }`}
+>
+  {probeOver && !screenpipeReady ? (
+    <div className="text-center" style={{ color: 'var(--destructive)' }}>
+      Screenpipe not found. Monitoring disabled.
+    </div>
+  ) : !started ? (
+    <div className="text-center text-lg font-semibold">
+      Start Interview to enable analytics
+    </div>
+  ) : (
+    <div className="flex flex-col items-center justify-center h-full w-full space-y-4">
+      {renderBadge()}
+      <div className="text-lg font-semibold">Violation Count: {violations.length}</div>
+      {violations.length > 0 && (
+        <div
+          style={{
+            maxHeight: '200px', // Fixed height for scrollable area
+            overflowY: 'auto', // Enable vertical scrollbar
+            width: '100%', // Fit container width
+            paddingRight: '8px', // Prevent content from touching scrollbar
+            color: 'var(--muted-foreground)',
+          }}
+          className='px-15'
+        >
+          <h3 className="font-bold mb-2">Violation History:</h3>
+          {violations.map((v, i) => (
+            <div key={i} className="mb-1">
+              {new Date(v.timestamp).toLocaleString()} - {v.website}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )}
+</div>
         </div>
       </div>
 
