@@ -11,7 +11,7 @@ import toast from "react-hot-toast"
 const Navbar = () => {
     const { data: session } = useSession()
     return(
-        <header className="border-b fixed w-full top-0 z-50 bg-background/50">
+        <header className="border-b fixed w-full top-0 z-50 bg-background/70">
         <div className=" flex h-16 items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2">
             <Logo className="w-[50px] h-[50px] fill-foreground" />

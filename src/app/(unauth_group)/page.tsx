@@ -104,20 +104,19 @@ export default function LandingPage() {
                 <span className="font-medium">Highly customizable</span> and easy to use for both{" "}
                 <span className="font-semibold">candidates</span> and <span className="font-semibold">recruiters</span>.
               </span>
-            </li>
-            <li className="flex items-start gap-2">
-              •
-              <span>
-                <span className="font-medium">Multi-platform support</span>: Works seamlessly on mobile, laptop, and
-                tablet—practice and assess anywhere, anytime.
-              </span>
-            </li>
-          </ul>
-        </section>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      •
+                      <span>
+                      <span className="font-medium">Progressive Web App (PWA)</span>: Practice and assess seamlessly on any
+                      device—mobile, laptop, or tablet—anywhere, anytime.
+                      </span>
+                    </li>
+                    </ul>
+                  </section>
 
-
-
-        <section className="py-10 bg-primary/10 w-full flex justify-center">
+                  {/* For Candidates Section */}
+                  <section className="py-10 bg-primary/10 w-full flex justify-center">
           <div className=" max-w-7xl mx-auto px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="order-2 lg:order-1 relative h-[550px]">
