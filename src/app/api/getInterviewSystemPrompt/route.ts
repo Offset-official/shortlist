@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
       `For parts of your response that should be spoken by an avatar (excluding code blocks, technical syntax, etc.), wrap those parts in <SPEAKABLE> and </SPEAKABLE> tags.`;
     return NextResponse.json({
       systemPrompt: base,
-      screenpipeRequired: iv.screenpipeRequired ?? true,
+      screenpipeRequired_: iv.screenpipeRequired ?? true,
       terminatorRequired: iv.terminatorRequired ?? false,
     });
   }
