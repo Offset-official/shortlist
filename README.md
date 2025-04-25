@@ -32,7 +32,6 @@ pnpm dev
 
 ## TODOs
 
-- Toasts
 - UI
 - Job listings needs to made server sided
 - Secure Routes
