@@ -1,26 +1,16 @@
 {
-    "name": "ShortList",
-    "short_name": "ShortList",
+    "name": "Shortlist",
+    "short_name": "Shortlist",
     "icons": [
       {
-        "src": "/assets/interview1.png",
-        "sizes": "192x192",
-        "type": "image/png",
-        "purpose": "any maskable"
-      },
-      {
-        "src": "/assets/interview1.png",
-        "sizes": "384x384",
-        "type": "image/png"
-      },
-      {
-        "src": "/assets/interview1.png",
-        "sizes": "512x512",
-        "type": "image/png"
+        "src": "/assets/logo.svg",
+        "sizes": "any",
+        "type": "image/svg+xml",
+        "purpose": "any"
       }
     ],
-    "theme_color": "#FFFFFF",
-    "background_color": "#FFFFFF",
+    "theme_color": "#E55D3F",
+    "background_color": "#E55D3F",
     "start_url": "/",
     "display": "standalone",
     "orientation": "portrait"
