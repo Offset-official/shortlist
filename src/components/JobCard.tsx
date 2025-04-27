@@ -17,6 +17,8 @@ type JobCardProps = {
     experienceLevel: string | null;
     skills: string[];
     postedDate: Date;
+    description: string;
+    // description: string;
     applicationCount: number;
     expiryDate?: Date | null;
     Recruiter: {
@@ -104,6 +106,9 @@ export default function JobCard({ job, appliedByMe }: JobCardProps & { appliedBy
             ))}
             {job.skills.length > 4 && <Badge variant="secondary" className="text-xs px-2 py-0.5">+{job.skills.length - 4} more</Badge>}
           </div>
+        </div>
+        <div className="mb-2 text-white-700 text-sm">
+          <strong>Description:</strong> {job.description}
         </div>
         <div className="flex-1" />
         <div className="flex flex-col gap-2 mt-2">

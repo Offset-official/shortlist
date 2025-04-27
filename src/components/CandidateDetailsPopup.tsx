@@ -1,7 +1,7 @@
 // components/CandidateDetailsPopup.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,20 @@ export default function CandidateDetailsPopup({
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const { resume } = candidate;
   // console.log("JOB LISTING ID", jobListingId);
+
+  // Check if interview exists and has been taken
+  const [interviewTaken, setInterviewTaken] = useState<null | { id: number }>(null);
+  useEffect(() => {
+    // Fetch interview for this candidate and jobListingId
+    fetch(`/api/interviews?candidateId=${candidate.id}&jobListingId=${jobListingId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.interview && data.interview.interviewStarted) {
+          setInterviewTaken({ id: data.interview.id });
+        }
+      })
+      .catch(() => {});
+  }, [candidate.id, jobListingId]);
 
   return (
     <>
@@ -179,9 +193,19 @@ export default function CandidateDetailsPopup({
             <Button variant="outline" onClick={onClose}>
               Close
             </Button>
-            <Button onClick={() => setIsScheduleOpen(true)}>
-              Schedule Interview
-            </Button>
+            {interviewTaken ? (
+              <Button
+                onClick={() => {
+                  window.location.href = `/interviewAnalysis?interviewId=${interviewTaken.id}`;
+                }}
+              >
+                Interview Details
+              </Button>
+            ) : (
+              <Button onClick={() => setIsScheduleOpen(true)}>
+                Schedule Interview
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -194,7 +218,6 @@ export default function CandidateDetailsPopup({
           candidateId={candidate.id}
           jobListingId={jobListingId}
           onScheduled={() => {
-            // place for toast, refetch, etc.
             setIsScheduleOpen(false);
           }}  
         />
