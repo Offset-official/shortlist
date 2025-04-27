@@ -264,6 +264,9 @@ export default function CandidateDashboard() {
                 <li key={i}>{rec}</li>
               ))}
             </ul>
+            <Button className="mt-6" onClick={() => router.push('/roadmaps')}>
+              View Roadmap
+            </Button>
           </CardContent>
         </Card>
 
