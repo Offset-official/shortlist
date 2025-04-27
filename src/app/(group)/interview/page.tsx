@@ -770,8 +770,8 @@ function InterviewContent() {
   console.log("screenpipe required", screenpipeRequired);
   console.log("screenpipe ready", screenpipeReady);
   return (
-    <div className="flex min-h-screen bg-background text-foreground relative">
-      <div className="w-1/2 flex flex-col h-screen p-4">
+    <div className="flex min-h-[85vh] bg-background text-foreground relative">
+      <div className="w-1/2 flex flex-col min-h-[85vh] p-4">
         <header className="mb-4">
           <h1 className="text-2xl font-bold">
             {over ? 'Interview Complete' : 'Interview'}
@@ -880,7 +880,7 @@ function InterviewContent() {
 
       </div>
 
-      <div className="w-1/2 flex flex-col h-screen border-l" style={{ borderColor: 'var(--border)' }}>
+      <div className="w-1/2 flex flex-col  h-[85vh] border-l" style={{ borderColor: 'var(--border)' }}>
         <div className="flex items-center p-2 border-b" style={{ borderColor: 'var(--border)' }}>
           {(['code', 'camera', 'screenpipe'] as const).map((t) => (
             <button
