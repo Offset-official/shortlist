@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const expiryDateTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
 
   // Debug: Log the received payload
-  console.log('Received payload:', body);
+  // console.log('Received payload:', body);
 
   try {
     const interview = await prisma.interview.create({

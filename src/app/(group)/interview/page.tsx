@@ -142,7 +142,7 @@ function TalkingHeadComponent({ text, gender, onLoad }: TalkingHeadProps) {
             ttsVoice: 'en-GB-Standard-A',
             lipsyncLang: 'en',
             ttsRate: 1.15,
-            ttsVolume: 16,
+            ttsVolume: 15.9,
           },
           (ev: ProgressEvent) => {
             if (ev.lengthComputable) {

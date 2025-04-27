@@ -124,3 +124,7 @@ export async function GET(req: NextRequest) {
     terminatorRequired: iv.terminatorRequired ?? false,
   });
 }
+
+
+i want the interview to simulate a real interview
+so make the technical questions follow and precede questions of complexities and data sractures as well instead of directly jumping into coding
