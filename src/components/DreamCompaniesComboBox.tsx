@@ -114,12 +114,22 @@ function MultiSelectPopover({
         You can adjust these classes to match your UI design system.
       */}
       <PopoverTrigger
-        className="h-10 w-full rounded-md border border-border bg-transparent px-3 py-2 text-left text-sm focus:outline-none"
+        className="h-10 w-full rounded-md border border-border bg-transparent px-3 py-2 text-left text-sm focus:outline-none min-h-[2.5rem] flex flex-wrap gap-2 items-center"
       >
-        {/* Display the selected items or a placeholder */}
-        {selectedValues.length > 0
-          ? selectedValues.join(", ")
-          : "Select up to 2 companies"}
+        {selectedValues.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {selectedValues.map((company) => (
+              <span
+                key={company}
+                className="inline-flex items-center px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold shadow"
+              >
+                {company}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground">Select up to 2 companies</span>
+        )}
       </PopoverTrigger>
       <PopoverContent className="p-0 w-[250px]">
         <Command>

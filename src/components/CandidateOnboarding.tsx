@@ -178,48 +178,44 @@ const CandidateOnboarding = () => {
   };
 
   return (
-
-    <Card className="relative w-[75vw] h-[75vh] shadow-lg">
-      <div className="text-foreground font-bold px-12 mt-8 text-3xl flex justify-between">
-        <div>Candidate Onboarding </div>
-
-        <Link href="/onboarding?type=recruiter" className="text-sm font-normal text-muted-foreground/50 hover:text-foreground/70" > Recruiter?</Link>
+    <Card className="relative w-full max-w-7xl mx-auto shadow-lg border-none bg-card">
+      <div className="text-foreground font-bold px-6 md:px-12 mt-8 text-2xl md:text-3xl flex flex-col md:flex-row justify-between items-center gap-2">
+        <div>Candidate Onboarding</div>
+        <Link href="/onboarding?type=recruiter" className="text-xs md:text-sm font-normal text-muted-foreground/70 hover:text-primary transition-colors">Recruiter?</Link>
       </div>
-      <div className="flex h-full">
-        {/* Left side */}
-        <div className="flex w-[40%] flex-col items-center justify-center relative">
-          <div className="relative w-[300px] h-[300px] bg-transparent px-[10%]">
+      <div className="flex flex-col md:flex-row h-full min-h-[60vh]">
+        {/* Left side (Image) */}
+        <div className="hidden md:flex w-[40%] flex-col items-center justify-center relative  rounded-l-xl">
+          <div className="relative w-[220px] h-[220px] md:w-[300px] md:h-[300px] bg-transparent px-[10%]">
             <Image
               src="/assets/interview1.png"
               alt="Interview"
               fill
               priority
+              className="object-contain drop-shadow-xl"
             />
           </div>
           <div className="w-full flex flex-row items-center justify-center mt-4">
-            <p className="mb-2 text-xl mr-3 font-bold">
-              Get placed in companies like
-            </p>
+            <p className="mb-2 text-base md:text-xl mr-2 font-bold text-center">Get placed in companies like</p>
             <RotatingText
               // @ts-ignore
               texts={["Google", "Microsoft", "Netflix", "Meta"]}
-              mainClassName="px-1 sm:px-2 md:px-3 bg-accent text-foreground overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
+              mainClassName="px-2 bg-accent text-foreground overflow-hidden py-1 justify-center rounded-lg shadow"
               staggerFrom="last"
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "-120%" }}
               staggerDuration={0.025}
-              splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1 font-bold text-xl"
+              splitLevelClassName="overflow-hidden pb-0.5 font-bold text-base md:text-xl"
               transition={{ type: "spring", damping: 40, stiffness: 400 }}
               rotationInterval={2000}
             />
           </div>
         </div>
-
-        {/* Right side */}
-        <div className="w-[60%] flex flex-col justify-center p-6 pt-0">
+        {/* Right side (Form) */}
+        <div className="w-full md:w-[60%] flex flex-col justify-center p-4 md:p-8">
           {isRedirecting ? (
-            <div className="flex flex-col items-center justify-center h-full">
+            <div className="flex flex-col items-center justify-center h-full min-h-[40vh]">
               <p className="text-2xl font-bold">Signing Up...</p>
             </div>
           ) : (
@@ -230,11 +226,11 @@ const CandidateOnboarding = () => {
                 onFinalStepCompleted={() => form.handleSubmit(onSubmit)()}
                 backButtonText="Previous"
                 nextButtonText="Next"
-                className="w-full h-full"
+                className="w-full h-full "
                 onNextStepValidate={validateCurrentStep}
               >
                 {/* Step 1: Name */}
-                <Step>
+                <Step >
                   <FormField
                     control={form.control}
                     name="name"

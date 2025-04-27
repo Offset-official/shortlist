@@ -163,25 +163,12 @@ const RecruiterOnboarding = () => {
       <div className="flex h-full">
         <div className="flex w-[40%] flex-col items-center justify-center relative">
           <div className="relative w-[300px] h-[300px] bg-transparent px-[10%]">
-            <Image src="/assets/interview1.png" alt="Interview" fill priority />
+            <Image src="/assets/report.png" alt="Interview" fill priority />
           </div>
           <div className="w-full flex flex-row items-center justify-center mt-4">
             <p className="mb-2 text-xl mr-3 font-bold">
-              Recruiters!!! COME ON BOARD
+              Get the best talent for your company
             </p>
-            <RotatingText
-              // @ts-ignore
-              texts={["Google", "Microsoft", "Netflix", "Meta"]}
-              mainClassName="px-1 sm:px-2 md:px-3 bg-accent text-foreground overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
-              staggerFrom="last"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "-120%" }}
-              staggerDuration={0.025}
-              splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1 font-bold text-xl"
-              transition={{ type: "spring", damping: 40, stiffness: 400 }}
-              rotationInterval={2000}
-            />
           </div>
         </div>
 
