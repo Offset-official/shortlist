@@ -8,9 +8,9 @@ export async function GET(request: NextRequest) {
         const data = await prisma.jobListing.findMany({
             where: {
                 status: 'active',
-                expiryDate: {
-                    gt: new Date(),
-                },
+                // expiryDate: {
+                //     gt: new Date(),
+                // },
             },
             include: {
                 Recruiter: true,

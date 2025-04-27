@@ -21,6 +21,8 @@ const JobListings = ()=>{
         const data = await response.json();
         setJobs(data.jobs);
         toast.success("Jobs action successful!");
+        // console.log("Jobs fetched:", data.jobs);
+
       } catch (error: unknown) {
         setError(error instanceof Error ? error.message : 'An unknown error occurred');
         toast.error("Jobs action failed.");
