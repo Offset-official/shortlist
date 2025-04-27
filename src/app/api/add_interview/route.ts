@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Debug: Log the received payload
-  console.log('Received payload:', body);
+  // console.log('Received payload:', body);
 
   /* 3 – Verify recruiter owns the job */
   const job = await prisma.jobListing.findFirst({
