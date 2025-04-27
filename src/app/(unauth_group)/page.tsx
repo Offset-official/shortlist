@@ -49,7 +49,7 @@ export default function LandingPage() {
             <Image alt='terminator logo' src="/assets/screenpipe.png" width={150} height={100} className="absolute bottom-0 -left-16 rotate-32"/>
             <Image alt='mediapipe logo' src="/assets/mediapipe.png" width={300} height={100} className="absolute bottom-0 -right-24 -rotate-32"/>
 
-            <div className="relative w-40 h-60 md:w-[25vw] md:h-80 z-30 -right-40 top-6 -rotate-12">
+            <div className="relative w-40 h-60 md:w-[35vw] md:h-[40vh] z-30 -right-40 top-6 -rotate-12">
               <Image
                 alt="Shortlist AI Interview Mockup 1"
                 src="/assets/mock1.png"
@@ -58,7 +58,7 @@ export default function LandingPage() {
                 style={{ zIndex: 3 }}
               />             
             </div>
-            <div className="relative -ml-8 w-80 h-60 md:w-[70vw] md:h-[45vh] z-50">
+            <div className="relative -ml-8 w-80 h-60 md:w-[70vw] md:h-[45vh] z-50 text-foreground">
               <Image
                 alt="Shortlist AI Interview Mockup 2"
                 src="/assets/mock2.png"
@@ -67,7 +67,7 @@ export default function LandingPage() {
                 style={{ zIndex: 4 }}
               />
             </div>
-            <div className="relative w-40 h-60 md:w-[25vw] md:h-72 z-10 right-50 rotate-12">
+            <div className="relative w-40 h-60 md:w-[35vw] md:h-96 z-10 right-60 rotate-12">
               <Image
                 alt="Shortlist AI Interview Mockup 3"
                 src="/assets/mock3.png"
