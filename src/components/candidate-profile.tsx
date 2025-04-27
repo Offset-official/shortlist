@@ -4,7 +4,6 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import ResumeButton from '@/components/ResumeButton';
 import Loading from '@/components/ui/loading';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,22 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { ResumeUploader } from '@/components/resume-uploader';
 import { toast } from "react-hot-toast";
 import { FileText } from 'lucide-react';
+import { Candidate } from '@/interfaces/model_interfaces';
 
-type Candidate = {
-  id: number;
-  name: string;
-  email: string;
-  year?: number | null;
-  collegeName?: string | null;
-  location?: string | null;
-  resume?: any;
-  dreamCompanies: string[];
-  skills: string[];
-  createdAt: string; // coming as ISO string from JSON
-  jobListingId?: number | null;
-  shortlistedJobListingId?: number | null;
-  resumeAnalysis?: any;
-};
 
 const CandidateProfile = () => {
   const { data: session, status } = useSession();
@@ -165,7 +150,7 @@ const CandidateProfile = () => {
                       </h3>
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         {/* Overall Score */}
-                        <div className="flex flex-col items-center md:items-start gap-1">
+                        <div className="flex flex-col items-center  gap-1">
                           <span className="text-4xl font-extrabold text-primary">{candidate.resumeAnalysis.overallScore}</span>
                           <span className="text-xs text-muted-foreground">Overall Score</span>
                         </div>
@@ -184,18 +169,10 @@ const CandidateProfile = () => {
                           </div>
                         </div>
                         {/* Recommendations */}
-                        <div className="flex-1 flex flex-col gap-1">
-                          <span className="font-semibold text-sm mb-1">Top Recommendations</span>
-                          <ul className="list-disc pl-5 text-xs text-muted-foreground">
-                            {candidate.resumeAnalysis.overallRecommendations.map((rec: string, i: number) => (
-                              <li key={i}>{rec}</li>
-                            ))}
-                          </ul>
-                        </div>
+
                       </div>
                       <div className="mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                        <span className="text-xs text-muted-foreground max-w-xl">{candidate.resumeAnalysis.overallRationale}</span>
-                        <Button size="sm" variant="outline" onClick={() => router.push('/profile/resume-analysis')}>View Detailed Analysis</Button>
+                        <Button size="sm" variant="outline" onClick={() => router.push('/resume-analysis')}>View Detailed Analysis</Button>
                       </div>
                     </div>
                   </>
@@ -205,7 +182,7 @@ const CandidateProfile = () => {
                     <Button size="sm" variant="outline" onClick={() => router.push('/resume')}>Get Resume Analyzed</Button>
                   </div>
                 )}
-                <span className="text-xs text-muted-foreground/70 font-thin">Improve your resume to increase your chances of getting shortlisted for jobs.</span>
+                <span className="text-xs text-muted-foreground font-medium">Improve your resume to increase your chances of getting shortlisted for jobs.</span>
               </div>
             </div>
 
