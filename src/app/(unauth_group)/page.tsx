@@ -54,16 +54,16 @@ export default function LandingPage() {
                 alt="Shortlist AI Interview Mockup 1"
                 src="/assets/mock1.png"
                 fill
-                className="object-contain rounded-lg shadow-lg"
+                className="object-contain rounded-lg"
                 style={{ zIndex: 3 }}
               />             
             </div>
-            <div className="relative -ml-8 w-80 h-60 md:w-[50vw] md:h-80 z-50">
+            <div className="relative -ml-8 w-80 h-60 md:w-[70vw] md:h-[45vh] z-50">
               <Image
                 alt="Shortlist AI Interview Mockup 2"
                 src="/assets/mock2.png"
                 fill
-                className="object-contain rounded-lg shadow-lg"
+                className="object-contain rounded-lg "
                 style={{ zIndex: 4 }}
               />
             </div>
@@ -72,7 +72,7 @@ export default function LandingPage() {
                 alt="Shortlist AI Interview Mockup 3"
                 src="/assets/mock3.png"
                 fill
-                className="object-contain rounded-lg shadow-lg"
+                className="object-contain rounded-lg "
                 style={{ zIndex: 1 }}
               />
             </div>
