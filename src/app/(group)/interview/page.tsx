@@ -142,7 +142,7 @@ function TalkingHeadComponent({ text, gender, onLoad }: TalkingHeadProps) {
             ttsVoice: 'en-GB-Standard-A',
             lipsyncLang: 'en',
             ttsRate: 1.15,
-            ttsVolume: 16,
+            ttsVolume: 15.9,
           },
           (ev: ProgressEvent) => {
             if (ev.lengthComputable) {
@@ -456,7 +456,28 @@ function InterviewContent() {
       const final = [...next, { role: 'assistant', content: cleanedContent }];
       setMessages(final);
       await saveHistory(final);
-      if (data.isInterviewOver) setOver(true);
+      if (data.isInterviewOver) {
+        setOver(true);
+        // Call /api/interviewOver with interviewId
+        try {
+          console.log(`[InterviewPage] Interview over, calling /api/interviewOver for interviewId: ${interviewId}`);
+          const response = await fetch('/api/interviewOver', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ interviewId }),
+          });
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('[InterviewPage] Failed to call /api/interviewOver:', errorData);
+            toast.error('Failed to finalize interview.');
+          } else {
+            console.log('[InterviewPage] Successfully called /api/interviewOver');
+          }
+        } catch (error) {
+          console.error('[InterviewPage] Error calling /api/interviewOver:', error);
+          toast.error('Error finalizing interview.');
+        }
+      }
     } finally {
       setLoading(false);
     }
