@@ -107,10 +107,12 @@ model Interview {
   screenpipeRequired  Boolean        @default(false)
   terminatorRequired  Boolean        @default(false)
   interviewStarted    Boolean        @default(false)
-
+  interviewStartedAt  DateTime?     // when the interview actually started
+  interviewEndedAt    DateTime?     // when the interview ended
   dsaId               Int?          // for DSA mock interviews, the id of the coding problem
-
   createdAt           DateTime       @default(now())
+  diagnostics         Diagnostics[] // Back-reference for diagnostics
+  interviewAnalysis   Json?         // Analysis of the interview  
 }
 
 model CodingProblem {
@@ -129,4 +131,16 @@ model CodingProblem {
   @@index([difficulty])
   @@index([category])
   @@index([companiesAskedIn])
+}
+
+model Diagnostics {
+  id           Int      @id @default(autoincrement())
+  interviewId  Int
+  poseData     Json?
+  faceData     Json?
+  cameraImage  String?  // base64 or URL
+  screenpipeData Json?
+  createdAt    DateTime @default(now())
+
+  interview    Interview @relation(fields: [interviewId], references: [id])
 }

@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   }
   await prisma.interview.update({
     where: { id: Number(interviewId) },
-    data: { interviewStarted: true },
+    data: { interviewStarted: true, interviewStartedAt: new Date() },
   });
   return NextResponse.json({ success: true });
 }
