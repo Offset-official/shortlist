@@ -2,7 +2,7 @@
   position: relative;
   width: 100%;
   min-height: 500px;
-  background-color: #0B0C0E;
+  background-color: var(--background);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -24,7 +24,7 @@
   height: 100%;
   z-index: 0;
   opacity: 0.4;
-  background: #0B0C0E;
+  background: var(--background);
   filter: url(#noiseFilter);
   pointer-events: none;
 }
@@ -38,7 +38,7 @@
   height: 100%;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(to right, #0B0C0E 20%, transparent 100%), linear-gradient(to top, #0B0C0E 0%, transparent 35%), linear-gradient(to bottom, #0B0C0E 0%, transparent 35%);
+  background: linear-gradient(to right, var(--background) 20%, transparent 100%), linear-gradient(to top, var(--background) 0%, transparent 35%), linear-gradient(to bottom, var(--background) 0%, transparent 35%);
 }
 
 .blobCont {
@@ -47,35 +47,25 @@
   justify-content: center;
   align-items: center;
   z-index: 1;
-  height: 600px;
-  width: 600px;
+  height: 800px;
+  width: 800px;
   position: absolute;
-  right: 8em;
+  right: 5em;
   top: 0;
   pointer-events: none;
 }
 
 .blob {
-  border-radius: 100px;
+  border-radius: 200px;
   filter: blur(60px);
   position: absolute;
 }
 
 .primary {
-  background-color: var(--primary);
-  top: 300px;
-  left: 100px;
-  height: 250px;
-  width: 250px;
   animation: primaryBlob 8s infinite ease;
 }
 
 .secondary {
-  background-color: var(--secondary);
-  top: 200px;
-  right: 0;
-  height: 250px;
-  width: 250px;
   animation: secondaryBlob 8s infinite linear;
 }
 

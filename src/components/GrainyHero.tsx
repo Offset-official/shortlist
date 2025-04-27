@@ -8,18 +8,11 @@ interface GrainyHeroProps {
 const GrainyHero = ({ children }: GrainyHeroProps) => (
   <div className={styles.heroWrapper}>
     {/* SVG noise filter */}
-    <svg className={styles.noiseSvg}>
-      <filter id="noiseFilter">
-        <feTurbulence type="fractalNoise" baseFrequency="0.6" stitchTiles="stitch" />
-        <feColorMatrix in="colorNoise" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0" />
-        <feComposite operator="in" in2="SourceGraphic" result="monoNoise" />
-        <feBlend in="SourceGraphic" in2="monoNoise" mode="screen" />
-      </filter>
-    </svg>
+
     {/* Blobs */}
     <div className={styles.blobCont}>
-      <div className={`${styles.blob} ${styles.primary}`}></div>
-      <div className={`${styles.blob} ${styles.secondary}`}></div>
+      <div className={`${styles.blob} ${styles.primary} bg-primary top-[300px] left-[100px] md:h-[350px] md:w-[350px]  h-[250px] w-[250px]`}></div>
+      <div className={`${styles.blob} ${styles.secondary} bg-secondary top-[200px] right-0 md:h-[350px] md:w-[350px] h-[250px] w-[250px]`}></div>
     </div>
     {/* Content */}
     <div className={styles.content}>{children}</div>

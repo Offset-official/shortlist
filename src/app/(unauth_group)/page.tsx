@@ -27,7 +27,7 @@ export default function LandingPage() {
                 <LinkButton
                   text="For Candidates"
                   href="/onboarding?type=candidate"
-                  className="bg-primary text-foreground hover:bg-primary/70 hover:border-primary"
+                  className="bg-primary text-primary-foreground hover:bg-primary/70 hover:border-primary"
                 >
                   <Users className="mr-2 h-5 w-5" />
                 </LinkButton>
@@ -36,7 +36,7 @@ export default function LandingPage() {
           </div>
         </section>
       </GrainyHero>
-      <main className="flex-1 flex flex-col items-center justify-center w-full bg-background">
+      <main className="flex-1 flex flex-col items-center justify-center w-full bg-background mt-10">
         {/* product Section */}
         <section className="flex flex-col items-center justify-center w-[80vw] p-10 m-10 mx-auto">
           <div className="flex items-center justify-center w-full mb-8 relative">
@@ -74,7 +74,7 @@ export default function LandingPage() {
           <h2 className="text-2xl md:text-3xl font-thin mb-6 text-center w-full">
             Experience <span className="font-bold">Next-Gen AI-Powered</span> Interviews
           </h2>
-          <ul className="space-y-4 text-lg max-w-2xl w-full px-2 font-extralight text-gray">
+          <ul className="space-y-4 text-lg max-w-2xl w-full px-2 font-extralight text-foreground">
             <li className="flex items-start gap-2">
               •
               <span>
@@ -156,7 +156,7 @@ export default function LandingPage() {
                 <LinkButton
                   href="/onboarding?type=candidate"
                   text="Create Your Profile"
-                  className="bg-primary hover:bg-primary/70 hover:border-primary text-foreground text-sm"
+                  className="bg-primary hover:bg-primary/70 hover:border-primary text-primary-foreground text-sm"
                 />
               </div>
             </div>
@@ -248,7 +248,7 @@ export default function LandingPage() {
                 <LinkButton
                   href="/onboarding?type=recruiter"
                   text="Start Recruiting"
-                  className="bg-secondary hover:bg-secondary/70 hover:border-secondary text-foreground text-sm"
+                  className="bg-secondary hover:bg-secondary/70 hover:border-secondary text-secondary-foreground text-sm"
                 />
               </div>
               <div className="relative h-[550px]">
@@ -278,7 +278,7 @@ export default function LandingPage() {
               <LinkButton
                 text="Join as Candidate"
                 href="/onboarding?type=candidate"
-                className="bg-primary text-foreground hover:bg-primary/70 hover:border-primary"
+                className="bg-primary text-primary-foreground hover:bg-primary/70 hover:border-primary"
               />
             </div>
           </div>

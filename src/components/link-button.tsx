@@ -6,7 +6,7 @@ const LinkButton = ({ href, text, className = "",children}:{href:string,text:str
         <Link
 
             href={href}
-            className={` text-white hover:bg-card/90 border-2 font-medium px-5 py-2 rounded-md inline-flex ${className}`}
+            className={` text-foreground hover:bg-card/90 border-2 font-medium px-5 py-2 rounded-md inline-flex ${className}`}
         >
             {children}{text}
         </Link>

@@ -48,7 +48,7 @@ type ResumeData = {
   }>;
 };
 
-export function ResumeUploader({ userId }: { userId: string }) {
+export function ResumeUploader({ userId, onResumeAnalysed }: { userId: string, onResumeAnalysed?: () => void }) {
   const [extractedText, setExtractedText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
@@ -81,12 +81,50 @@ export function ResumeUploader({ userId }: { userId: string }) {
       const data = await response.json();
       setExtractedText(data.text);
       toast.success("Resume text extracted successfully");
+
+      // Automatically parse and analyze after extraction
+      await handleExtractAnalyseJsonAuto(data.text);
     } catch (err: any) {
       console.error("Error extracting text:", err);
       setError(err.message || "Failed to extract text from the file.");
       toast.error("An error occurred while extracting resume text");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Helper to allow passing text directly for auto-trigger
+  const handleExtractAnalyseJsonAuto = async (text: string) => {
+    try {
+      setIsAnalyzing(true);
+      setError(null);
+
+      const response = await fetch("/api/extract_save_resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, candidateId: userId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error("Failed to parse and save resume");
+        throw new Error(errorData.error || "Failed to parse resume");
+      }
+
+      const parsed: ResumeData = await response.json();
+      setResumeData(parsed);
+      toast.success("Resume parsed and saved successfully");
+
+      await handleResumeAnalysis(parsed);
+
+      // Call the callback after analysis
+      if (onResumeAnalysed) onResumeAnalysed();
+    } catch (err: any) {
+      console.error("Error parsing resume:", err);
+      setError(err.message || "Failed to parse the resume.");
+      toast.error("An error occurred while parsing resume");
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -192,14 +230,6 @@ export function ResumeUploader({ userId }: { userId: string }) {
               <div className="flex space-x-2">
                 <Button variant="outline" size="sm" onClick={handleCopyText}>
                   Copy Text
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleExtractAnalyseJson}
-                  disabled={isAnalyzing}
-                >
-                  {isAnalyzing ? "Processing..." : "Parse to JSON"}
                 </Button>
               </div>
             </div>

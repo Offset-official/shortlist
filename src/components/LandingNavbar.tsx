@@ -124,7 +124,7 @@ const Navbar = () => {
                       />
                     )}
                   </div>
-                  <LinkButton href="/dashboard" text="Go to Dashboard" className="w-full justify-center text-lg py-3" />
+                  <LinkButton href="/dashboard" text="Go to Dashboard" className="w-full justify-center text-lg py-3 text-foreground" />
                   <Button
                     variant="ghost"
                     onClick={async () => {
