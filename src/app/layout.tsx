@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import type { Metadata, Viewport } from "next";
 import { ModeToggle } from "@/components/mode-toggle"
 import { Toaster } from "react-hot-toast";
+import { CheckCircle, XCircle, Info } from 'lucide-react';
 
 const APP_NAME = "Shortlist";
 const APP_DEFAULT_TITLE = "Shortlist - Connecting Talent with Opportunities";
@@ -82,41 +83,30 @@ export default function RootLayout({
             {children}
             <ModeToggle />
             <Toaster
-              position="top-right"
-              toastOptions={{
-                style: {
-                  background: 'rgba(30,30,30,0.95)',
-                  color: '#fff',
-                  borderRadius: '6px',
-                  fontSize: '0.97rem',
-                  boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)',
-                  border: 'none',
-                  padding: '12px 18px',
-                  minWidth: '180px',
-                  maxWidth: '320px',
-                },
-                success: {
-                  style: {
-                    background: 'rgba(34,197,94,0.95)',
-                    color: '#fff',
-                  },
-                  iconTheme: {
-                    primary: '#22c55e',
-                    secondary: '#fff',
-                  },
-                },
-                error: {
-                  style: {
-                    background: 'rgba(239,68,68,0.95)',
-                    color: '#fff',
-                  },
-                  iconTheme: {
-                    primary: '#ef4444',
-                    secondary: '#fff',
-                  },
-                },
-              }}
-            />
+      position="bottom-right"
+      toastOptions={{
+        style: {
+          background: 'var(--color-card)',
+          color: 'var(--color-card-foreground)',
+          borderRadius: '0.5rem',
+          fontSize: '0.875rem',
+          boxShadow: '0 2px 8px 0 rgba(0,0,0,0.05)',
+          border: '1px solid var(--color-border)',
+          padding: '10px 14px',
+          minWidth: '160px',
+          maxWidth: '300px',
+        },
+        success: {
+          icon: <CheckCircle className="text-tertiary" size={18} />,
+        },
+        error: {
+          icon: <XCircle className="text-destructive" size={18} />,
+        },
+        custom: {
+          icon: <Info className="text-secondary" size={18} />,
+        },
+      }}
+    />
           </Providers>
         </ThemeProvider>
       </body>

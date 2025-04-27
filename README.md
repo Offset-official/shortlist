@@ -12,9 +12,7 @@ pnpm dev
 
 ## Info
 
-`/dashboard` - d
-
-`/color_check`- color scheme of the website
+`/dashboard` - dashboard
 
 `/profile` - user's page
 
@@ -34,7 +32,6 @@ pnpm dev
 
 ## TODOs
 
-- Toasts
 - UI
 - Job listings needs to made server sided
 - Secure Routes

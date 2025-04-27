@@ -1,93 +1,87 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
 
 export const runtime = "nodejs";
 
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
+/* ------------------------------------------------------------------ */
+/* ENV CHECK                                                          */
+/* ------------------------------------------------------------------ */
+const apiKey = process.env.GROQ_API_KEY;
+if (!apiKey) throw new Error("GROQ_API_KEY is not set");
 
-const ai = new GoogleGenAI({ apiKey });
-
+/* ------------------------------------------------------------------ */
+/* POST /api/llm                                                      */
+/* ------------------------------------------------------------------ */
 export async function POST(req: NextRequest) {
   try {
+    /* ---------------- parse body ---------------------------------- */
     const body = await req.json();
     let { messages, systemInstruction } = body;
 
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
         { reply: "Error: No messages provided." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // Remove system messages
-    messages = messages.filter((msg: any) => msg.role !== "system");
+    /* ---------------- normalise + strip system msgs --------------- */
+    messages = messages
+      .filter((m: any) => m.role !== "system")
+      .map((m: any) => {
+        let text: string;
 
-    const promptMessage = messages[messages.length - 1];
-    const historyMessages = messages.slice(0, messages.length - 1);
+        if (typeof m.content === "string") {
+          text = m.content;
+        } else if (Array.isArray(m.content?.parts)) {
+          text = m.content.parts.map((p: any) => p.text).join(" ");
+        } else {
+          text = String(m.content);
+        }
 
-    const transformMessage = (msg: any) => {
-      const role = msg.role === "assistant" ? "model" : msg.role;
-      return {
-        role,
-        parts:
-          typeof msg.content === "string"
-            ? [{ text: msg.content }]
-            : Array.isArray(msg.content?.parts)
-            ? msg.content.parts
-            : [{ text: String(msg.content) }],
-      };
-    };
+        return { role: m.role, content: text };
+      });
 
-    const transformedHistory = historyMessages.map(transformMessage);
-
-    // Add a dummy "hi" from user to start of transformed history (if you want/need it)
-    transformedHistory.unshift({
-      role: "user",
-      parts: [{ text: "hi" }],
+    /* ---------------- insert our own system message --------------- */
+    messages.unshift({
+      role: "system",
+      content: systemInstruction ?? "You are a helpful assistant.",
     });
 
-    let promptText: string;
-    if (typeof promptMessage.content === "string") {
-      promptText = promptMessage.content;
-    } else if (Array.isArray(promptMessage.content?.parts)) {
-      promptText = promptMessage.content.parts
-        .map((part: any) => part.text)
-        .join(" ");
-    } else {
-      promptText = String(promptMessage.content);
+    /* ---------------- call Groq ----------------------------------- */
+    const groqRes = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "llama3-70b-8192",
+          messages,
+          max_tokens: 500,
+        }),
+      },
+    );
+
+    if (!groqRes.ok) {
+      const err = await groqRes.text();
+      throw new Error(`Groq API error ${groqRes.status}: ${err}`);
     }
 
-    // Create the chat with model and history
-    const chat = ai.chats.create({
-      model: "gemini-2.0-flash-lite",
-      history: transformedHistory,
-      config: {
-        systemInstruction: systemInstruction || "You are a helpful assistant.",
-        // Limit output to 100 tokens
-        maxOutputTokens: 500,
-      },
-    });
+    const data = await groqRes.json();
+    const replyText: string = data.choices?.[0]?.message?.content ?? "";
 
-    const response = await chat.sendMessage({ message: promptText });
-    
-    // Process the response text
-    const replyText = response.text;
-    
-    // Check for interview over before sending response
-    const isInterviewOver = (replyText ?? "").includes("<INTERVIEW OVER>");
-    
-    // Remove the <INTERVIEW OVER> tag from the displayed text
-    const cleanedReply = (replyText ?? "").replace(/<INTERVIEW OVER>/g, "").trim();
-    
-    return NextResponse.json({ 
-      reply: cleanedReply,
-      isInterviewOver 
-    });
+    /* ---------------- post-process -------------------------------- */
+    const isInterviewOver = replyText.includes("<INTERVIEW OVER>");
+    const cleanedReply = replyText.replace(/<INTERVIEW OVER>/g, "").trim();
+
+    return NextResponse.json({ reply: cleanedReply, isInterviewOver });
   } catch (error) {
+    console.error("[LLM-API] error:", error);
     return NextResponse.json(
       { reply: `Error: ${String(error)}` },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

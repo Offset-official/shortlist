@@ -38,7 +38,7 @@
   height: 100%;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(to right, #0B0C0E 0%, transparent 100%), linear-gradient(to top, #0B0C0E 0%, transparent 100%);
+  background: linear-gradient(to right, #0B0C0E 20%, transparent 100%), linear-gradient(to top, #0B0C0E 0%, transparent 35%), linear-gradient(to bottom, #0B0C0E 0%, transparent 35%);
 }
 
 .blobCont {
