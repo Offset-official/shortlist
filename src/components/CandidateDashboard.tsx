@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
@@ -60,13 +59,12 @@ export default function CandidateDashboard() {
           }
           setAppliedJobs(candidate.appliedJobs || [])
           setInterviews(candidate.interviews || [])
-          setResumeScore(candidate.resumeAnalysis.overallScore || 0)
+          setResumeScore(candidate.resumeAnalysis?.overallScore || 0)
           setQuestionsCompleted(candidate.questionsCompleted || 0)
         }
         if (candidate?.dreamCompanies?.length) {
           setRecommender([
-            `For ${candidate.dreamCompanies.join(", ")}, focus on DSA, System Design, and Core CS subjects.`,
-            "Practice company-specific interview questions."
+            `For your dream companies like ${candidate.dreamCompanies.join(", ")}, focus on DSA, System Design, and Core CS subjects like networks and OS.`,
           ])
         }
       })
@@ -121,28 +119,6 @@ export default function CandidateDashboard() {
 
   const featureCards = [
     {
-      title: "AI Interview Prep",
-      description: "Practice interviews with AI feedback",
-      icon: Video,
-      href: "/interview",
-      color: "bg-secondary text-secondary-foreground",
-      badge: "Popular",
-    },
-    {
-      title: "Resume Analyzer",
-      description: "Get AI-powered feedback on your resume",
-      icon: FileText,
-      href: "/resume",
-      color: "bg-tertiary text-tertiary-foreground",
-    },
-    {
-      title: "Mock Interviews",
-      description: "Schedule practice interviews with professionals",
-      icon: MessageSquare,
-      href: "/mock-interview",
-      color: "bg-tertiary text-tertiary-foreground",
-    },
-    {
       title: "DSA Preparation",
       description: "Practice coding problems and algorithms",
       icon: Code,
@@ -150,33 +126,12 @@ export default function CandidateDashboard() {
       color: "bg-tertiary text-tertiary-foreground",
     },
     {
-      title: "Career Roadmaps",
-      description: "Personalized career development paths",
-      icon: Layers,
-      href: "/roadmaps",
-      color: "bg-secondary text-secondary-foreground",
-    },
-    {
       title: "Job Listings",
       description: "Browse and apply to matching opportunities",
       icon: Briefcase,
       href: "/jobs",
       color: "bg-tertiary text-tertiary-foreground",
-      badge: "New",
-    },
-    {
-      title: "Skills Assessment",
-      description: "Test your technical and soft skills",
-      icon: Activity,
-      href: "/skills",
-      color: "bg-tertiary text-tertiary-foreground",
-    },
-    {
-      title: "Profile",
-      description: "Manage your professional profile",
-      icon: User,
-      href: "/profile",
-      color: "bg-tertiary text-tertiary-foreground",
+      badge: "Hot",
     },
   ]
 
@@ -196,36 +151,36 @@ export default function CandidateDashboard() {
       <div className="flex flex-col gap-8">
         {/* Welcome Section */}
         <div className="">
-          <div className="text-3xl font-semibold mb-1">
-            Welcome back, {session?.user?.name ? <span className="text-primary font-extrabold">{session.user.name}</span> : "Candidate"} 👋
+          <div className="text-3xl font-light mb-1">
+            Welcome back, {session?.user?.name ? <span className="text-primary font-bold">{session.user.name}</span> : "Candidate"}
           </div>
           <div className="text-gray">
             This dashboard is crafted just for you. Track your journey, discover new opportunities, and get personalized recommendations to land your dream job.
           </div>
         </div>
-              {/* Mock Interview Card */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-gradient-to-r from-primary/10 to-card shadow-lg border-primary relative">
+        {/* Mock Interview Card */}
+        <div className="flex gap-6  flex-col md:flex-row">
+          <Card className="bg-gradient-to-r from-primary/10 to-card shadow-lg border-primary relative flex-1 min-w-5/8">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className=" flex items-center gap-2 text-2xl">
                 <Video className="h-6 w-6 text-primary " /> Take a Mock Interview
               </CardTitle>
               <CardDescription>Simulate a real interview experience and get instant feedback tailored to you.</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="mb-2 text-sm max-w-3/4">Choose your domain, difficulty, and get started with a professional or AI-powered mock interview. This is your safe space to practice and grow.</p>
+              <p className="mb-2 text-sm max-w-7/8">Choose your domain, difficulty, and get started with a professional or AI-powered mock interview. This is your safe space to practice and grow. Receive detailed feedback on your answers, communication style, and technical approach to identify areas for improvement and build confidence for your real interviews.</p>
               <Button onClick={() => router.push("/mock-interview")} className="text-white bg-primary">Start Mock Interview</Button>
             </CardContent>
             {/* Avatar image anchored right */}
             <img
               src="/assets/avatar.png"
               alt="Avatar"
-              className="absolute -right-10 -bottom-0 h-[120%] pointer-events-none select-none"
+              className="absolute -right-5 lg:-right-20 -bottom-0 h-[10em] lg:h-[125%] pointer-events-none select-none"
               style={{ zIndex: 1 }}
             />
           </Card>
           {/* DSA Questions Preview */}
-          <Card className="bg-gradient-to-l from-tertiary/5 to-card shadow-lg border-tertiary relative">
+          <Card className="bg-gradient-to-l from-tertiary/5 to-card shadow-lg border-tertiary relative flex-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Code className="h-5 w-5 text-tertiary" />
@@ -261,97 +216,98 @@ export default function CandidateDashboard() {
 
 
         {/* Profile Completion + Jobs + Applications/Interviews */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Profile Completion Card */}
+        <div className="flex flex-col md:flex-row gap-6 w-full">
           {profileCompletion && (
+            <div className="flex-1 min-w-[280px] flex">
+              <Card className="flex flex-col bg-card border border-gray/20 w-full">
+                <CardHeader>
+                  <CardTitle className="text-lg">Profile Completion</CardTitle>
+                  <CardDescription className="text-gray">Complete your profile to attract more recruiters</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-lg font-bold text-primary">{profileCompletion}%</span>
+                    <Progress value={profileCompletion} className="h-2 flex-1 ml-4" />
+                  </div>
+                  <div className="bg-secondary/10 p-3 rounded-lg mt-4 border border-secondary">
+                    <p className="text-sm font-medium">
+                      <span className="text-secondary-foreground">Tip:</span> Add your resume to improve your profile.
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full border-secondary text-secondary" onClick={() => router.push("/profile")}>
+                    <User className="mr-2 h-4 w-4" />
+                    Complete Your Profile
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          )}
+          <div className="flex-1 min-w-[280px] flex">
             <Card className="flex flex-col bg-card border border-gray/20 w-full">
               <CardHeader>
-                <CardTitle className="text-lg">Profile Completion</CardTitle>
-                <CardDescription className="text-gray">Complete your profile to attract more recruiters</CardDescription>
+                <CardTitle>Handpicked Jobs for You</CardTitle>
+                <CardDescription>Opportunities that match your interests</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-lg font-bold text-primary">{profileCompletion}%</span>
-                  <Progress value={profileCompletion} className="h-2 flex-1 ml-4" />
-                </div>
-                <div className="bg-secondary/10 p-3 rounded-lg mt-4 border border-secondary">
-                  <p className="text-sm font-medium">
-                    <span className="text-secondary-foreground">Tip:</span> Add your resume to improve your profile.
-                  </p>
+                <div className="space-y-2">
+                  {jobs.length === 0 && <div className="text-gray text-sm">No jobs found.</div>}
+                  {jobs.map((job) => (
+                    <div key={job.id} className="flex flex-col md:flex-row md:items-center md:justify-between border-b last:border-b-0 py-2 border-gray/20">
+                      <div>
+                        <div className="font-semibold text-primary-foreground">{job.title}</div>
+                        <div className="text-xs text-gray">{job.Recruiter?.companyName || 'Company'} &middot; {job.location || (job.remote ? 'Remote' : 'Location not specified')}</div>
+                      </div>
+                      <div className="text-xs text-gray mt-1 md:mt-0">{job.salary ? job.salary : 'Salary N/A'}</div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full border-secondary text-secondary" onClick={() => router.push("/profile")}>
-                  <User className="mr-2 h-4 w-4" />
-                  Complete Your Profile
-                </Button>
+                <Button variant="link" className="w-full text-secondary" onClick={() => router.push("/jobs")}>Show More</Button>
               </CardFooter>
             </Card>
-          )}
-
-          {/* Handpicked Jobs Card */}
-          <Card className="flex flex-col bg-card border border-gray/20 w-full">
-            <CardHeader>
-              <CardTitle>Handpicked Jobs for You</CardTitle>
-              <CardDescription>Opportunities that match your interests</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {jobs.length === 0 && <div className="text-gray text-sm">No jobs found.</div>}
-                {jobs.map((job) => (
-                  <div key={job.id} className="flex flex-col md:flex-row md:items-center md:justify-between border-b last:border-b-0 py-2 border-gray/20">
-                    <div>
-                      <div className="font-semibold text-primary-foreground">{job.title}</div>
-                      <div className="text-xs text-gray">{job.Recruiter?.companyName || 'Company'} &middot; {job.location || (job.remote ? 'Remote' : 'Location not specified')}</div>
-                    </div>
-                    <div className="text-xs text-gray mt-1 md:mt-0">{job.salary ? job.salary : 'Salary N/A'}</div>
+          </div>
+          <div className="flex-1 min-w-[280px] flex">
+            <Card className="flex flex-col bg-card border border-gray/20 w-full">
+              <CardHeader>
+                <CardTitle className="text-xl font-extrabold text-primary-foreground">Your Applications</CardTitle>
+                <CardDescription className="text-gray">Jobs you've applied for & interviews scheduled</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <div>
+                  <div className="flex flex-col gap-3 mb-2">
+                    {appliedJobs.length === 0 && <div className="text-gray text-sm">No applications yet.</div>}
+                    <ul className="space-y-2">
+                      {appliedJobs.map((job: any) => (
+                        <li
+                          key={job.id}
+                          className="flex items-center justify-between rounded-lg border border-secondary/30 bg-secondary/10 px-3 py-1"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium text-primary-foreground">{job.title}</span>
+                            <span className="text-xs text-gray">{job.status ? `Status: ${job.status}` : null}</span>
+                          </div>
+                          <span className="ml-2 text-xs text-secondary">{job.location || "Company"}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="link" className="w-full text-secondary" onClick={() => router.push("/jobs")}>Show More</Button>
-            </CardFooter>
-          </Card>
-
-          {/* Applications & Interviews Card */}
-          <Card className="flex flex-col bg-card border border-gray/20 w-full">
-            <CardHeader>
-              <CardTitle className="text-xl font-extrabold text-primary-foreground">Your Applications</CardTitle>
-              <CardDescription className="text-gray">Jobs you've applied for & interviews scheduled</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <div>
-                <div className="flex flex-col gap-3 mb-2">
-                  {appliedJobs.length === 0 && <div className="text-gray text-sm">No applications yet.</div>}
-                  <ul className="space-y-2">
-                    {appliedJobs.map((job: any) => (
-                      <li
-                        key={job.id}
-                        className="flex items-center justify-between rounded-lg border border-secondary/30 bg-secondary/10 px-3 py-1"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium text-primary-foreground">{job.title}</span>
-                          <span className="text-xs text-gray">{job.status ? `Status: ${job.status}` : null}</span>
-                        </div>
-                        <span className="ml-2 text-xs text-secondary">{job.location || "Company"}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="flex flex-col gap-3 mb-4 mt-6">
+                    <span>You have <span className="text-2xl font-bold text-primary">{interviews.length}</span> interview{interviews.length > 1 ? "s" : ""} pending!</span></div>
+                  <Button
+                    variant="outline"
+                    className="text-primary border-primary"
+                    onClick={() => router.push("/interviews")}
+                  >
+                    Check out Scheduled Interviews
+                  </Button>
                 </div>
-                <div className="flex flex-col gap-3 mb-4 mt-6">
-                  <span>You have <span className="text-2xl font-bold text-primary">{interviews.length}</span> interview{interviews.length > 1 ? "s" : ""} pending!</span></div>
-                <Button
-                  variant="outline"
-                  className="text-primary border-primary"
-                  onClick={() => router.push("/interviews")}
-                >
-                  Check out Scheduled Interviews
-                </Button>
-              </div>
-            </CardContent>
-            {/* Removed CardFooter with View All button */}
-          </Card>
+              </CardContent>
+              {/* Removed CardFooter with View All button */}
+            </Card>
+          </div>
         </div>
 
         {/* Stats Section */}
@@ -366,67 +322,80 @@ export default function CandidateDashboard() {
             </Card>
           ))}
         </div>
-        {/* Recommender Section */}
-        <Card className="bg-gradient-to-br from-secondary/10 to-card border-secondary relative overflow-hidden">
-          <CardHeader>
-            <CardTitle>Your Personalized Study Plan</CardTitle>
-            <CardDescription>Recommendations based on your dream companies</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="list-disc pl-5 space-y-1">
-              {recommender.length === 0 && <li className="text-gray text-sm">Select your dream companies to get recommendations.</li>}
-              {recommender.map((rec, i) => (
-                <li key={i}>{rec}</li>
-              ))}
-            </ul>
-            <Button className="mt-6 bg-secondary text-secondary-foreground hover:bg-secondary/70" onClick={() => router.push('/roadmaps')}>
-              View Roadmap
-            </Button>
-            {/* Roadmap SVG background */}
-            <div className="absolute -bottom-10 right-0 w-64 h-64 opacity-50 pointer-events-none select-none z-0">
-              <RoadmapSVG />
-            </div>
-          </CardContent>
-        </Card>
-
 
         {/* Feature Cards */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6">Your Tools & Features</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featureCards.map((card, i) => (
-              <Link href={card.href} key={i} className="group">
-                <Card className="h-full transition-all hover:shadow-md hover:border-primary border border-gray/20 bg-card">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <div className={`p-2 rounded-lg ${card.color}`}>
-                        <card.icon className="h-5 w-5" />
-                      </div>
-                      {card.badge && (
-                        <Badge variant="secondary" className="ml-auto bg-pink text-foreground p-1.5">
-                          {card.badge}
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardTitle className="text-lg mb-1">{card.title}</CardTitle>
-                    <CardDescription>{card.description}</CardDescription>
-                  </CardContent>
-                  <CardFooter>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="ml-auto group-hover:bg-primary group-hover:text-primary-foreground"
-                    >
-                      Open
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </Link>
-            ))}
-          </div>
+        <div className="flex gap-6">
+          {/* Recommender Section */}
+          <Card className="bg-gradient-to-br from-secondary/10 to-card border-secondary relative overflow-hidden flex-1">
+            <CardHeader>
+              <CardTitle>Your Personalized Study Plan</CardTitle>
+              <CardDescription>Recommendations based on your dream companies</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="list-disc pl-5 space-y-1">
+                {recommender.length === 0 && <li className="text-gray text-sm">Select your dream companies to get recommendations.</li>}
+                {recommender.map((rec, i) => (
+                  <li key={i}>{rec}</li>
+                ))}
+              </ul>
+              <Button className="mt-6 bg-secondary text-secondary-foreground hover:bg-secondary/70" onClick={() => router.push('/roadmaps')}>
+                Make a Roadmap
+              </Button>
+              {/* Roadmap SVG background */}
+              <div className="absolute -bottom-10 right-0 w-64 h-64 opacity-10 pointer-events-none select-none z-0">
+                <RoadmapSVG className="fill-secondary" />
+              </div>
+            </CardContent>
+          </Card>
+          {/* Feature Card 1: DSA Preparation (Yellow) */}
+          <Card className="bg-gradient-to-br from-tertiary/10 to-card border-tertiary relative overflow-hidden flex-1">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5 text-tertiary" />
+                DSA Preparation
+              </CardTitle>
+              <CardDescription>Practice coding problems and algorithms</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                className="mt-6 bg-tertiary/60 text-tertiary-foreground hover:bg-tertiary/80"
+                onClick={() => router.push("/dsa")}
+              >
+                Practice Now
+              </Button>
+              {/* Roadmap SVG background for visual consistency */}
+              <div className="absolute -bottom-10 right-0 w-64 h-64 opacity-10 pointer-events-none select-none z-0">
+                <RoadmapSVG className="fill-tertiary" />
+              </div>
+            </CardContent>
+          </Card>
+          {/* Feature Card 2: Job Listings (Pink) */}
+          <Card className="bg-gradient-to-br from-pink/10 to-card border-pink relative overflow-hidden flex-1">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Briefcase className="h-5 w-5 text-pink" />
+                Job Listings
+                <Badge variant="secondary" className="ml-2 bg-pink text-foreground p-1.5">
+                  Hot
+                </Badge>
+              </CardTitle>
+              <CardDescription>Browse and apply to matching opportunities</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                className="mt-6 bg-pink/60 text-pink-foreground hover:bg-pink/80"
+                onClick={() => router.push("/jobs")}
+              >
+                Browse Jobs
+              </Button>
+              {/* Roadmap SVG background for visual consistency */}
+              <div className="absolute -bottom-10 right-0 w-64 h-64 opacity-10 pointer-events-none select-none z-0">
+                <RoadmapSVG className="fill-pink" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
+
       </div>
     </main>
   )

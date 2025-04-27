@@ -43,6 +43,12 @@ export default function LandingPage() {
             {/* Glow effect behind images */}
             <div className="absolute inset-0 bg-gradient-to-r from-secondary/20 via-yellow/20 to-primary/20 blur-3xl rounded-full opacity-70"></div>
 
+            <Image alt='groq logo' src="/assets/groq.png" width={200} height={100} className="absolute -top-12 
+            -left-12 -rotate-32"/>
+            <Image alt='fluvio logo' src="/assets/fluvio.png" width={300} height={100} className="absolute -top-12 -right-16 rotate-32"/>
+            <Image alt='terminator logo' src="/assets/screenpipe.png" width={150} height={100} className="absolute bottom-0 -left-16 rotate-32"/>
+            <Image alt='mediapipe logo' src="/assets/mediapipe.png" width={300} height={100} className="absolute bottom-0 -right-24 -rotate-32"/>
+
             <div className="relative w-40 h-60 md:w-[25vw] md:h-80 z-30 -right-40 top-6 -rotate-12">
               <Image
                 alt="Shortlist AI Interview Mockup 1"
@@ -50,7 +56,7 @@ export default function LandingPage() {
                 fill
                 className="object-contain rounded-lg shadow-lg"
                 style={{ zIndex: 3 }}
-              />
+              />             
             </div>
             <div className="relative -ml-8 w-80 h-60 md:w-[50vw] md:h-80 z-50">
               <Image
