@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
   /* ------------------------------------------------------------------------ */
   /*  REGULAR INTERVIEW                                                      */
   /* ------------------------------------------------------------------------ */
-  let base = `You are conducting an interview for the role “${iv.jobListing.title}” with candidate ${iv.candidate.name}. `;
+  let base = `You are conducting an interview for the role “${iv.jobListing?.title || 'Mock Interview'}” with candidate ${iv.candidate.name}. `;
 
   if (iv.type === InterviewType.TECHNICAL) {
     /* ----- Build topic strings ------------------------------------------- */
