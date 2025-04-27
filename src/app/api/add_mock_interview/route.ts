@@ -24,6 +24,16 @@ export async function POST(req: NextRequest) {
         jobListingId: 1, // Use a dummy jobListing or create a special one for mocks
         mock: true,
         type: body.type,
+        ...(body.dsaId ? { dsaId: Number(body.dsaId) } : {}),
+        dsaTopics: Array.isArray(body.dsaTopics)
+          ? body.dsaTopics
+          : typeof body.dsaTopics === 'string'
+          ? body.dsaTopics.split(',').map((t: string) => {
+              // Expecting "topic@difficulty" strings when coming as CSV
+              const [topic, difficulty] = t.split('@');
+              return { topic: topic.trim(), difficulty: difficulty?.trim() || '' };
+            })
+          : [],
         topics: Array.isArray(body.topics)
           ? body.topics
           : typeof body.topics === 'string'

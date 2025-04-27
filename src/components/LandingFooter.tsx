@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { Github, Twitter, Instagram, Mail, Phone } from "lucide-react";
+import Logo from "@/components/svgs/logo";
+import { Github, Instagram, Mail, Phone, Youtube } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -10,13 +10,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-2 mb-4">
-              <Image
-                src="/assets/interview1.png?height=32&width=32"
-                alt="Shortlist Logo"
-                width={32}
-                height={32}
-                className="rounded"
-              />
+              <Logo className="h-8 w-8 fill-foreground" />
               <span className="font-semibold">Shortlist</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-md">
@@ -42,11 +36,11 @@ export default function Footer() {
             <h3 className="font-medium text-sm mb-4">Contact</h3>
             <div className="flex flex-col space-y-3">
               <Link
-                href="mailto:shortlist@example.com"
+                href="mailto:shortlist.notifs@gmail.com"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
               >
                 <Mail size={16} />
-                <span>shortlist@example.com</span>
+                <span>shortlist.notifs@gmail.com</span>
               </Link>
               <Link
                 href="tel:+917014206208"
@@ -68,13 +62,13 @@ export default function Footer() {
 
           {/* Social Icons */}
           <div className="flex items-center gap-4 order-1 md:order-2">
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="GitHub">
+            <Link href="https://github.com/Offset-official/shortlist" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="GitHub">
               <Github size={18} />
             </Link>
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Twitter">
-              <Twitter size={18} />
+            <Link href="https://youtube.com" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Youtube">
+              <Youtube size={18} />
             </Link>
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Instagram">
+            <Link href="https://www.instagram.com/offset_official__/" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Instagram">
               <Instagram size={18} />
             </Link>
           </div>
