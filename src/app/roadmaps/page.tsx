@@ -5,6 +5,7 @@ import mermaid from "mermaid";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 export default function RoadmapsPage() {
   const [input, setInput] = useState("");
@@ -139,16 +140,101 @@ export default function RoadmapsPage() {
             </div>
           )}
           {svg && (
-            <div className="flex justify-center items-center w-full overflow-x-auto my-6">
-              <div
-                style={{ minWidth: 800, maxWidth: 1400, minHeight: 600 }}
-                className="flex justify-center items-center"
-                dangerouslySetInnerHTML={{ __html: svg.replace('<svg ', '<svg width="100%" height="600px" ') }}
-              />
+            <div className="flex justify-center items-center w-full overflow-x-auto my-6" style={{ position: 'relative' }}>
+              {/* Hint is now absolutely positioned in the top-right of the diagram container */}
+              <div style={{
+                position: 'absolute',
+                top: 24,
+                right: 24,
+                zIndex: 30,
+                pointerEvents: 'auto',
+              }}>
+                <ZoomHint />
+              </div>
+              <div style={{ width: "100%", minWidth: 800, maxWidth: 1400, minHeight: 600, position: "relative" }}>
+                <TransformWrapper
+                  initialScale={1}
+                  minScale={0.2}
+                  maxScale={5}
+                  wheel={{ step: 0.1 }}
+                  doubleClick={{ disabled: true }}
+                  panning={{ velocityDisabled: true }}
+                >
+                  <TransformComponent>
+                    <div
+                      style={{ width: "100%", height: "600px" }}
+                      dangerouslySetInnerHTML={{ __html: svg.replace('<svg ', '<svg width="100%" height="600px" ') }}
+                    />
+                  </TransformComponent>
+                </TransformWrapper>
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+// Animated zoom icon with tooltip
+function ZoomHint() {
+  const [showTip, setShowTip] = React.useState(true);
+  React.useEffect(() => {
+    const timer = setTimeout(() => setShowTip(false), 3500);
+    return () => clearTimeout(timer);
+  }, []);
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 18,
+        right: 22,
+        zIndex: 20,
+        display: "flex",
+        alignItems: "center",
+        cursor: "zoom-in",
+      }}
+      onMouseEnter={() => setShowTip(true)}
+      onMouseLeave={() => setShowTip(false)}
+    >
+      <span style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 32,
+        height: 32,
+        borderRadius: "50%",
+        background: "var(--card)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+        animation: "zoomPulse 1.5s infinite",
+        border: "1.5px solid var(--primary)",
+      }}>
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="var(--primary)" strokeWidth="2"><circle cx="9" cy="9" r="7"/><line x1="15" y1="15" x2="19" y2="19" strokeLinecap="round"/><line x1="9" y1="5" x2="9" y2="13"/><line x1="5" y1="9" x2="13" y2="9"/></svg>
+      </span>
+      {showTip && (
+        <span style={{
+          marginLeft: 10,
+          background: "var(--card)",
+          color: "var(--primary)",
+          fontWeight: 500,
+          fontSize: 14,
+          borderRadius: 6,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+          padding: "6px 14px",
+          whiteSpace: "nowrap",
+          border: "1px solid var(--primary)",
+          transition: "opacity 0.2s",
+        }}>
+          Tip: Zoom & pan with scroll, drag, or pinch
+        </span>
+      )}
+      <style>{`
+        @keyframes zoomPulse {
+          0% { box-shadow: 0 0 0 0 var(--primary); }
+          70% { box-shadow: 0 0 0 10px var(--primary); opacity: 0.15; }
+          100% { box-shadow: 0 0 0 0 var(--primary); }
+        }
+      `}</style>
+    </div>
   );
 }
