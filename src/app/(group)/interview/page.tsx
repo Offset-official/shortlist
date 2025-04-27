@@ -776,6 +776,7 @@ function InterviewContent() {
           <h1 className="text-2xl font-bold">
             {over ? 'Interview Complete' : 'Interview'}
           </h1>
+          <h3>Powered by <b>Screenpipe</b> & <b>Fluvio</b> & <b>Groq</b></h3>
         </header>
 
         {!started ? (
