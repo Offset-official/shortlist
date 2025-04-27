@@ -316,13 +316,13 @@ export function ScheduleInterviewDialog({
                     />
                     <span>Enable Screenpipe (Suspicion Detection)</span>
                   </label>
-                  <label className="flex items-center space-x-2 text-sm text-foreground">
+                  {/* <label className="flex items-center space-x-2 text-sm text-foreground">
                     <Checkbox
                       checked={terminatorRequired}
                       onCheckedChange={(chk) => setTerminatorRequired(!!chk)}
                     />
                     <span>Enable Terminator (UI Restriction)</span>
-                  </label>
+                  </label> */}
                 </div>
               </div>
 
