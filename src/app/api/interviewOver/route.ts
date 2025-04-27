@@ -27,6 +27,8 @@ interface InterviewAnalysis {
   faceSummary: string;
   poseSummary: string;
   suspicionSummary: string;
+  completedQuestions: number; // Number of correctly answered questions
+  questionSummary: string; // Summary of question performance
 }
 
 export async function POST(req: NextRequest) {
@@ -36,9 +38,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing interviewId' }, { status: 400 });
     }
 
-    // Fetch interview
+    // Fetch interview with chatHistory
     const interview = await prisma.interview.findUnique({
       where: { id: Number(interviewId) },
+      select: {
+        id: true,
+        numQuestions: true,
+        chatHistory: true,
+      },
     });
     if (!interview) {
       return NextResponse.json({ error: 'Interview not found' }, { status: 404 });
@@ -53,6 +60,9 @@ export async function POST(req: NextRequest) {
     // Analyze MediaPipe and Screenpipe data, update diagnostics with violations
     const analysis = await analyzeDiagnostics(diagnostics, interviewId);
 
+    // Analyze chat history for completed questions
+    const chatAnalysis = await analyzeChatHistory(interview.chatHistory, interview.numQuestions ?? 0);
+
     // Call Gemini API for structured JSON summaries
     const { faceSummary, poseSummary, suspicionSummary } = await getGeminiAnalysis(analysis);
 
@@ -66,6 +76,8 @@ export async function POST(req: NextRequest) {
       faceSummary,
       poseSummary,
       suspicionSummary,
+      completedQuestions: chatAnalysis.completedQuestions,
+      questionSummary: chatAnalysis.questionSummary,
     };
 
     // Update interview with interviewEndedAt and interviewAnalysis
@@ -185,9 +197,9 @@ async function analyzeDiagnostics(diagnostics: any[], interviewId: number) {
     'No Face Detected': totalSamples > 0 ? Number((faceDirectionCounts['No Face Detected'] / totalSamples * 100).toFixed(2)) : 0,
   };
 
-  // Summarize violations (e.g., "2 violations: Google, tab switch")
+  // Summarize violations
   const violationTypes = [...new Set(violations.map((v) => v.website))];
-  const violationSummary = violationCount > 0 
+  const violationSummary = violationCount > 0
     ? `${violationCount} violation${violationCount === 1 ? '' : 's'}: ${violationTypes.join(', ')}`
     : 'No violations detected';
 
@@ -200,7 +212,108 @@ async function analyzeDiagnostics(diagnostics: any[], interviewId: number) {
   };
 }
 
-// Call Gemini API for structured JSON summaries
+// Analyze chat history to count correctly answered questions and summarize
+async function analyzeChatHistory(chatHistory: any, numQuestions: number) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!chatHistory || !Array.isArray(chatHistory) || chatHistory.length === 0) {
+    return {
+      completedQuestions: 0,
+      questionSummary: 'No chat history available to analyze question performance.',
+    };
+  }
+
+  if (!apiKey) {
+    console.error('GEMINI_API_KEY is not set');
+    return {
+      completedQuestions: 0,
+      questionSummary: 'Question analysis unavailable: API key missing.',
+    };
+  }
+
+  const systemPrompt = `
+    You are an expert interview evaluator. Analyze the chat history to determine how many questions the candidate answered correctly out of ${numQuestions}. A question is typically posed by the assistant, followed by the user's response. A correct answer demonstrates a clear understanding of the problem and provides a valid solution or response. Provide a concise summary (~40 words, ~60-80 tokens) of the candidate's question performance in professional language for recruiters. Return a JSON object with fields: completedQuestions (number), questionSummary (string).
+  `;
+
+  const chatText = chatHistory
+    .map((entry) => `${entry.role === 'assistant' ? 'Interviewer' : 'Candidate'}: ${entry.content}`)
+    .join('\n');
+
+  const userPrompt = `
+    Chat History:
+    ${chatText}
+
+    Analyze the chat history to count correctly answered questions out of ${numQuestions}. Return:
+    {
+      "completedQuestions": <number>,
+      "questionSummary": "Summary text..."
+    }
+  `;
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: userPrompt,
+                },
+              ],
+            },
+          ],
+          systemInstruction: {
+            role: 'system',
+            parts: [
+              {
+                text: systemPrompt,
+              },
+            ],
+          },
+          generationConfig: {
+            maxOutputTokens: 100,
+            response_mime_type: 'application/json',
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Gemini API error for chat analysis:', errorData);
+      return {
+        completedQuestions: 0,
+        questionSummary: 'Question analysis unavailable: API request failed.',
+      };
+    }
+
+    const data = await response.json();
+    if (typeof data !== 'object' || data === null) {
+      throw new Error('Invalid response format');
+    }
+    const candidates = (data as { candidates?: { content?: { parts?: { text?: string }[] } }[] }).candidates;
+    const result = JSON.parse(candidates?.[0]?.content?.parts?.[0]?.text || '{}');
+
+    return {
+      completedQuestions: result.completedQuestions || 0,
+      questionSummary: result.questionSummary || 'Question analysis unavailable: No response.',
+    };
+  } catch (err) {
+    console.error('Gemini API fetch error for chat analysis:', err);
+    return {
+      completedQuestions: 0,
+      questionSummary: 'Question analysis unavailable: Network error.',
+    };
+  }
+}
+
+// Call Gemini API for structured JSON summaries (face, pose, suspicion)
 async function getGeminiAnalysis(analysis: any) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -278,8 +391,12 @@ async function getGeminiAnalysis(analysis: any) {
     }
 
     const data = await response.json();
-    const result = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
-    
+    if (typeof data !== 'object' || data === null) {
+      throw new Error('Invalid response format');
+    }
+    const candidates = (data as { candidates?: { content?: { parts?: { text?: string }[] } }[] }).candidates;
+    const result = JSON.parse(candidates?.[0]?.content?.parts?.[0]?.text || '{}');
+
     return {
       faceSummary: result.faceSummary || 'Face analysis unavailable: No response',
       poseSummary: result.poseSummary || 'Pose analysis unavailable: No response',
