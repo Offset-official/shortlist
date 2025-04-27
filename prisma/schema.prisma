@@ -111,9 +111,6 @@ model Interview {
   dsaId               Int?          // for DSA mock interviews, the id of the coding problem
 
   createdAt           DateTime       @default(now())
-
-  // back-relation to Diagnostic
-  diagnostics         Diagnostic[]
 }
 
 model CodingProblem {
@@ -132,18 +129,4 @@ model CodingProblem {
   @@index([difficulty])
   @@index([category])
   @@index([companiesAskedIn])
-}
-
-model Diagnostic {
-  id              Int       @id @default(autoincrement())
-  poseData        Json?     // For storing pose detection data
-  faceData        Json?     // For storing face detection data
-  cameraImage     String?   @db.Text  // Base64 encoded image, optional
-  screenpipeData  Json?     // For storing screenpipe data
-  violations      Json?     // For storing detected violations
-  interview       Interview @relation(fields: [interviewId], references: [id])
-  interviewId     Int
-  timestamp       DateTime  @default(now())
-  
-  @@index([interviewId])
 }
