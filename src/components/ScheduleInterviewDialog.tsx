@@ -1,4 +1,3 @@
-// components/ScheduleInterviewDialog.tsx
 'use client';
 
 import { useState } from 'react';
@@ -9,11 +8,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from "react-hot-toast";
+import { toast } from 'react-hot-toast';
 
 const DSA_TOPICS = [
   { topic: 'Arrays', difficulties: ['Easy', 'Medium', 'Hard'] },
@@ -70,87 +70,82 @@ export function ScheduleInterviewDialog({
   onScheduled,
 }: Props) {
   const [type, setType] = useState<'TECHNICAL' | 'HR'>('TECHNICAL');
-  const [scheduledDateTime, setScheduledDateTime] = useState('');
-  const [expiryDateTime, setExpiryDateTime] = useState('');
   const [programmingLanguage, setProgrammingLanguage] = useState('Python');
   const [dsaTopics, setDsaTopics] = useState<{ topic: string; difficulty: string }[]>([]);
   const [nonDsaTopics, setNonDsaTopics] = useState<string[]>([]);
   const [hrTopics, setHrTopics] = useState<string[]>([]);
   const [numQuestions, setNumQuestions] = useState(2);
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [screenpipeRequired, setScreenpipeRequired] = useState(true);
   const [terminatorRequired, setTerminatorRequired] = useState(false);
+  const [expiryDateTime, setExpiryDateTime] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // DSA topic selection
-  const toggleDsaTopic = (topic: string, difficulty: string, checked: boolean) => {
-    setDsaTopics((prev) => {
-      if (checked) {
-        return [...prev, { topic, difficulty }];
-      } else {
-        return prev.filter((t) => !(t.topic === topic && t.difficulty === difficulty));
-      }
-    });
-  };
+  const toggleDsaTopic = (topic: string, difficulty: string, checked: boolean) =>
+    setDsaTopics((prev) =>
+      checked
+        ? [...prev, { topic, difficulty }]
+        : prev.filter((t) => !(t.topic === topic && t.difficulty === difficulty))
+    );
 
   // Non-DSA topic selection
-  const toggleNonDsaTopic = (topic: string, checked: boolean) => {
-    setNonDsaTopics((prev) =>
-      checked ? [...prev, topic] : prev.filter((t) => t !== topic)
-    );
-  };
+  const toggleNonDsaTopic = (topic: string, checked: boolean) =>
+    setNonDsaTopics((prev) => (checked ? [...prev, topic] : prev.filter((t) => t !== topic)));
 
   // HR topic selection
-  const toggleHrTopic = (topic: string, checked: boolean) => {
-    setHrTopics((prev) =>
-      checked ? [...prev, topic] : prev.filter((t) => t !== topic)
-    );
-  };
+  const toggleHrTopic = (topic: string, checked: boolean) =>
+    setHrTopics((prev) => (checked ? [...prev, topic] : prev.filter((t) => t !== topic)));
 
   /* POST /api/add_interview */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg(null);
-    if (!expiryDateTime) return;
-    // Validate expiryDateTime string
+    setError(null);
+    setLoading(true);
+
+    // Validate expiryDateTime
+    if (!expiryDateTime) {
+      setError('Please select an expiry date and time.');
+      setLoading(false);
+      return;
+    }
     const selected = new Date(expiryDateTime);
     if (isNaN(selected.getTime())) {
-      setErrorMsg('Invalid expiry date & time. Please select a valid date and time.');
+      setError('Invalid expiry date & time. Please select a valid date and time.');
+      setLoading(false);
       return;
     }
     const now = new Date();
     if (selected < now) {
-      setErrorMsg(`Expiry date & time cannot be before the current time. Current time: ${now.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`);
+      setError(
+        `Expiry date & time cannot be before the current time. Current time: ${now.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`
+      );
+      setLoading(false);
       return;
     }
 
-    if (type === 'TECHNICAL') {
-      if (dsaTopics.length < 1) {
-        setErrorMsg('Select at least 1 DSA topic (with difficulty) for technical interview.');
-        return;
-      }
-      if (numQuestions < 1) {
-        setErrorMsg('Number of questions must be at least 1.');
-        return;
-      }
+    // Validate topics and questions
+    if (type === 'TECHNICAL' && dsaTopics.length < 1) {
+      setError('Select at least 1 DSA topic (with difficulty) for technical interview.');
+      setLoading(false);
+      return;
     }
-    if (type === 'HR') {
-      if (hrTopics.length < 2) {
-        setErrorMsg('Select at least 2 HR topics.');
-        return;
-      }
-      if (numQuestions < 1) {
-        setErrorMsg('Number of questions must be at least 1.');
-        return;
-      }
+    if (type === 'HR' && hrTopics.length < 2) {
+      setError('Select at least 2 HR topics.');
+      setLoading(false);
+      return;
     }
-    setLoading(true);
+    if (numQuestions < 1) {
+      setError('Number of questions must be at least 1.');
+      setLoading(false);
+      return;
+    }
 
     const payload: any = {
       candidateId,
       jobListingId,
       type,
-      expiryDateTime: selected.toISOString(), // always send valid ISO string
+      expiryDateTime: selected.toISOString(),
       numQuestions,
       screenpipeRequired,
       terminatorRequired,
@@ -170,17 +165,18 @@ export function ScheduleInterviewDialog({
         body: JSON.stringify(payload),
       });
 
-      setLoading(false);
-
       if (res.ok) {
+        toast.success('Interview scheduled successfully!');
         onScheduled();
         onOpenChange(false);
-        setScheduledDateTime('');
+        setExpiryDateTime('');
         setDsaTopics([]);
         setNonDsaTopics([]);
         setHrTopics([]);
         setNumQuestions(2);
         setType('TECHNICAL');
+        setScreenpipeRequired(true);
+        setTerminatorRequired(false);
       } else {
         let msg = 'Something went wrong.';
         try {
@@ -189,201 +185,218 @@ export function ScheduleInterviewDialog({
         } catch {
           msg = await res.text();
         }
-        setErrorMsg(msg || 'Server error.');
+        setError(msg || 'Server error.');
       }
     } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
       setLoading(false);
-      setErrorMsg('Network error. Please try again.');
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Schedule Interview</DialogTitle>
+          <DialogTitle className="text-3xl font-semibold tracking-tight">
+            Schedule Interview
+          </DialogTitle>
         </DialogHeader>
 
-        {/* Error banner */}
-        {errorMsg && (
-          <div className="rounded bg-red-50 border border-red-300 p-2 text-sm text-red-700">
-            {errorMsg}
-          </div>
-        )}
+        <Card className="border border-border bg-card text-card-foreground shadow-lg">
+          <CardContent className="py-8">
+            {error && (
+              <div className="rounded bg-red-50 border border-red-300 p-2 text-sm text-red-700 mb-6">
+                {error}
+              </div>
+            )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Expiry date & time */}
-          <div>
-            <Label htmlFor="expiry">Interview Expiry Date & Time</Label>
-            <Input
-              id="expiry"
-              type="datetime-local"
-              required
-              min={new Date().toISOString().slice(0, 16)}
-              value={expiryDateTime}
-              onChange={e => setExpiryDateTime(e.target.value)}
-            />
-          </div>
-
-          {/* Date & time */}
-          {/* <div>
-            <Label htmlFor="scheduled">Date & Time</Label>
-            <Input
-              id="scheduled"
-              type="datetime-local"
-              required
-              value={scheduledDateTime}
-              onChange={(e) => setScheduledDateTime(e.target.value)}
-            />
-          </div> */}
-
-          {/* Interview type */}
-          <div>
-            <Label htmlFor="type">Interview Type</Label>
-            <select
-              id="type"
-              className="mt-1 block w-full rounded border"
-              value={type}
-              onChange={(e) => {
-                setType(e.target.value as 'TECHNICAL' | 'HR');
-                setDsaTopics([]);
-                setNonDsaTopics([]);
-                setHrTopics([]);
-              }}
-            >
-              <option value="TECHNICAL">Technical</option>
-              <option value="HR">HR</option>
-            </select>
-          </div>
-
-          {/* Technical interview details */}
-          {type === 'TECHNICAL' && (
-            <>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Expiry Date & Time */}
               <div>
-                <Label>Programming Language</Label>
+                <Label htmlFor="expiry">Interview Expiry Date & Time</Label>
+                <Input
+                  id="expiry"
+                  type="datetime-local"
+                  required
+                  min={new Date().toISOString().slice(0, 16)}
+                  value={expiryDateTime}
+                  onChange={(e) => setExpiryDateTime(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+
+              {/* Interview Type */}
+              <div>
+                <Label htmlFor="type">Interview Type</Label>
                 <select
-                  className="mt-1 block w-full rounded border"
-                  value={programmingLanguage}
-                  onChange={e => setProgrammingLanguage(e.target.value)}
+                  id="type"
+                  value={type}
+                  onChange={(e) => {
+                    setType(e.target.value as 'TECHNICAL' | 'HR');
+                    setDsaTopics([]);
+                    setNonDsaTopics([]);
+                    setHrTopics([]);
+                    setScreenpipeRequired(true);
+                    setTerminatorRequired(false);
+                  }}
+                  className="mt-1 w-full rounded-md border border-input bg-background py-2 px-3 text-foreground"
                 >
-                  {LANGUAGES.map(lang => (
-                    <option key={lang} value={lang}>{lang}</option>
-                  ))}
+                  <option value="TECHNICAL">Technical</option>
+                  <option value="HR">HR</option>
                 </select>
               </div>
-              <div>
-                <Label>DSA Topics (at least 1, with difficulty)</Label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  {DSA_TOPICS.map(({ topic, difficulties }) => (
-                    <div key={topic} className="flex flex-col">
-                      <span className="font-medium text-xs">{topic}</span>
-                      <div className="flex flex-row gap-2">
-                        {difficulties.map(diff => (
-                          <label key={diff} className="flex items-center space-x-1 text-xs">
-                            <Checkbox
-                              checked={!!dsaTopics.find(t => t.topic === topic && t.difficulty === diff)}
-                              onCheckedChange={chk => toggleDsaTopic(topic, diff, chk as boolean)}
-                            />
-                            <span>{diff}</span>
-                          </label>
-                        ))}
-                      </div>
+
+              {/* Technical Interview Details */}
+              {type === 'TECHNICAL' && (
+                <>
+                  <div>
+                    <Label htmlFor="language">Programming Language</Label>
+                    <select
+                      id="language"
+                      value={programmingLanguage}
+                      onChange={(e) => setProgrammingLanguage(e.target.value)}
+                      className="mt-1 w-full rounded-md border border-input bg-background py-2 px-3 text-foreground"
+                    >
+                      {LANGUAGES.map((lang) => (
+                        <option key={lang} value={lang}>
+                          {lang}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <Label>
+                      DSA Topics <span className="text-xs opacity-70">(at least 1)</span>
+                    </Label>
+                    <div className="mt-2 grid grid-cols-2 gap-3">
+                      {DSA_TOPICS.map(({ topic, difficulties }) => (
+                        <fieldset key={topic} className="rounded-lg border border-border p-2">
+                          <legend className="px-1 text-sm font-medium text-foreground">
+                            {topic}
+                          </legend>
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {difficulties.map((diff) => (
+                              <label
+                                key={diff}
+                                className="flex items-center space-x-1 text-xs text-foreground"
+                              >
+                                <Checkbox
+                                  checked={!!dsaTopics.find((t) => t.topic === topic && t.difficulty === diff)}
+                                  onCheckedChange={(chk) => toggleDsaTopic(topic, diff, chk as boolean)}
+                                />
+                                <span>{diff}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </fieldset>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+
+                  <div>
+                    <Label>
+                      Other Technical Topics <span className="text-xs opacity-70">(optional)</span>
+                    </Label>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      {NON_DSA_TOPICS.map((topic) => (
+                        <label
+                          key={topic}
+                          className="flex items-center space-x-2 text-sm text-foreground"
+                        >
+                          <Checkbox
+                            checked={nonDsaTopics.includes(topic)}
+                            onCheckedChange={(chk) => toggleNonDsaTopic(topic, chk as boolean)}
+                          />
+                          <span>{topic}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* HR Interview Details */}
+              {type === 'HR' && (
+                <div>
+                  <Label>
+                    HR Topics <span className="text-xs opacity-70">(choose ≥ 2)</span>
+                  </Label>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {HR_TOPICS.map((topic) => (
+                      <label
+                        key={topic}
+                        className="flex items-center space-x-2 text-sm text-foreground"
+                      >
+                        <Checkbox
+                          checked={hrTopics.includes(topic)}
+                          onCheckedChange={(chk) => toggleHrTopic(topic, chk as boolean)}
+                        />
+                        <span>{topic}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Interview Settings */}
+              <div>
+                <Label>Interview Settings</Label>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <label className="flex items-center space-x-2 text-sm text-foreground">
+                    <Checkbox
+                      checked={screenpipeRequired}
+                      onCheckedChange={(chk) => setScreenpipeRequired(!!chk)}
+                    />
+                    <span>Enable Screenpipe (Suspicion Detection)</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm text-foreground">
+                    <Checkbox
+                      checked={terminatorRequired}
+                      onCheckedChange={(chk) => setTerminatorRequired(!!chk)}
+                    />
+                    <span>Enable Terminator (UI Restriction)</span>
+                  </label>
                 </div>
               </div>
+
+              {/* Number of Questions */}
               <div>
-                <Label>Other Technical Topics (optional)</Label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  {NON_DSA_TOPICS.map(topic => (
-                    <label key={topic} className="flex items-center space-x-2">
-                      <Checkbox
-                        checked={nonDsaTopics.includes(topic)}
-                        onCheckedChange={chk => toggleNonDsaTopic(topic, chk as boolean)}
-                      />
-                      <span className="text-sm">{topic}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <Label>Number of Questions</Label>
+                <Label htmlFor="qty">Number of Questions</Label>
                 <Input
+                  id="qty"
                   type="number"
                   min={1}
                   max={10}
                   value={numQuestions}
-                  onChange={e => setNumQuestions(Number(e.target.value))}
+                  onChange={(e) => setNumQuestions(Number(e.target.value))}
+                  className="mt-1"
                 />
               </div>
-            </>
-          )}
 
-          {/* HR interview details */}
-          {type === 'HR' && (
-            <>
-              <div>
-                <Label>HR Topics (choose at least 2)</Label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  {HR_TOPICS.map(topic => (
-                    <label key={topic} className="flex items-center space-x-2">
-                      <Checkbox
-                        checked={hrTopics.includes(topic)}
-                        onCheckedChange={chk => toggleHrTopic(topic, chk as boolean)}
-                      />
-                      <span className="text-sm">{topic}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <Label>Number of Questions</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={numQuestions}
-                  onChange={e => setNumQuestions(Number(e.target.value))}
-                />
-              </div>
-            </>
-          )}
-
-          {/* Monitoring & Restriction checkboxes */}
-          <div className="flex flex-col gap-2">
-            <label className="flex items-center gap-2">
-              <Checkbox
-                checked={screenpipeRequired}
-                onCheckedChange={chk => setScreenpipeRequired(!!chk)}
-              />
-              <span>Enable suspicion monitoring using Screenpipe</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <Checkbox
-                checked={terminatorRequired}
-                onCheckedChange={chk => setTerminatorRequired(!!chk)}
-              />
-              <span>Enable UI restriction using Terminator</span>
-            </label>
-          </div>
-
-          {/* Footer */}
-          <DialogFooter className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading || (type === 'TECHNICAL' && dsaTopics.length < 1) || (type === 'HR' && hrTopics.length < 2)}
-            >
-              {loading ? 'Scheduling…' : 'Schedule'}
-            </Button>
-          </DialogFooter>
-        </form>
+              <DialogFooter className="flex justify-end space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={
+                    loading ||
+                    (type === 'TECHNICAL' && dsaTopics.length < 1) ||
+                    (type === 'HR' && hrTopics.length < 2)
+                  }
+                >
+                  {loading ? 'Scheduling…' : 'Schedule'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </CardContent>
+        </Card>
       </DialogContent>
     </Dialog>
   );
