@@ -1,15 +1,6 @@
 // app/api/diagnostics/route.ts
 import { NextResponse } from 'next/server';
-
-// In-memory store for demo—loses data on cold starts.
-// In production, replace this with a real database.
-const diagnosticsStore = new Map<string, {
-  poseData: any,
-  faceData: any,
-  cameraImage: string | undefined,
-  screenpipeData: any,
-  interviewId: string
-}>();
+import prisma from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
@@ -19,15 +10,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing interviewId' }, { status: 400 });
     }
 
-    diagnosticsStore.set(interviewId, {
-      poseData,
-      faceData,
-      cameraImage,
-      screenpipeData,
-      interviewId
+    await prisma.diagnostics.create({
+      data: {
+        interviewId: Number(interviewId),
+        poseData,
+        faceData,
+        cameraImage,
+        screenpipeData,
+      },
     });
 
-    console.log(`Stored diagnostics for interviewId=${interviewId}`);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Diagnostics POST error:', err);
@@ -35,13 +27,13 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
-  // Grab all values from the Map
-  const allDiagnostics = Array.from(diagnosticsStore.values());
+// export async function GET() {
+//   // Grab all values from the Map
+//   // const allDiagnostics = Array.from(diagnosticsStore.values());
 
-  return NextResponse.json({
-    success: true,
-    count: allDiagnostics.length,
-    data: allDiagnostics
-  });
-}
+//   return NextResponse.json({
+//     success: true,
+//     count: allDiagnostics.length,
+//     data: allDiagnostics
+//   });
+// }
