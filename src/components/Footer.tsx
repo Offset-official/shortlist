@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Github, Twitter, Instagram, Mail, Phone } from "lucide-react";
-
+import Logo from "@/components/svgs/logo";
 const Footer = () =>{
   return (
     <footer className="bg-card border-t py-6 md:py-10">
@@ -11,13 +11,7 @@ const Footer = () =>{
           {/* Column 1: Logo and Description */}
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-2 mb-4">
-              <Image
-                src="/assets/interview1.png?height=32&width=32"
-                alt="Shortlist Logo"
-                width={32}
-                height={32}
-                className="rounded"
-              />
+            <Logo className="h-8 w-8 fill-primary" />
               <span className="font-semibold">Shortlist</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-md">
@@ -32,7 +26,7 @@ const Footer = () =>{
               <Link href="/about_us" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 About
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Pricing
               </Link>
             </div>
