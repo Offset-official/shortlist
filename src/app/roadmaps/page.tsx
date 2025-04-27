@@ -70,42 +70,15 @@ export default function RoadmapsPage() {
     setCorrectionWarning("");
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch("/api/getRoadmap", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: `Generate a career roadmap for the role: ${input}. Respond ONLY with a mermaid js code block.
-              
-              Please focus on only the 5-6 most essential concept areas that interviewers commonly ask about, with just 2-3 key subtopics under each.  
-
-Make the diagram visually clean with:
-- A clear linear progression from start to "Interview Ready"
-- Use a vertical layout
-- Start with graph TD and not graph LR
-- Distinct visual styling for main topics vs subtopics
-- Minimal text that focuses on must-know concepts
-- Use this specific color scheme:
-  - Main nodes: fill:#E55D3F, stroke:#0B0C0E, color:#FFFFFF
-  - Subtopic nodes: fill:#FFFFFF, stroke:#E2E2E2
-  - Start/End nodes: fill:#25C66E, stroke:#0B0C0E, color:#FFFFFF
-  - Connection lines: stroke:#3F96DA, stroke-width:2px
-  - Use #FB4E85 (pink) and #FBD64E (yellow) as accent colors for any highlighting needed
-              Respond ONLY with a mermaid js code block and no preceding text.`,
-            },
-          ],
-        }),
+        body: JSON.stringify({ topic: input }),
       });
       if (!res.ok) throw new Error("Failed to fetch roadmap");
       const data = await res.json();
 
-      let text =
-        data.choices?.[0]?.message?.content ||
-        data.result ||
-        data.reply ||
-        "";
+      let text = data.roadmap || "";
       if (typeof text === "object" && text.reply) text = text.reply;
 
       const match = text.match(/```mermaid[\r\n]+([\s\S]*?)```/i);
