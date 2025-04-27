@@ -159,7 +159,7 @@ function ProblemCard({ problem }: ProblemCardProps) {
     };
   }
 
-  const mockInterviewHref = `/mockInterview?dsaId=${problem.id}&title=${encodeURIComponent(
+  const mockInterviewHref = `/mock-interview?dsaId=${problem.id}&title=${encodeURIComponent(
     problem.title
   )}&difficulty=${encodeURIComponent(problem.difficulty)}`;
 
