@@ -34,7 +34,7 @@ export default async function DsaPage({
   const pageSize = 9;
   const skip = (page - 1) * pageSize;
 
-  let questions = [];
+  let questions: any[] = [];
   try {
     questions = await prisma.codingProblem.findMany({
       skip,
