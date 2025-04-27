@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     const interview = await prisma.interview.create({
       data: {
         candidateId,
-        jobListingId: 1, // Use a dummy jobListing or create a special one for mocks
+        // jobListingId: 1, // Use a dummy jobListing or create a special one for mocks
         mock: true,
         type: body.type,
         ...(body.dsaId ? { dsaId: Number(body.dsaId) } : {}),
