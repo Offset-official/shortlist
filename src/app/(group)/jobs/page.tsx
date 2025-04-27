@@ -41,7 +41,7 @@ const JobListings = ()=>{
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {jobs.length > 0 ? (
           jobs.map((job) => (
-            <JobCard key={job.id} job={job} appliedByMe={!!(session && session.user.type === 'candidate' && job.candidates && job.candidates.some((c:any) => c.id === session.user.id))} />
+            <JobCard key={job.id} job={job} appliedByMe={!!(session && session.user.type === 'candidate' && job.candidates && job.candidates.some((c:any) => c.id === session.user.id))}/>
           ))
         ) : (
           <div className="col-span-full text-center py-16">

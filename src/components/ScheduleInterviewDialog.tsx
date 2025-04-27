@@ -1,19 +1,13 @@
-'use client';
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { toast } from 'react-hot-toast';
 
 const DSA_TOPICS = [
   { topic: 'Arrays', difficulties: ['Easy', 'Medium', 'Hard'] },
@@ -81,7 +75,6 @@ export function ScheduleInterviewDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // DSA topic selection
   const toggleDsaTopic = (topic: string, difficulty: string, checked: boolean) =>
     setDsaTopics((prev) =>
       checked
@@ -89,21 +82,17 @@ export function ScheduleInterviewDialog({
         : prev.filter((t) => !(t.topic === topic && t.difficulty === difficulty))
     );
 
-  // Non-DSA topic selection
   const toggleNonDsaTopic = (topic: string, checked: boolean) =>
     setNonDsaTopics((prev) => (checked ? [...prev, topic] : prev.filter((t) => t !== topic)));
 
-  // HR topic selection
   const toggleHrTopic = (topic: string, checked: boolean) =>
     setHrTopics((prev) => (checked ? [...prev, topic] : prev.filter((t) => t !== topic)));
 
-  /* POST /api/add_interview */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Validate expiryDateTime
     if (!expiryDateTime) {
       setError('Please select an expiry date and time.');
       setLoading(false);
@@ -124,7 +113,6 @@ export function ScheduleInterviewDialog({
       return;
     }
 
-    // Validate topics and questions
     if (type === 'TECHNICAL' && dsaTopics.length < 1) {
       setError('Select at least 1 DSA topic (with difficulty) for technical interview.');
       setLoading(false);
@@ -166,17 +154,8 @@ export function ScheduleInterviewDialog({
       });
 
       if (res.ok) {
-        toast.success('Interview scheduled successfully!');
         onScheduled();
         onOpenChange(false);
-        setExpiryDateTime('');
-        setDsaTopics([]);
-        setNonDsaTopics([]);
-        setHrTopics([]);
-        setNumQuestions(2);
-        setType('TECHNICAL');
-        setScreenpipeRequired(true);
-        setTerminatorRequired(false);
       } else {
         let msg = 'Something went wrong.';
         try {
@@ -196,55 +175,47 @@ export function ScheduleInterviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-3xl font-semibold tracking-tight">
-            Schedule Interview
-          </DialogTitle>
-        </DialogHeader>
-
+      <DialogContent className="max-w-2xl p-0">
         <Card className="border border-border bg-card text-card-foreground shadow-lg">
-          <CardContent className="py-8">
-            {error && (
-              <div className="rounded bg-red-50 border border-red-300 p-2 text-sm text-red-700 mb-6">
-                {error}
-              </div>
-            )}
+          <CardContent className="py-8 px-6">
+            <h1 className="text-3xl font-semibold tracking-tight mb-6">Schedule Interview</h1>
+
+            {error && <p className="text-destructive mb-6">{error}</p>}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Expiry Date & Time */}
-              <div>
-                <Label htmlFor="expiry">Interview Expiry Date & Time</Label>
-                <Input
-                  id="expiry"
-                  type="datetime-local"
-                  required
-                  min={new Date().toISOString().slice(0, 16)}
-                  value={expiryDateTime}
-                  onChange={(e) => setExpiryDateTime(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-
-              {/* Interview Type */}
-              <div>
-                <Label htmlFor="type">Interview Type</Label>
-                <select
-                  id="type"
-                  value={type}
-                  onChange={(e) => {
-                    setType(e.target.value as 'TECHNICAL' | 'HR');
-                    setDsaTopics([]);
-                    setNonDsaTopics([]);
-                    setHrTopics([]);
-                    setScreenpipeRequired(true);
-                    setTerminatorRequired(false);
-                  }}
-                  className="mt-1 w-full rounded-md border border-input bg-background py-2 px-3 text-foreground"
-                >
-                  <option value="TECHNICAL">Technical</option>
-                  <option value="HR">HR</option>
-                </select>
+              {/* Grouped: Expiry & Type */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="expiry">Interview Expiry Date & Time</Label>
+                  <Input
+                    id="expiry"
+                    type="datetime-local"
+                    required
+                    min={new Date().toISOString().slice(0, 16)}
+                    value={expiryDateTime}
+                    onChange={(e) => setExpiryDateTime(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="type">Interview Type</Label>
+                  <select
+                    id="type"
+                    value={type}
+                    onChange={(e) => {
+                      setType(e.target.value as 'TECHNICAL' | 'HR');
+                      setDsaTopics([]);
+                      setNonDsaTopics([]);
+                      setHrTopics([]);
+                      setScreenpipeRequired(true);
+                      setTerminatorRequired(false);
+                    }}
+                    className="mt-1 w-full rounded-md border border-input bg-background py-2 px-3 text-foreground"
+                  >
+                    <option value="TECHITICAL">Technical</option>
+                    <option value="HR">HR</option>
+                  </select>
+                </div>
               </div>
 
               {/* Technical Interview Details */}
@@ -301,10 +272,7 @@ export function ScheduleInterviewDialog({
                     </Label>
                     <div className="mt-2 grid grid-cols-2 gap-2">
                       {NON_DSA_TOPICS.map((topic) => (
-                        <label
-                          key={topic}
-                          className="flex items-center space-x-2 text-sm text-foreground"
-                        >
+                        <label key={topic} className="flex items-center space-x-2 text-sm text-foreground">
                           <Checkbox
                             checked={nonDsaTopics.includes(topic)}
                             onCheckedChange={(chk) => toggleNonDsaTopic(topic, chk as boolean)}
@@ -325,10 +293,7 @@ export function ScheduleInterviewDialog({
                   </Label>
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     {HR_TOPICS.map((topic) => (
-                      <label
-                        key={topic}
-                        className="flex items-center space-x-2 text-sm text-foreground"
-                      >
+                      <label key={topic} className="flex items-center space-x-2 text-sm text-foreground">
                         <Checkbox
                           checked={hrTopics.includes(topic)}
                           onCheckedChange={(chk) => toggleHrTopic(topic, chk as boolean)}
@@ -370,17 +335,16 @@ export function ScheduleInterviewDialog({
                   min={1}
                   max={10}
                   value={numQuestions}
-                  onChange={(e) => setNumQuestions(Number(e.target.value))}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 1 && value <= 10) setNumQuestions(value);
+                  }}
                   className="mt-1"
                 />
               </div>
 
-              <DialogFooter className="flex justify-end space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                   Cancel
                 </Button>
                 <Button
@@ -393,7 +357,7 @@ export function ScheduleInterviewDialog({
                 >
                   {loading ? 'Scheduling…' : 'Schedule'}
                 </Button>
-              </DialogFooter>
+              </div>
             </form>
           </CardContent>
         </Card>

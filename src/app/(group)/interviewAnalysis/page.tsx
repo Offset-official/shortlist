@@ -2,16 +2,25 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return '–';
-  return new Date(dateStr).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+  return new Date(dateStr).toLocaleString('en-IN', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
 }
 
-function ChatHistoryModal({ chatHistory, onClose }: { chatHistory: any; onClose: () => void }) {
-  // Handle both array and object chatHistory
+function ChatHistoryModal({
+  chatHistory,
+  onClose,
+}: {
+  chatHistory: any;
+  onClose: () => void;
+}) {
   let messages: { role: string; content: string }[] = [];
   if (Array.isArray(chatHistory)) {
     messages = chatHistory;
@@ -20,30 +29,54 @@ function ChatHistoryModal({ chatHistory, onClose }: { chatHistory: any; onClose:
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white max-w-2xl w-full rounded-lg shadow-xl p-6 relative max-h-[80vh] flex flex-col">
+    <div className="fixed inset-0 bg-[var(--color-foreground)]/50 flex items-center justify-center z-50">
+      <div className="bg-[var(--color-card)] text-[var(--color-card-foreground)] max-w-2xl w-full rounded-lg shadow-xl p-6 relative max-h-[80vh] flex flex-col">
         <button
-          className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-gray-700 transition"
+          className="absolute top-4 right-4 text-2xl text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition"
           onClick={onClose}
         >
           &times;
         </button>
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Chat History</h2>
-        <div className="flex-1 overflow-y-auto text-sm bg-gray-50 p-4 rounded-md border border-gray-200">
+        <CardTitle className="text-2xl font-semibold mb-4 text-[var(--color-foreground)]">
+          Chat History
+        </CardTitle>
+        <div className="flex-1 overflow-y-auto chat-scroll p-4 rounded-md border border-border">
           {messages.length > 0 ? (
             messages.map((msg, i) => (
               <div
                 key={i}
                 className={`mb-3 p-3 rounded-lg ${
-                  msg.role === 'assistant' ? 'bg-blue-100' : 'bg-green-100'
+                  msg.role === 'assistant'
+                    ? 'bg-[var(--color-secondary)]/20'
+                    : 'bg-[var(--color-tertiary)]/20'
                 }`}
               >
-                <span className="font-semibold text-gray-800 capitalize">{msg.role}:</span>{' '}
-                <span className="whitespace-pre-line text-gray-700">{msg.content}</span>
+                <span className="font-semibold capitalize text-[var(--color-foreground)]">
+                  {msg.role}:
+                </span>
+                <ReactMarkdown
+                  components={{
+                    code({ node, inline, className, children, ...props }) {
+                      return !inline ? (
+                        <pre className="overflow-x-auto chat-scroll rounded bg-[var(--color-muted)] p-2">
+                          <code className="font-mono text-sm" {...props}>
+                            {children}
+                          </code>
+                        </pre>
+                      ) : (
+                        <code className="bg-[var(--color-muted)] px-1 rounded font-mono text-sm" {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
               </div>
             ))
           ) : (
-            <pre className="text-gray-600">{JSON.stringify(chatHistory, null, 2)}</pre>
+            <pre className="text-[var(--color-muted-foreground)]">{JSON.stringify(chatHistory, null, 2)}</pre>
           )}
         </div>
       </div>
@@ -77,10 +110,12 @@ export default function InterviewAnalysisPage() {
 
   if (!interviewId) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="max-w-md p-6">
           <CardContent>
-            <p className="text-red-600 text-center">Missing interviewId in query.</p>
+            <p className="text-[var(--color-destructive)] text-center">
+              Missing interviewId in query.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -89,10 +124,12 @@ export default function InterviewAnalysisPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="max-w-md p-6">
           <CardContent>
-            <p className="text-gray-600 text-center">Loading...</p>
+            <p className="text-[var(--color-muted-foreground)] text-center">
+              Loading...
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -101,10 +138,10 @@ export default function InterviewAnalysisPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="max-w-md p-6">
           <CardContent>
-            <p className="text-red-600 text-center">{error}</p>
+            <p className="text-[var(--color-destructive)] text-center">{error}</p>
           </CardContent>
         </Card>
       </div>
@@ -113,10 +150,12 @@ export default function InterviewAnalysisPage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="max-w-md p-6">
           <CardContent>
-            <p className="text-gray-600 text-center">No analysis data found.</p>
+            <p className="text-[var(--color-muted-foreground)] text-center">
+              No analysis data found.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -129,80 +168,87 @@ export default function InterviewAnalysisPage() {
   const isHR = data.type === 'HR';
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12">
-      <Card className="max-w-2xl mx-auto shadow-lg">
+    <div className="min-h-screen bg-background py-12">
+      <Card className="max-w-4xl mx-auto shadow-lg">
         <CardHeader>
-          <CardTitle className="text-3xl font-semibold text-gray-800">
+          <CardTitle className="text-3xl font-semibold text-foreground">
             {data.mock ? 'Mock Interview Analysis' : 'Interview Analysis'}
           </CardTitle>
+          <h3>Powered by <b>Groq</b></h3>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 gap-4">
             <div>
-              <strong className="text-gray-700">Candidate:</strong>{' '}
-              <span className="text-gray-900">{data.candidate?.name || '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Candidate:</strong>{' '}
+              <span className="text-foreground">{data.candidate?.name || '–'}</span>
             </div>
             <div>
-              <strong className="text-gray-700">Role:</strong>{' '}
-              <span className="text-gray-900">{data.jobListing?.title || '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Role:</strong>{' '}
+              <span className="text-foreground">{data.jobListing?.title || '–'}</span>
             </div>
             <div>
-              <strong className="text-gray-700">Interview Type:</strong>{' '}
-              <span className="text-gray-900">{data.type || '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Interview Type:</strong>{' '}
+              <span className="text-foreground">{data.type || '–'}</span>
             </div>
             <div>
-              <strong className="text-gray-700">Started At:</strong>{' '}
-              <span className="text-gray-900">{formatDate(data.interviewStartedAt)}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Started At:</strong>{' '}
+              <span className="text-foreground">
+                {formatDate(data.interviewStartedAt)}
+              </span>
             </div>
             <div>
-              <strong className="text-gray-700">Ended At:</strong>{' '}
-              <span className="text-gray-900">{formatDate(data.interviewEndedAt)}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Ended At:</strong>{' '}
+              <span className="text-foreground">
+                {formatDate(data.interviewEndedAt)}
+              </span>
             </div>
             {isDSAMock && (
               <div>
-                <strong className="text-gray-700">DSA Question ID:</strong>{' '}
-                <span className="text-gray-900">{data.dsaId}</span>
+                <strong className="text-[var(--color-muted-foreground)]">DSA Question ID:</strong>{' '}
+                <span className="text-foreground">{data.dsaId}</span>
               </div>
             )}
             {isTechnical && (
               <div>
-                <strong className="text-gray-700">DSA Topics:</strong>{' '}
-                <span className="text-gray-900">
+                <strong className="text-[var(--color-muted-foreground)]">DSA Topics:</strong>{' '}
+                <span className="text-foreground">
                   {Array.isArray(data.dsaTopics)
-                    ? data.dsaTopics.map((t: any) => `${t.topic} (${t.difficulty})`).join(', ')
+                    ? data.dsaTopics
+                        .map((t: any) => `${t.topic} (${t.difficulty})`)
+                        .join(', ')
                     : '–'}
                 </span>
               </div>
             )}
             {isTechnical && (
               <div>
-                <strong className="text-gray-700">Other Technical Topics:</strong>{' '}
-                <span className="text-gray-900">
+                <strong className="text-[var(--color-muted-foreground)]">Other Technical Topics:</strong>{' '}
+                <span className="text-foreground">
                   {Array.isArray(data.topics) ? data.topics.join(', ') : '–'}
                 </span>
               </div>
             )}
             {isTechnical && (
               <div>
-                <strong className="text-gray-700">Programming Language:</strong>{' '}
-                <span className="text-gray-900">{data.programmingLanguage || '–'}</span>
+                <strong className="text-[var(--color-muted-foreground)]">Programming Language:</strong>{' '}
+                <span className="text-foreground">{data.programmingLanguage || '–'}</span>
               </div>
             )}
             {isHR && (
               <div>
-                <strong className="text-gray-700">HR Topics:</strong>{' '}
-                <span className="text-gray-900">
+                <strong className="text-[var(--color-muted-foreground)]">HR Topics:</strong>{' '}
+                <span className="text-foreground">
                   {Array.isArray(data.hrTopics) ? data.hrTopics.join(', ') : '–'}
                 </span>
               </div>
             )}
             <div>
-              <strong className="text-gray-700">Number of Questions:</strong>{' '}
-              <span className="text-gray-900">{data.numQuestions || '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Number of Questions:</strong>{' '}
+              <span className="text-foreground">{data.numQuestions || '–'}</span>
             </div>
             <div>
               <Button
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-primary hover:bg-secondary text-primary-foreground"
                 onClick={() => setShowChat(true)}
               >
                 View Chat History
@@ -210,54 +256,58 @@ export default function InterviewAnalysisPage() {
             </div>
           </div>
 
-          <hr className="my-6 border-gray-200" />
+          <hr className="my-6 border-border" />
 
-          <h2 className="text-2xl font-semibold text-gray-800">AI Analysis</h2>
+          <h2 className="text-2xl font-semibold text-foreground">AI Analysis</h2>
           <div className="grid grid-cols-1 gap-4">
             <div>
-              <strong className="text-gray-700">Completed Questions:</strong>{' '}
-              <span className="text-gray-900">
+              <strong className="text-[var(--color-muted-foreground)]">Completed Questions:</strong>{' '}
+              <span className="text-foreground">
                 {analysis.completedQuestions !== undefined
                   ? `${analysis.completedQuestions} / ${data.numQuestions}`
                   : '–'}
               </span>
             </div>
             <div>
-              <strong className="text-gray-700">Question Performance Summary:</strong>{' '}
-              <span className="text-gray-900">{analysis.questionSummary || '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Question Performance Summary:</strong>{' '}
+              <span className="text-foreground">{analysis.questionSummary || '–'}</span>
             </div>
             <div>
-              <strong className="text-gray-700">Face Summary:</strong>{' '}
-              <span className="text-gray-900">{analysis.faceSummary || '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Face Summary:</strong>{' '}
+              <span className="text-foreground">{analysis.faceSummary || '–'}</span>
             </div>
             <div>
-              <strong className="text-gray-700">Pose Summary:</strong>{' '}
-              <span className="text-gray-900">{analysis.poseSummary || '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Pose Summary:</strong>{' '}
+              <span className="text-foreground">{analysis.poseSummary || '–'}</span>
             </div>
             <div>
-              <strong className="text-gray-700">Pose Stability:</strong>{' '}
-              <span className="text-gray-900">{analysis.poseStability ? `${analysis.poseStability}%` : '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Pose Stability:</strong>{' '}
+              <span className="text-foreground">
+                {analysis.poseStability ? `${analysis.poseStability}%` : '–'}
+              </span>
             </div>
             <div>
-              <strong className="text-gray-700">Face Visibility:</strong>{' '}
-              <span className="text-gray-900">{analysis.faceVisibility ? `${analysis.faceVisibility}%` : '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Face Visibility:</strong>{' '}
+              <span className="text-foreground">
+                {analysis.faceVisibility ? `${analysis.faceVisibility}%` : '–'}
+              </span>
             </div>
             <div>
-              <strong className="text-gray-700">Violation Count:</strong>{' '}
-              <span className="text-gray-900">{analysis.violationCount ?? '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Violation Count:</strong>{' '}
+              <span className="text-foreground">{analysis.violationCount ?? '–'}</span>
             </div>
             <div>
-              <strong className="text-gray-700">Suspicion Summary:</strong>{' '}
-              <span className="text-gray-900">{analysis.suspicionSummary || '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Suspicion Summary:</strong>{' '}
+              <span className="text-foreground">{analysis.suspicionSummary || '–'}</span>
             </div>
             <div>
-              <strong className="text-gray-700">Violation Summary:</strong>{' '}
-              <span className="text-gray-900">{analysis.violationSummary || '–'}</span>
+              <strong className="text-[var(--color-muted-foreground)]">Violation Summary:</strong>{' '}
+              <span className="text-foreground">{analysis.violationSummary || '–'}</span>
             </div>
             <div>
-              <strong className="text-gray-700">Face Direction Distribution:</strong>
+              <strong className="text-[var(--color-muted-foreground)]">Face Direction Distribution:</strong>
               {analysis.faceDirectionDistribution ? (
-                <ul className="ml-6 mt-2 list-disc text-gray-900">
+                <ul className="ml-6 mt-2 list-disc text-foreground">
                   {Object.entries(analysis.faceDirectionDistribution).map(([dir, val]) => (
                     <li key={dir}>
                       {dir}: {val as number}%
@@ -265,7 +315,7 @@ export default function InterviewAnalysisPage() {
                   ))}
                 </ul>
               ) : (
-                <span className="text-gray-900 ml-2">–</span>
+                <span className="text-foreground ml-2">–</span>
               )}
             </div>
           </div>

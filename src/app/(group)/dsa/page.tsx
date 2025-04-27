@@ -1,11 +1,14 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
-import prisma from "@/lib/prisma"; // Your Prisma client instance
+import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/authOptions";
-import { CodingProblem } from "@/interfaces/model_interfaces"; // Your CodingProblem interface
+import { CodingProblem } from "@/interfaces/model_interfaces";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from "react-hot-toast";
+
+// Enable debug logging only when needed (set to false in production)
+const DEBUG = false;
 
 export default async function DsaPage({
   searchParams,
@@ -16,8 +19,10 @@ export default async function DsaPage({
   let session;
   try {
     session = await getServerSession(authOptions);
+    DEBUG && console.log("Session retrieved:", !!session);
   } catch (error) {
-    console.error("Error retrieving session:", error);
+    // Log only in debug mode
+    DEBUG && console.error("Error retrieving session:", error);
     redirect("/login");
   }
 
@@ -25,21 +30,26 @@ export default async function DsaPage({
     redirect("/login");
   }
 
-  // Determine the current page using query params (default is page 1)
   const page = searchParam.page ? Number(searchParam.page) || 1 : 1;
   const pageSize = 9;
   const skip = (page - 1) * pageSize;
 
-  // Fetch only the 9 coding problems corresponding to the current page.
-  const questions = await prisma.codingProblem.findMany({
-    skip,
-    take: pageSize,
-    orderBy: { id: "asc" },
-  });
+  let questions = [];
+  try {
+    questions = await prisma.codingProblem.findMany({
+      skip,
+      take: pageSize,
+      orderBy: { id: "asc" },
+    });
+    DEBUG && console.log(`Fetched ${questions.length} problems for page ${page}`);
+  } catch (error) {
+    DEBUG && console.error("Error fetching coding problems:", error);
+    // Optionally render an error state instead of redirecting
+    questions = [];
+  }
 
   const handleDSAAction = async () => {
     try {
-      // Example: Add toast to DSA action
       toast.success("DSA action successful!");
     } catch (err) {
       toast.error("DSA action failed.");
@@ -47,29 +57,71 @@ export default async function DsaPage({
   };
 
   return (
-    <div className=" mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">DSA Problems</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {questions.map((problem) => (
-          <ProblemCard key={problem.id} problem={problem} />
-        ))}
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <h1
+        className="text-3xl font-bold mb-6"
+        style={{ color: "var(--foreground)" }}
+      >
+        DSA Problems
+      </h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {questions.length > 0 ? (
+          questions.map((problem) => (
+            <ProblemCard key={problem.id} problem={problem} />
+          ))
+        ) : (
+          <p
+            className="col-span-full text-center text-sm"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            No problems found. Try refreshing or checking your database.
+          </p>
+        )}
       </div>
-      <div className="flex justify-between mt-8">
-        {page > 1 && (
+      <div className="flex justify-center items-center gap-4 mt-10">
+        {page > 1 ? (
           <Link
             href={`/dsa?page=${page - 1}`}
-            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            className="px-4 py-2 rounded-[var(--radius-md)] transition-colors hover:bg-[color:calc(var(--primary)_90%_var(--foreground))]"
+            style={{
+              backgroundColor: "var(--primary)",
+              color: "var(--primary-foreground)",
+            }}
           >
             Previous
           </Link>
+        ) : (
+          <span
+            className="px-4 py-2 rounded-[var(--radius-md)] cursor-not-allowed"
+            style={{
+              backgroundColor: "var(--muted)",
+              color: "var(--muted-foreground)",
+            }}
+          >
+            Previous
+          </span>
         )}
-        {questions.length === pageSize && (
+        {questions.length === pageSize ? (
           <Link
             href={`/dsa?page=${page + 1}`}
-            className="ml-auto px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            className="px-4 py-2 rounded-[var(--radius-md)] transition-colors hover:bg-[color:calc(var(--primary)_90%_var(--foreground))]"
+            style={{
+              backgroundColor: "var(--primary)",
+              color: "var(--primary-foreground)",
+            }}
           >
             Next
           </Link>
+        ) : (
+          <span
+            className="px-4 py-2 rounded-[var(--radius-md)] cursor-not-allowed"
+            style={{
+              backgroundColor: "var(--muted)",
+              color: "var(--muted-foreground)",
+            }}
+          >
+            Next
+          </span>
         )}
       </div>
     </div>
@@ -81,35 +133,93 @@ interface ProblemCardProps {
 }
 
 function ProblemCard({ problem }: ProblemCardProps) {
-  // Choose color styling based on the problem's difficulty.
-  let difficultyColor = "";
+  let difficultyStyles = {
+    backgroundColor: "",
+    color: "",
+    borderColor: "",
+  };
+
   if (problem.difficulty === "Easy") {
-    difficultyColor = "bg-green-100 text-green-800";
+    difficultyStyles = {
+      backgroundColor: "var(--tertiary)",
+      color: "var(--secondary-foreground)",
+      borderColor: "color-mix(in srgb, var(--tertiary) 80%, var(--foreground))",
+    };
   } else if (problem.difficulty === "Medium") {
-    difficultyColor = "bg-yellow-100 text-yellow-800";
+    difficultyStyles = {
+      backgroundColor: "var(--yellow)",
+      color: "var(--card-foreground)",
+      borderColor: "color-mix(in srgb, var(--yellow) 80%, var(--foreground))",
+    };
   } else if (problem.difficulty === "Hard") {
-    difficultyColor = "bg-red-100 text-red-800";
+    difficultyStyles = {
+      backgroundColor: "var(--destructive)",
+      color: "var(--secondary-foreground)",
+      borderColor: "color-mix(in srgb, var(--destructive) 80%, var(--foreground))",
+    };
   }
 
-  // Link to mockInterview with DSA mode and question info
-  const mockInterviewHref = `/mockInterview?dsaId=${problem.id}&title=${encodeURIComponent(problem.title)}&difficulty=${encodeURIComponent(problem.difficulty)}`;
+  const mockInterviewHref = `/mockInterview?dsaId=${problem.id}&title=${encodeURIComponent(
+    problem.title
+  )}&difficulty=${encodeURIComponent(problem.difficulty)}`;
 
   return (
     <Link href={mockInterviewHref}>
-      <Card className="cursor-pointer hover:shadow-lg transition">
-        <CardHeader className="flex justify-between items-center p-4">
-          {/* Display the problem number */}
-          <span className="font-bold">#{problem.id}</span>
-          <span className={`text-xs font-semibold px-2 py-1 rounded ${difficultyColor}`}>
+      <Card
+        className="group flex flex-col h-full transition-all duration-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.15)]"
+        style={{
+          backgroundColor: "var(--card)",
+          borderColor: "var(--border)",
+          borderRadius: "var(--radius-lg)",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <CardHeader
+          className="flex justify-between items-center p-4"
+          style={{ borderBottomColor: "var(--border)" }}
+        >
+          <span
+            className="font-semibold text-lg"
+            style={{ color: "var(--card-foreground)" }}
+          >
+            #{problem.id}
+          </span>
+          <span
+            className="text-sm font-medium px-3 py-1 rounded-full border"
+            style={{
+              backgroundColor: difficultyStyles.backgroundColor,
+              color: difficultyStyles.color,
+              borderColor: difficultyStyles.borderColor,
+            }}
+          >
             {problem.difficulty}
           </span>
         </CardHeader>
-        <CardContent className="p-4">
-          <p className="text-sm mb-2 line-clamp-3">{problem.description}</p>
+        <CardContent className="p-4 flex-grow">
+          <h3
+            className="text-lg font-medium mb-2 group-hover:text-[var(--primary)] transition-colors"
+            style={{ color: "var(--card-foreground)" }}
+          >
+            {problem.title}
+          </h3>
+          <p
+            className="text-sm line-clamp-3"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            {problem.description}
+          </p>
           {problem.category && problem.category.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
+            <div className="flex flex-wrap gap-2 mt-4">
               {problem.category.map((cat, index) => (
-                <span key={index} className="text-xs bg-gray-200 rounded px-2 py-1">
+                <span
+                  key={index}
+                  className="text-xs rounded-full px-3 py-1 border"
+                  style={{
+                    backgroundColor: "var(--muted)",
+                    color: "var(--muted-foreground)",
+                    borderColor: "var(--border)",
+                  }}
+                >
                   {cat}
                 </span>
               ))}
