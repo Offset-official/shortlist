@@ -206,7 +206,6 @@ function ZoomHint() {
         borderRadius: "50%",
         background: "var(--card)",
         boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
-        animation: "zoomPulse 1.5s infinite",
         border: "1.5px solid var(--primary)",
       }}>
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="var(--primary)" strokeWidth="2"><circle cx="9" cy="9" r="7"/><line x1="15" y1="15" x2="19" y2="19" strokeLinecap="round"/><line x1="9" y1="5" x2="9" y2="13"/><line x1="5" y1="9" x2="13" y2="9"/></svg>
