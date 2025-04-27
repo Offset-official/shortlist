@@ -1,11 +1,19 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ReactNode } from 'react';
 
+type CodeProps = {
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children?: ReactNode;
+  [key: string]: any;
+};
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return '–';
   return new Date(dateStr).toLocaleString('en-IN', {
@@ -55,24 +63,24 @@ function ChatHistoryModal({
                   {msg.role}:
                 </span>
                 <ReactMarkdown
-                  components={{
-                    code({ node, inline, className, children, ...props }) {
-                      return !inline ? (
-                        <pre className="overflow-x-auto chat-scroll rounded bg-[var(--color-muted)] p-2">
-                          <code className="font-mono text-sm" {...props}>
-                            {children}
-                          </code>
-                        </pre>
-                      ) : (
-                        <code className="bg-[var(--color-muted)] px-1 rounded font-mono text-sm" {...props}>
-                          {children}
-                        </code>
-                      );
-                    },
-                  }}
-                >
-                  {msg.content}
-                </ReactMarkdown>
+  components={{
+    code({ node, inline, className, children, ...props }: CodeProps) {
+      return !inline ? (
+        <pre className="overflow-x-auto chat-scroll rounded bg-[var(--color-muted)] p-2">
+          <code className="font-mono text-sm" {...props}>
+            {children}
+          </code>
+        </pre>
+      ) : (
+        <code className="bg-[var(--color-muted)] px-1 rounded font-mono text-sm" {...props}>
+          {children}
+        </code>
+      );
+    },
+  }}
+>
+  {msg.content}
+</ReactMarkdown>
               </div>
             ))
           ) : (
@@ -84,7 +92,7 @@ function ChatHistoryModal({
   );
 }
 
-export default function InterviewAnalysisPage() {
+function InterviewAnalysisContent() {
   const params = useSearchParams();
   const interviewId = params?.get('interviewId');
   const [data, setData] = useState<any>(null);
@@ -326,5 +334,13 @@ export default function InterviewAnalysisPage() {
         <ChatHistoryModal chatHistory={data.chatHistory} onClose={() => setShowChat(false)} />
       )}
     </div>
+  );
+}
+
+export default function InterviewAnalysisPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background"><Card className="max-w-md p-6"><CardContent><p className="text-[var(--color-muted-foreground)] text-center">Loading...</p></CardContent></Card></div>}>
+      <InterviewAnalysisContent />
+    </Suspense>
   );
 }
