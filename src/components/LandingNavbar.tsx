@@ -83,8 +83,9 @@ const Navbar = () => {
                 <Button
                   variant="ghost"
                   onClick={async () => {
-                    await signOut({ redirect: false })
-                    toast.success("Signed out successfully!")
+                    const mod = await import('next-auth/react');
+                    await mod.signOut({ redirect: true, callbackUrl: "/login" });
+                    // toast.success("Signed out successfully!");
                   }}
                   className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                 >
@@ -128,8 +129,9 @@ const Navbar = () => {
                   <Button
                     variant="ghost"
                     onClick={async () => {
-                      await signOut({ redirect: false })
-                      toast.success("Signed out successfully!")
+                      const mod = await import('next-auth/react');
+                      await mod.signOut({ redirect: true, callbackUrl: "/login" });
+                      // toast.success("Signed out successfully!");
                     }}
                     className="text-destructive hover:text-destructive/90 hover:bg-destructive/10 w-full justify-center text-lg py-3"
                   >

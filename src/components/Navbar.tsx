@@ -124,13 +124,16 @@ const Navbar = () => {
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={async () => {
+                            <DropdownMenuItem
+                              onClick={async () => {
                                 const mod = await import('next-auth/react');
-                                await mod.signOut({ redirect: false });
-                                toast.success("Signed out successfully!");
-                            }} className="text-destructive focus:text-destructive">
-                                <LogOut className="mr-2 h-4 w-4" />
-                                <span>Log out</span>
+                                await mod.signOut({ redirect: true, callbackUrl: "/login" });
+                                toast.success("Signed out successfully!"); // Optionally remove this line to avoid showing toast after redirect
+                              }}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <LogOut className="mr-2 h-4 w-4" />
+                              <span>Log out</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -190,11 +193,14 @@ const Navbar = () => {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={async () => {
-                        const mod = await import('next-auth/react');
-                        await mod.signOut({ redirect: false });
-                        toast.success("Signed out successfully!");
-                      }} className="text-destructive focus:text-destructive">
+                      <DropdownMenuItem
+                        onClick={async () => {
+                          const mod = await import('next-auth/react');
+                          await mod.signOut({ redirect: true, callbackUrl: "/login" });
+                          // toast.success("Signed out successfully!"); // Optionally remove this line to avoid showing toast after redirect
+                        }}
+                        className="text-destructive focus:text-destructive"
+                      >
                         <LogOut className="mr-2 h-4 w-4" />
                         <span>Log out</span>
                       </DropdownMenuItem>
